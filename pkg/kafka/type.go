@@ -1,6 +1,8 @@
 package kafka
 
-import "github.com/IBM/sarama"
+import (
+	"github.com/IBM/sarama"
+)
 
 // Config holds configuration for Kafka producer.
 type Config struct {
@@ -18,4 +20,9 @@ type producerImpl struct {
 type ConsumerConfig struct {
 	Brokers []string
 	GroupID string
+}
+
+// consumerImpl implements IConsumer.
+type consumerImpl struct {
+	group sarama.ConsumerGroup
 }

@@ -59,6 +59,7 @@ type EnvironmentConfig struct {
 type KafkaConfig struct {
 	Brokers []string
 	Topic   string
+	GroupID string
 }
 
 // RedisConfig is the configuration for Redis
@@ -252,6 +253,7 @@ func Load() (*Config, error) {
 	// Kafka - Event publishing (optional)
 	cfg.Kafka.Brokers = viper.GetStringSlice("kafka.brokers")
 	cfg.Kafka.Topic = viper.GetString("kafka.topic")
+	cfg.Kafka.GroupID = viper.GetString("kafka.group_id")
 
 	// JWT
 	cfg.JWT.SecretKey = viper.GetString("jwt.secret_key")

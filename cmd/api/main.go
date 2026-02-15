@@ -53,13 +53,14 @@ func main() {
 		ColorEnabled: cfg.Logger.ColorEnabled,
 	})
 
-	// Register graceful shutdown
-	registerGracefulShutdown(logger)
+	// Create context with signal handling for graceful shutdown
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	logger.Info(ctx, "Starting Knowledge API Service...")
 
 	// Encrypter
 	encrypterInstance := encrypter.New(cfg.Encrypter.Key)
-
-	ctx := context.Background()
 
 	// Qdrant
 	qdrantClient, err := qdrant.Connect(ctx, cfg.Qdrant)
@@ -113,12 +114,12 @@ func main() {
 	logger.Infof(ctx, "MinIO client initialized")
 
 	// Kafka - Event publishing (optional)
-	kafkaProducer, err := kafka.Connect(cfg.Kafka)
+	kafkaProducer, err := kafka.ConnectProducer(cfg.Kafka)
 	if err != nil {
 		logger.Warnf(ctx, "Kafka not configured or unavailable (optional): %v", err)
 		kafkaProducer = nil
 	} else {
-		defer kafka.Disconnect()
+		defer kafka.DisconnectProducer()
 		logger.Infof(ctx, "Kafka producer client initialized")
 	}
 
@@ -171,18 +172,6 @@ func main() {
 		logger.Error(ctx, "Failed to run server: ", err)
 		return
 	}
-}
 
-// registerGracefulShutdown registers a signal handler for graceful shutdown.
-func registerGracefulShutdown(logger log.Logger) {
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		<-sigChan
-		logger.Info(context.Background(), "Shutting down gracefully...")
-
-		logger.Info(context.Background(), "Cleanup completed")
-		os.Exit(0)
-	}()
+	logger.Info(ctx, "API server stopped gracefully")
 }

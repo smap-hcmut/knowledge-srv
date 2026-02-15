@@ -79,6 +79,7 @@ kafka:
   brokers:
     - "localhost:9092"
   topic: "knowledge.events"
+  group_id: "knowledge-consumer"
 
 # JWT
 jwt:
