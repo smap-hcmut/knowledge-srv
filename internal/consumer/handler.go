@@ -2,34 +2,54 @@ package consumer
 
 import (
 	"context"
+	"fmt"
+
+	indexingConsumer "knowledge-srv/internal/indexing/delivery/kafka/consumer"
+	indexingRepo "knowledge-srv/internal/indexing/repository/postgre"
+	indexingUsecase "knowledge-srv/internal/indexing/usecase"
 )
 
 // domainConsumers holds references to all domain consumers for cleanup
 type domainConsumers struct {
-	// Add domain consumers here as needed
-	// Example: searchConsumer *searchConsumer.Consumer
+	indexingConsumer *indexingConsumer.Consumer
 }
 
 // setupDomains initializes all domain layers (repositories, usecases, consumers)
 func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, error) {
-	// Initialize domains here as needed
-	// Example:
-	// searchRepo := searchRepo.New(srv.postgresDB)
-	// searchUC := searchUsecase.New(srv.l, searchRepo, ...)
-	// searchCons, err := searchConsumer.New(...)
+	// Initialize indexing domain
+	indexingRepo := indexingRepo.New(srv.postgresDB)
+	indexingUC := indexingUsecase.New(
+		srv.l,
+		indexingRepo,
+		srv.qdrantClient,
+		srv.minioClient,
+		srv.voyageClient,
+		srv.redisClient,
+		"knowledge_indexing", // TODO: move to config
+	)
+	indexingCons, err := indexingConsumer.New(indexingConsumer.Config{
+		Logger:      srv.l,
+		KafkaConfig: srv.kafkaConfig,
+		UseCase:     indexingUC,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create indexing consumer: %w", err)
+	}
+
+	srv.l.Infof(ctx, "Indexing domain initialized")
 
 	return &domainConsumers{
-		// Add initialized consumers here
+		indexingConsumer: indexingCons,
 	}, nil
 }
 
 // startConsumers starts all domain consumers in background goroutines
 func (srv *ConsumerServer) startConsumers(ctx context.Context, consumers *domainConsumers) error {
-	// Start consumers here as needed
-	// Example:
-	// if err := consumers.searchConsumer.ConsumeSearchRequests(ctx); err != nil {
-	//     return fmt.Errorf("failed to start search consumer: %w", err)
-	// }
+	// Start indexing consumer
+	topic := "analytics.batch.completed" // TODO: move to config
+	if err := consumers.indexingConsumer.ConsumeBatchCompleted(ctx, topic); err != nil {
+		return fmt.Errorf("failed to start indexing consumer: %w", err)
+	}
 
 	srv.l.Infof(ctx, "All consumers started successfully")
 	return nil
@@ -37,13 +57,12 @@ func (srv *ConsumerServer) startConsumers(ctx context.Context, consumers *domain
 
 // stopConsumers gracefully stops all domain consumers
 func (srv *ConsumerServer) stopConsumers(ctx context.Context, consumers *domainConsumers) {
-	// Close consumers here as needed
-	// Example:
-	// if consumers.searchConsumer != nil {
-	//     if err := consumers.searchConsumer.Close(); err != nil {
-	//         srv.l.Errorf(ctx, "Error closing search consumer: %v", err)
-	//     }
-	// }
+	// Close indexing consumer
+	if consumers.indexingConsumer != nil {
+		if err := consumers.indexingConsumer.Close(); err != nil {
+			srv.l.Errorf(ctx, "Error closing indexing consumer: %v", err)
+		}
+	}
 
 	srv.l.Infof(ctx, "All consumers stopped")
 }
