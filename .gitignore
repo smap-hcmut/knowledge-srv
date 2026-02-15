@@ -1,0 +1,25 @@
+.vscode
+
+# Dependencies
+vendor/
+.go-version
+
+# Environment variables
+.env
+sqlboiler.toml
+
+# Kubernetes secrets
+k8s/secret.yaml
+
+docs
+
+# OpenSpec
+.cursor/*
+.agent/*
+.claude/*
+AGENTS.md
+CLAUDE.md
+
+# Auth config with secrets
+auth-config.yaml
+secrets/
