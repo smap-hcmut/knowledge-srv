@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"identity-srv/pkg/log"
+	"knowledge-srv/pkg/log"
 )
 
 // DiscordWebhook contains webhook information for Discord API.

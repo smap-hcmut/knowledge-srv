@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"html/template"
 
-	i18nPkg "identity-srv/pkg/i18n"
+	i18nPkg "knowledge-srv/pkg/i18n"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )

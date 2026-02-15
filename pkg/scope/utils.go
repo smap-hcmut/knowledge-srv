@@ -3,7 +3,7 @@ package scope
 import (
 	"context"
 
-	"identity-srv/internal/model"
+	"knowledge-srv/internal/model"
 )
 
 type PayloadCtxKey struct{}

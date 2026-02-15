@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"runtime"
 
-	"identity-srv/pkg/discord"
-	"identity-srv/pkg/errors"
+	"knowledge-srv/pkg/discord"
+	"knowledge-srv/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 )
