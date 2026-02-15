@@ -164,6 +164,8 @@ type EncrypterConfig struct {
 
 // InternalConfig is the configuration for internal service authentication
 type InternalConfig struct {
+	// InternalKey is the shared secret for InternalAuth (Authorization header). Optional; leave empty to disable.
+	InternalKey string
 	ServiceKeys map[string]string
 }
 
@@ -277,7 +279,8 @@ func Load() (*Config, error) {
 	// Encrypter
 	cfg.Encrypter.Key = viper.GetString("encrypter.key")
 
-	// Internal Service Keys
+	// Internal auth key and service keys
+	cfg.InternalConfig.InternalKey = viper.GetString("internal.internal_key")
 	serviceKeys := make(map[string]string)
 	if viper.IsSet("internal.service_keys") {
 		serviceKeysRaw := viper.GetStringMapString("internal.service_keys")
