@@ -19,7 +19,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 // @title       SMAP Knowledge Service API
@@ -69,7 +68,7 @@ func main() {
 		return
 	}
 	defer qdrant.Disconnect()
-	logger.Infof(ctx, "Qdrant connected to %s:%d", cfg.Qdrant.Host, cfg.Qdrant.Port)
+	logger.Infof(ctx, "Qdrant client initialized")
 
 	// Voyage - Embedding
 	voyageClient, err := voyage.NewVoyage(voyage.VoyageConfig{APIKey: cfg.Voyage.APIKey})
@@ -93,7 +92,7 @@ func main() {
 		return
 	}
 	defer postgre.Disconnect(ctx, postgresDB)
-	logger.Infof(ctx, "PostgreSQL connected to %s:%d/%s (schema: %s)", cfg.Postgres.Host, cfg.Postgres.Port, cfg.Postgres.DBName, cfg.Postgres.Schema)
+	logger.Infof(ctx, "PostgreSQL client initialized")
 
 	// Redis - Caching, rate limiting
 	redisClient, err := redis.Connect(ctx, cfg.Redis)
@@ -102,7 +101,7 @@ func main() {
 		return
 	}
 	defer redis.Disconnect()
-	logger.Infof(ctx, "Redis connected to %s:%d (DB %d)", cfg.Redis.Host, cfg.Redis.Port, cfg.Redis.DB)
+	logger.Infof(ctx, "Redis client initialized")
 
 	// MinIO - Report storage (PDF/DOCX)
 	minioClient, err := minio.Connect(ctx, &cfg.MinIO)
@@ -111,7 +110,7 @@ func main() {
 		return
 	}
 	defer minio.Disconnect()
-	logger.Infof(ctx, "MinIO connected to %s (bucket: %s)", cfg.MinIO.Endpoint, cfg.MinIO.Bucket)
+	logger.Infof(ctx, "MinIO client initialized")
 
 	// Kafka - Event publishing (optional)
 	kafkaProducer, err := kafka.Connect(cfg.Kafka)
@@ -120,23 +119,20 @@ func main() {
 		kafkaProducer = nil
 	} else {
 		defer kafka.Disconnect()
-		logger.Infof(ctx, "Kafka producer connected to %v, topic: %s", cfg.Kafka.Brokers, cfg.Kafka.Topic)
+		logger.Infof(ctx, "Kafka producer client initialized")
 	}
 
 	// Discord - Monitoring & Notification
-	discordClient, err := discord.New(logger, &discord.DiscordWebhook{
-		ID:    cfg.Discord.WebhookID,
-		Token: cfg.Discord.WebhookToken,
-	})
+	discordClient, err := discord.New(logger, cfg.Discord.WebhookURL)
 	if err != nil {
 		logger.Warnf(ctx, "Discord webhook not configured (optional): %v", err)
 		discordClient = nil
 	} else {
-		logger.Info(ctx, "Discord webhook initialized")
+		logger.Info(ctx, "Discord client initialized")
 	}
 
 	// JWT Manager (verify tokens from cookie/header)
-	jwtManager, err := jwt.New(jwt.Config{SecretKey: cfg.JWT.SecretKey, Issuer: cfg.JWT.Issuer, Audience: cfg.JWT.Audience, TTL: time.Duration(cfg.JWT.TTL) * time.Second})
+	jwtManager, err := jwt.New(jwt.Config{SecretKey: cfg.JWT.SecretKey})
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize JWT manager: ", err)
 		return
@@ -146,7 +142,6 @@ func main() {
 	// HTTP server
 	httpServer, err := httpserver.New(logger, httpserver.Config{
 		Logger:      logger,
-		Host:        cfg.HTTPServer.Host,
 		Port:        cfg.HTTPServer.Port,
 		Mode:        cfg.HTTPServer.Mode,
 		Environment: cfg.Environment.Name,

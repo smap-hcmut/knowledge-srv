@@ -16,10 +16,16 @@ type Config struct {
 	DefaultAvatarURL string
 }
 
+// webhookInfo holds parsed webhook id and token (internal use).
+type webhookInfo struct {
+	id    string
+	token string
+}
+
 // discordImpl implements IDiscord.
 type discordImpl struct {
 	l       log.Logger
-	webhook *DiscordWebhook
+	webhook *webhookInfo
 	config  Config
 	client  *http.Client
 }

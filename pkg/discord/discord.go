@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"knowledge-srv/pkg/log"
 )
 
 func newHTTPClient(timeout time.Duration) *http.Client {
@@ -32,8 +34,23 @@ func DefaultConfig() Config {
 	}
 }
 
+// newImpl builds discordImpl from parsed id and token (internal).
+func newImpl(l log.Logger, id, token string) (IDiscord, error) {
+	if id == "" || token == "" {
+		return nil, errWebhookRequired
+	}
+	cfg := DefaultConfig()
+	client := newHTTPClient(cfg.Timeout)
+	return &discordImpl{
+		l:       l,
+		webhook: &webhookInfo{id: id, token: token},
+		config:  cfg,
+		client:  client,
+	}, nil
+}
+
 func (d *discordImpl) GetWebhookURL() string {
-	return fmt.Sprintf(webhookURLTemplate, d.webhook.ID, d.webhook.Token)
+	return fmt.Sprintf(webhookURLTemplate, d.webhook.id, d.webhook.token)
 }
 
 func (d *discordImpl) Close() error {

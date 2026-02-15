@@ -2,6 +2,8 @@ package discord
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"knowledge-srv/pkg/log"
 )
@@ -22,31 +24,29 @@ type IDiscord interface {
 	Close() error
 }
 
-// DiscordWebhook contains webhook information for Discord API.
-type DiscordWebhook struct {
-	ID    string
-	Token string
+// parseWebhookURL extracts id and token from Discord webhook URL (https://discord.com/api/webhooks/{id}/{token}).
+func parseWebhookURL(webhookURL string) (id, token string, err error) {
+	webhookURL = strings.TrimSpace(webhookURL)
+	prefix := "https://discord.com/api/webhooks/"
+	if !strings.HasPrefix(webhookURL, prefix) {
+		return "", "", fmt.Errorf("discord: invalid webhook URL format")
+	}
+	rest := strings.TrimPrefix(webhookURL, prefix)
+	parts := strings.SplitN(rest, "/", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return "", "", fmt.Errorf("discord: webhook URL must be .../webhooks/{id}/{token}")
+	}
+	return parts[0], parts[1], nil
 }
 
-// NewDiscordWebhook creates a new Discord webhook instance.
-func NewDiscordWebhook(id, token string) (*DiscordWebhook, error) {
-	if id == "" || token == "" {
+// New creates a new Discord service from webhook URL (chuỗi copy khi tạo webhook trên Discord).
+func New(l log.Logger, webhookURL string) (IDiscord, error) {
+	if webhookURL == "" {
 		return nil, errWebhookRequired
 	}
-	return &DiscordWebhook{ID: id, Token: token}, nil
-}
-
-// New creates a new Discord service. Returns the interface.
-func New(l log.Logger, webhook *DiscordWebhook) (IDiscord, error) {
-	if webhook == nil || webhook.ID == "" || webhook.Token == "" {
-		return nil, errWebhookRequired
+	id, token, err := parseWebhookURL(webhookURL)
+	if err != nil {
+		return nil, err
 	}
-	cfg := DefaultConfig()
-	client := newHTTPClient(cfg.Timeout)
-	return &discordImpl{
-		l:       l,
-		webhook: webhook,
-		config:  cfg,
-		client:  client,
-	}, nil
+	return newImpl(l, id, token)
 }

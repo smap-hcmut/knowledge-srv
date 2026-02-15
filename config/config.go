@@ -117,18 +117,13 @@ type CookieConfig struct {
 	Name           string
 }
 
-// JWTConfig is used to verify tokens (same secret/issuer as auth service). This service does not issue tokens.
+// JWTConfig is for verifying tokens only
 type JWTConfig struct {
-	Algorithm string
-	Issuer    string
-	Audience  []string
 	SecretKey string
-	TTL       int // in seconds
 }
 
 // HTTPServerConfig is the configuration for the HTTP server
 type HTTPServerConfig struct {
-	Host string
 	Port int
 	Mode string
 }
@@ -152,9 +147,9 @@ type PostgresConfig struct {
 	Schema   string // Added Schema support
 }
 
+// DiscordConfig: webhook URL từ Discord
 type DiscordConfig struct {
-	WebhookID    string
-	WebhookToken string
+	WebhookURL string
 }
 
 // EncrypterConfig is the configuration for the encrypter
@@ -162,17 +157,15 @@ type EncrypterConfig struct {
 	Key string
 }
 
-// InternalConfig is the configuration for internal service authentication
+// InternalConfig
 type InternalConfig struct {
-	// InternalKey is the shared secret for InternalAuth (Authorization header). Optional; leave empty to disable.
 	InternalKey string
-	ServiceKeys map[string]string
 }
 
 // Load loads configuration using Viper
 func Load() (*Config, error) {
 	// Set config file name and paths
-	viper.SetConfigName("auth-config")
+	viper.SetConfigName("knowledge-config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config")
 	viper.AddConfigPath(".")
@@ -197,7 +190,6 @@ func Load() (*Config, error) {
 
 	// Environment & Server
 	cfg.Environment.Name = viper.GetString("environment.name")
-	cfg.HTTPServer.Host = viper.GetString("http_server.host")
 	cfg.HTTPServer.Port = viper.GetInt("http_server.port")
 	cfg.HTTPServer.Mode = viper.GetString("http_server.mode")
 	cfg.Logger.Level = viper.GetString("logger.level")
@@ -262,11 +254,7 @@ func Load() (*Config, error) {
 	cfg.Kafka.Topic = viper.GetString("kafka.topic")
 
 	// JWT
-	cfg.JWT.Algorithm = viper.GetString("jwt.algorithm")
-	cfg.JWT.Issuer = viper.GetString("jwt.issuer")
-	cfg.JWT.Audience = viper.GetStringSlice("jwt.audience")
 	cfg.JWT.SecretKey = viper.GetString("jwt.secret_key")
-	cfg.JWT.TTL = viper.GetInt("jwt.ttl")
 
 	// Cookie
 	cfg.Cookie.Domain = viper.GetString("cookie.domain")
@@ -279,20 +267,11 @@ func Load() (*Config, error) {
 	// Encrypter
 	cfg.Encrypter.Key = viper.GetString("encrypter.key")
 
-	// Internal auth key and service keys
+	// Internal auth
 	cfg.InternalConfig.InternalKey = viper.GetString("internal.internal_key")
-	serviceKeys := make(map[string]string)
-	if viper.IsSet("internal.service_keys") {
-		serviceKeysRaw := viper.GetStringMapString("internal.service_keys")
-		for service, key := range serviceKeysRaw {
-			serviceKeys[service] = key
-		}
-	}
-	cfg.InternalConfig.ServiceKeys = serviceKeys
 
 	// Discord
-	cfg.Discord.WebhookID = viper.GetString("discord.webhook_id")
-	cfg.Discord.WebhookToken = viper.GetString("discord.webhook_token")
+	cfg.Discord.WebhookURL = viper.GetString("discord.webhook_url")
 
 	// Validate required fields
 	if err := validate(cfg); err != nil {
@@ -307,7 +286,6 @@ func setDefaults() {
 	viper.SetDefault("environment.name", "production")
 
 	// HTTP Server
-	viper.SetDefault("http_server.host", "")
 	viper.SetDefault("http_server.port", 8080)
 	viper.SetDefault("http_server.mode", "debug")
 
@@ -319,7 +297,7 @@ func setDefaults() {
 
 	// 1. Qdrant
 	viper.SetDefault("qdrant.host", "localhost")
-	viper.SetDefault("qdrant.port", 6333)
+	viper.SetDefault("qdrant.port", 6334)
 	viper.SetDefault("qdrant.use_tls", false)
 	viper.SetDefault("qdrant.timeout", 30)
 
@@ -363,12 +341,6 @@ func setDefaults() {
 	viper.SetDefault("oauth2.provider", "google")
 	viper.SetDefault("oauth2.scopes", []string{"openid", "email", "profile"})
 
-	// JWT
-	viper.SetDefault("jwt.algorithm", "HS256")
-	viper.SetDefault("jwt.issuer", "smap-auth-service")
-	viper.SetDefault("jwt.audience", []string{"knowledge-srv"})
-	viper.SetDefault("jwt.ttl", 28800) // 8 hours
-
 	// Cookie
 	viper.SetDefault("cookie.domain", ".smap.com")
 	viper.SetDefault("cookie.secure", true)
@@ -399,15 +371,6 @@ func validate(cfg *Config) error {
 	}
 	if len(cfg.JWT.SecretKey) < 32 {
 		return fmt.Errorf("jwt.secret_key must be at least 32 characters for security")
-	}
-	if cfg.JWT.Issuer == "" {
-		return fmt.Errorf("jwt.issuer is required")
-	}
-	if len(cfg.JWT.Audience) == 0 {
-		return fmt.Errorf("jwt.audience must have at least one value")
-	}
-	if cfg.JWT.TTL <= 0 {
-		return fmt.Errorf("jwt.ttl must be greater than 0")
 	}
 
 	// Validate Encrypter

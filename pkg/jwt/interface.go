@@ -1,8 +1,6 @@
 package jwt
 
 import (
-	"time"
-
 	"knowledge-srv/pkg/scope"
 )
 
@@ -11,7 +9,7 @@ import (
 type IManager interface {
 	GenerateToken(userID, email, role string, groups []string) (string, error)
 	VerifyToken(tokenString string) (*Claims, error)
-	SetConfig(issuer string, audience []string, ttl time.Duration)
+	SetConfig(issuer string)
 	Verify(token string) (scope.Payload, error)
 	CreateToken(payload scope.Payload) (string, error)
 }
@@ -23,8 +21,7 @@ func New(cfg Config) (IManager, error) {
 	}
 	return &managerImpl{
 		secretKey: []byte(cfg.SecretKey),
-		issuer:    cfg.Issuer,
-		audience:  cfg.Audience,
-		ttl:       cfg.TTL,
+		issuer:    "", // only used by GenerateToken; not needed for verify
+		ttl:       defaultTTL,
 	}, nil
 }
