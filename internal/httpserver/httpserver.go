@@ -3,29 +3,51 @@ package httpserver
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 // Run starts the HTTP server and blocks until a shutdown signal is received.
+// It performs graceful shutdown and surfaces ListenAndServe errors to the caller.
 func (srv HTTPServer) Run() error {
-	err := srv.mapHandlers()
-	if err != nil {
+	if err := srv.mapHandlers(); err != nil {
 		srv.l.Fatalf(context.Background(), "Failed to map handlers: %v", err)
 		return err
 	}
 
-	ctx := context.Background()
+	addr := fmt.Sprintf("%s:%d", srv.host, srv.port)
+	server := &http.Server{
+		Addr:    addr,
+		Handler: srv.gin,
+	}
+
+	serveErr := make(chan error, 1)
 	go func() {
-		srv.gin.Run(fmt.Sprintf("%s:%d", srv.host, srv.port))
+		srv.l.Infof(context.Background(), "Started server on %s", addr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			serveErr <- err
+		}
 	}()
 
-	srv.l.Infof(ctx, "Started server on : %s:%d", srv.host, srv.port)
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
-	srv.l.Info(ctx, <-ch)
-	srv.l.Info(ctx, "Stopping API server.")
 
+	select {
+	case err := <-serveErr:
+		return err
+	case sig := <-ch:
+		srv.l.Infof(context.Background(), "Received signal %v, shutting down gracefully", sig)
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		srv.l.Errorf(context.Background(), "Server shutdown error: %v", err)
+		return err
+	}
+	srv.l.Info(context.Background(), "API server stopped.")
 	return nil
 }
