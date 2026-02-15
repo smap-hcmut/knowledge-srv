@@ -6,6 +6,7 @@ import (
 	"github.com/IBM/sarama"
 )
 
+// validateProducerConfig validates producer configuration
 func validateProducerConfig(cfg Config) error {
 	if len(cfg.Brokers) == 0 {
 		return fmt.Errorf("kafka: at least one broker is required")
@@ -16,16 +17,7 @@ func validateProducerConfig(cfg Config) error {
 	return nil
 }
 
-func validateConsumerConfig(cfg ConsumerConfig) error {
-	if len(cfg.Brokers) == 0 {
-		return fmt.Errorf("kafka: at least one broker is required")
-	}
-	if cfg.GroupID == "" {
-		return fmt.Errorf("kafka: group ID is required")
-	}
-	return nil
-}
-
+// newProducerImpl creates a new Kafka producer implementation
 func newProducerImpl(cfg Config) (*producerImpl, error) {
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForLocal
@@ -70,21 +62,4 @@ func (p *producerImpl) HealthCheck() error {
 		return fmt.Errorf("producer is not initialized")
 	}
 	return nil
-}
-
-// NewConsumerGroup creates a new Kafka consumer group.
-func NewConsumerGroup(cfg ConsumerConfig) (sarama.ConsumerGroup, error) {
-	if err := validateConsumerConfig(cfg); err != nil {
-		return nil, err
-	}
-	config := sarama.NewConfig()
-	config.Version = KafkaVersion
-	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRoundRobin()
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	config.Consumer.Return.Errors = true
-	consumer, err := sarama.NewConsumerGroup(cfg.Brokers, cfg.GroupID, config)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Kafka consumer group: %w", err)
-	}
-	return consumer, nil
 }
