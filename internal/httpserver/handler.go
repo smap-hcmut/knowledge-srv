@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"knowledge-srv/internal/middleware"
+	"knowledge-srv/internal/model"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -26,10 +27,10 @@ func (srv HTTPServer) registerMiddlewares(mw middleware.Middleware) {
 
 	// Log CORS mode for visibility
 	ctx := context.Background()
-	if srv.environment == "production" {
-		srv.l.Infof(ctx, "CORS mode: production (strict origins only)")
+	if srv.environment == string(model.EnvironmentProduction) {
+		srv.l.Infof(ctx, "CORS mode: production")
 	} else {
-		srv.l.Infof(ctx, "CORS mode: %s (permissive - allows localhost and private subnets)", srv.environment)
+		srv.l.Infof(ctx, "CORS mode: %s", srv.environment)
 	}
 
 	// Add locale middleware to extract and set locale from request header

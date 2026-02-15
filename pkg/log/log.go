@@ -3,10 +3,18 @@ package log
 import (
 	"context"
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+// timeEncoder dùng format dễ đọc: 2006-01-02 15:04:05.000
+const timeFormat = "2006-01-02 15:04:05.000"
+
+func timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(t.Format(timeFormat))
+}
 
 var logLevelMap = map[string]zapcore.Level{
 	LevelDebug:  zapcore.DebugLevel,
@@ -39,7 +47,7 @@ func (l *zapLogger) init() {
 	encoderCfg.TimeKey = "TIME"
 	encoderCfg.NameKey = "NAME"
 	encoderCfg.MessageKey = "MESSAGE"
-	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderCfg.EncodeTime = timeEncoder
 
 	if l.cfg.ColorEnabled && l.cfg.Encoding == EncodingConsole {
 		encoderCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder

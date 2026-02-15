@@ -23,7 +23,6 @@ type HTTPServer struct {
 	// Server Configuration
 	gin         *gin.Engine
 	l           log.Logger
-	host        string
 	port        int
 	mode        string
 	environment string
@@ -50,7 +49,6 @@ type HTTPServer struct {
 type Config struct {
 	// Server Configuration
 	Logger      log.Logger
-	Host        string
 	Port        int
 	Mode        string
 	Environment string
@@ -92,7 +90,6 @@ func New(logger log.Logger, cfg Config) (*HTTPServer, error) {
 		// Server Configuration
 		l:           logger,
 		gin:         gin.Default(),
-		host:        cfg.Host,
 		port:        cfg.Port,
 		mode:        cfg.Mode,
 		environment: cfg.Environment,

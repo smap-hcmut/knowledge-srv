@@ -22,7 +22,6 @@ func (m *managerImpl) GenerateToken(userID, email, role string, groups []string)
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    m.issuer,
 			Subject:   userID,
-			Audience:  m.audience,
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 			IssuedAt:  jwt.NewNumericDate(now),
 			ID:        jti,
@@ -57,11 +56,9 @@ func (m *managerImpl) VerifyToken(tokenString string) (*Claims, error) {
 	return claims, nil
 }
 
-// SetConfig sets issuer, audience, and TTL.
-func (m *managerImpl) SetConfig(issuer string, audience []string, ttl time.Duration) {
+// SetConfig sets issuer (TTL kept as default for GenerateToken if ever used).
+func (m *managerImpl) SetConfig(issuer string) {
 	m.issuer = issuer
-	m.audience = audience
-	m.ttl = ttl
 }
 
 // Verify implements scope.Manager.

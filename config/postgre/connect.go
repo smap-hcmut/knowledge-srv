@@ -69,15 +69,11 @@ func Connect(ctx context.Context, cfg config.PostgresConfig) (*sql.DB, error) {
 		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s search_path=%s",
 			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, sslMode, searchPath)
 
-		fmt.Printf("[PostgreSQL] Attempting to connect to %s:%d/%s (SSL mode: %s)...\n",
-			cfg.Host, cfg.Port, cfg.DBName, sslMode)
-
 		// Open database connection (does not actually connect yet)
 		db, dbErr := sql.Open("postgres", dsn)
 		if dbErr != nil {
 			err = fmt.Errorf("failed to open PostgreSQL connection: %w", dbErr)
 			initErr = err
-			fmt.Printf("[PostgreSQL] ERROR: Failed to open connection: %v\n", err)
 			return
 		}
 
@@ -87,21 +83,16 @@ func Connect(ctx context.Context, cfg config.PostgresConfig) (*sql.DB, error) {
 		db.SetConnMaxLifetime(defaultConnMaxLifetime)
 		db.SetConnMaxIdleTime(defaultConnMaxIdleTime)
 
-		fmt.Printf("[PostgreSQL] Pinging database...\n")
-
 		// Verify connection by pinging the database
 		if pingErr := db.PingContext(connectCtx); pingErr != nil {
 			// Close connection to prevent resource leak
 			_ = db.Close()
 			err = fmt.Errorf("failed to ping PostgreSQL: %w", pingErr)
 			initErr = err
-			fmt.Printf("[PostgreSQL] ERROR: Failed to ping database: %v\n", pingErr)
 			return
 		}
 
 		instance = db
-		fmt.Printf("[PostgreSQL] Successfully connected to %s:%d/%s\n",
-			cfg.Host, cfg.Port, cfg.DBName)
 	})
 
 	return instance, err
@@ -126,16 +117,13 @@ func Disconnect(ctx context.Context, db *sql.DB) error {
 	defer mu.Unlock()
 
 	if db != nil {
-		fmt.Printf("[PostgreSQL] Disconnecting...\n")
 		if err := db.Close(); err != nil {
-			fmt.Printf("[PostgreSQL] ERROR: Failed to close connection: %v\n", err)
 			return fmt.Errorf("failed to close PostgreSQL connection: %w", err)
 		}
 
 		instance = nil
 		initErr = nil
 		once = sync.Once{} // Reset to allow reconnection
-		fmt.Printf("[PostgreSQL] Disconnected successfully\n")
 	}
 	return nil
 }
@@ -191,13 +179,9 @@ func Reconnect(ctx context.Context, cfg config.PostgresConfig) error {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, sslMode)
 
-	fmt.Printf("[PostgreSQL] Reconnecting to %s:%d/%s (SSL mode: %s)...\n",
-		cfg.Host, cfg.Port, cfg.DBName, sslMode)
-
 	// Open new database connection
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		fmt.Printf("[PostgreSQL] ERROR: Failed to create new connection: %v\n", err)
 		return fmt.Errorf("failed to create new PostgreSQL connection: %w", err)
 	}
 
@@ -214,13 +198,10 @@ func Reconnect(ctx context.Context, cfg config.PostgresConfig) error {
 	if pingErr := db.PingContext(connectCtx); pingErr != nil {
 		// Close connection to prevent resource leak
 		_ = db.Close()
-		fmt.Printf("[PostgreSQL] ERROR: Failed to reconnect: %v\n", pingErr)
 		return fmt.Errorf("failed to connect to PostgreSQL: %w", pingErr)
 	}
 
 	instance = db
-	fmt.Printf("[PostgreSQL] Reconnected successfully to %s:%d/%s\n",
-		cfg.Host, cfg.Port, cfg.DBName)
 
 	return nil
 }

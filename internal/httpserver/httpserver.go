@@ -18,7 +18,7 @@ func (srv HTTPServer) Run() error {
 		return err
 	}
 
-	addr := fmt.Sprintf("%s:%d", srv.host, srv.port)
+	addr := fmt.Sprintf(":%d", srv.port)
 	server := &http.Server{
 		Addr:    addr,
 		Handler: srv.gin,
@@ -26,7 +26,7 @@ func (srv HTTPServer) Run() error {
 
 	serveErr := make(chan error, 1)
 	go func() {
-		srv.l.Infof(context.Background(), "Started server on %s", addr)
+		srv.l.Infof(context.Background(), "API server listening on %s", addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			serveErr <- err
 		}
