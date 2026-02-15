@@ -10,14 +10,14 @@ import (
 )
 
 var (
-	instance *redis.Client
+	instance redis.IRedis
 	once     sync.Once
 	mu       sync.RWMutex
 	initErr  error
 )
 
 // Connect initializes and connects to Redis using singleton pattern.
-func Connect(ctx context.Context, cfg config.RedisConfig) (*redis.Client, error) {
+func Connect(ctx context.Context, cfg config.RedisConfig) (redis.IRedis, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -32,23 +32,22 @@ func Connect(ctx context.Context, cfg config.RedisConfig) (*redis.Client, error)
 
 	var err error
 	once.Do(func() {
-		clientCfg := redis.Config{
+		clientCfg := redis.RedisConfig{
 			Host:     cfg.Host,
 			Port:     cfg.Port,
 			Password: cfg.Password,
 			DB:       cfg.DB,
 		}
 
-		client, e := redis.New(clientCfg)
+		client, e := redis.NewRedis(clientCfg)
 		if e != nil {
 			err = fmt.Errorf("failed to initialize Redis client: %w", e)
 			initErr = err
 			return
 		}
 
-		// Ping to verify connection
 		if e := client.Ping(ctx); e != nil {
-			client.Close()
+			_ = client.Close()
 			err = fmt.Errorf("failed to ping Redis: %w", e)
 			initErr = err
 			return
@@ -61,7 +60,7 @@ func Connect(ctx context.Context, cfg config.RedisConfig) (*redis.Client, error)
 }
 
 // GetClient returns the singleton Redis client instance.
-func GetClient() *redis.Client {
+func GetClient() redis.IRedis {
 	mu.RLock()
 	defer mu.RUnlock()
 
