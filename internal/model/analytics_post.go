@@ -1,67 +1,8 @@
-package indexing
+package model
 
-import (
-	"time"
-)
+import "time"
 
-type IndexInput struct {
-	BatchID     string
-	ProjectID   string
-	FileURL     string
-	RecordCount int
-}
-
-type RetryFailedInput struct {
-	MaxRetryCount int
-	Limit         int
-	ErrorTypes    []string
-}
-
-type ReconcileInput struct {
-	StaleDuration time.Duration
-	Limit         int
-}
-
-type IndexOutput struct {
-	BatchID       string
-	TotalRecords  int
-	Indexed       int
-	Failed        int
-	Skipped       int // Spam, bot, duplicate
-	Duration      time.Duration
-	FailedRecords []FailedRecord
-}
-
-type FailedRecord struct {
-	AnalyticsID  string
-	ErrorType    string
-	ErrorMessage string
-}
-
-type RetryFailedOutput struct {
-	TotalRetried int
-	Succeeded    int
-	Failed       int
-	Duration     time.Duration
-}
-
-type ReconcileOutput struct {
-	TotalChecked int
-	Fixed        int
-	Requeued     int
-	Duration     time.Duration
-}
-
-type StatisticOutput struct {
-	ProjectID      string
-	TotalIndexed   int
-	TotalFailed    int
-	TotalPending   int
-	LastIndexedAt  *time.Time
-	AvgIndexTimeMs int
-}
-
-// AnalyticsPost - Cấu trúc của 1 record trong file JSONL từ Analytics Service
+// AnalyticsPost - Structure of a record in the JSONL file
 type AnalyticsPost struct {
 	// Core Identity
 	ID        string `json:"id"`
@@ -69,11 +10,11 @@ type AnalyticsPost struct {
 	SourceID  string `json:"source_id"`
 
 	// UAP Core
-	Content          string         `json:"content"`
-	ContentCreatedAt time.Time      `json:"content_created_at"`
-	IngestedAt       time.Time      `json:"ingested_at"`
-	Platform         string         `json:"platform"`
-	UAPMetadata      UAPMetadata    `json:"uap_metadata"`
+	Content          string      `json:"content"`
+	ContentCreatedAt time.Time   `json:"content_created_at"`
+	IngestedAt       time.Time   `json:"ingested_at"`
+	Platform         string      `json:"platform"`
+	UAPMetadata      UAPMetadata `json:"uap_metadata"`
 
 	// Sentiment
 	OverallSentiment      string  `json:"overall_sentiment"`
@@ -110,7 +51,7 @@ type AnalyticsPost struct {
 	IsToxic             bool    `json:"is_toxic"`
 }
 
-// UAPMetadata - Metadata từ UAP
+// UAPMetadata - Metadata from UAP
 type UAPMetadata struct {
 	Author            string             `json:"author"`
 	AuthorDisplayName string             `json:"author_display_name"`
@@ -121,7 +62,7 @@ type UAPMetadata struct {
 	Location          string             `json:"location,omitempty"`
 }
 
-// EngagementMetadata - Engagement trong metadata
+// EngagementMetadata - Engagement in metadata
 type EngagementMetadata struct {
 	Views    int `json:"views"`
 	Likes    int `json:"likes"`
@@ -129,7 +70,7 @@ type EngagementMetadata struct {
 	Shares   int `json:"shares"`
 }
 
-// Aspect - ABSA aspect
+// Aspect - ABSA aspect (Aspect-based sentiment analysis)
 type Aspect struct {
 	Aspect            string    `json:"aspect"`
 	AspectDisplayName string    `json:"aspect_display_name"`
@@ -142,14 +83,14 @@ type Aspect struct {
 	Explanation       string    `json:"explanation"`
 }
 
-// Mention - Text mention trong aspect
+// Mention - Text mention in aspect
 type Mention struct {
 	Text     string `json:"text"`
 	StartPos int    `json:"start_pos"`
 	EndPos   int    `json:"end_pos"`
 }
 
-// RiskFactor - Risk factor
+// RiskFactor - Risk factor (Risk assessment)
 type RiskFactor struct {
 	Factor      string `json:"factor"`
 	Severity    string `json:"severity"`

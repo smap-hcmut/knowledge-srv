@@ -2,8 +2,7 @@ package usecase
 
 import (
 	"knowledge-srv/internal/indexing"
-	"knowledge-srv/pkg/discord"
-	"knowledge-srv/pkg/gemini"
+	repo "knowledge-srv/internal/indexing/repository"
 	"knowledge-srv/pkg/log"
 	"knowledge-srv/pkg/minio"
 	"knowledge-srv/pkg/qdrant"
@@ -13,38 +12,40 @@ import (
 
 // implUseCase implements the indexing.UseCase interface
 type implUseCase struct {
-	l        log.Logger
-	repo     indexing.Repository
-	qdrant   qdrant.IQdrant
-	minio    minio.MinIO
-	voyage   voyage.IVoyage
-	gemini   gemini.IGemini
-	redis    redis.IRedis
-	producer indexing.Producer
-	discord  discord.IDiscord
+	l      log.Logger
+	repo   repo.Repository
+	qdrant qdrant.IQdrant
+	minio  minio.MinIO
+	voyage voyage.IVoyage
+	redis  redis.IRedis
+
+	// Config
+	collectionName   string
+	maxConcurrency   int
+	minContentLength int
+	minQualityScore  float64
 }
 
 // New creates a new indexing usecase
 func New(
 	l log.Logger,
-	repo indexing.Repository,
+	repository repo.Repository,
 	qdrant qdrant.IQdrant,
 	minio minio.MinIO,
 	voyage voyage.IVoyage,
-	gemini gemini.IGemini,
 	redis redis.IRedis,
-	producer indexing.Producer,
-	discord discord.IDiscord,
+	collectionName string,
 ) indexing.UseCase {
 	return &implUseCase{
-		l:        l,
-		repo:     repo,
-		qdrant:   qdrant,
-		minio:    minio,
-		voyage:   voyage,
-		gemini:   gemini,
-		redis:    redis,
-		producer: producer,
-		discord:  discord,
+		l:                l,
+		repo:             repository,
+		qdrant:           qdrant,
+		minio:            minio,
+		voyage:           voyage,
+		redis:            redis,
+		collectionName:   collectionName,
+		maxConcurrency:   10,  // Parallel workers
+		minContentLength: 10,  // Min chars
+		minQualityScore:  0.3, // Min quality score
 	}
 }

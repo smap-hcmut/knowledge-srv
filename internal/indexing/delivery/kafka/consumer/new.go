@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"fmt"
+
 	"knowledge-srv/config"
 	"knowledge-srv/internal/indexing"
 	pkgKafka "knowledge-srv/pkg/kafka"
@@ -21,9 +22,8 @@ type Consumer struct {
 	kafkaConfig config.KafkaConfig
 	uc          indexing.UseCase
 
-	// Consumer groups (using IConsumer interface)
-	documentIndexingGroup    pkgKafka.IConsumer
-	knowledgeBaseEventsGroup pkgKafka.IConsumer
+	// Consumer group for analytics batch completed
+	batchCompletedGroup pkgKafka.IConsumer
 }
 
 // New creates a new indexing consumer
@@ -47,22 +47,10 @@ func New(cfg Config) (*Consumer, error) {
 
 // Close closes all consumer groups
 func (c *Consumer) Close() error {
-	var errs []error
-
-	if c.documentIndexingGroup != nil {
-		if err := c.documentIndexingGroup.Close(); err != nil {
-			errs = append(errs, fmt.Errorf("failed to close document indexing group: %w", err))
+	if c.batchCompletedGroup != nil {
+		if err := c.batchCompletedGroup.Close(); err != nil {
+			return fmt.Errorf("failed to close batch completed group: %w", err)
 		}
-	}
-
-	if c.knowledgeBaseEventsGroup != nil {
-		if err := c.knowledgeBaseEventsGroup.Close(); err != nil {
-			errs = append(errs, fmt.Errorf("failed to close knowledge base events group: %w", err))
-		}
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("errors closing consumer groups: %v", errs)
 	}
 
 	return nil
