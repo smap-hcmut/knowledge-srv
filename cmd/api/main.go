@@ -4,25 +4,28 @@ import (
 	"context"
 	"fmt"
 	"knowledge-srv/config"
-	configPostgre "knowledge-srv/config/postgre"
-	_ "knowledge-srv/docs" // Import swagger docs
-	authUsecase "knowledge-srv/internal/authentication/usecase"
+	"knowledge-srv/config/kafka"
+	"knowledge-srv/config/minio"
+	"knowledge-srv/config/postgre"
+	"knowledge-srv/config/qdrant"
+	"knowledge-srv/config/redis"
 	"knowledge-srv/internal/httpserver"
 	"knowledge-srv/pkg/discord"
 	"knowledge-srv/pkg/encrypter"
-	pkgJWT "knowledge-srv/pkg/jwt"
+	"knowledge-srv/pkg/gemini"
+	"knowledge-srv/pkg/jwt"
 	"knowledge-srv/pkg/log"
-	pkgRedis "knowledge-srv/pkg/redis"
+	"knowledge-srv/pkg/voyage"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 )
 
-// @title       SMAP Identity Service API
-// @description SMAP Identity Service API documentation.
+// @title       SMAP Knowledge Service API
+// @description SMAP Knowledge Service API documentation.
 // @version     1
-// @host        knowledge-srv.tantai.dev
+// @host        smap.tantai.dev
 // @schemes     https
 // @BasePath    /knowledge
 //
@@ -36,15 +39,14 @@ import (
 // @name Authorization
 // @description Legacy Bearer token authentication (deprecated - use cookie authentication instead). Format: "Bearer {token}"
 func main() {
-	// 1. Load configuration
-	// Reads config from YAML file and environment variables
+	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		fmt.Println("Failed to load config: ", err)
 		return
 	}
 
-	// 2. Initialize logger
+	// Initialize logger
 	logger := log.Init(log.ZapConfig{
 		Level:        cfg.Logger.Level,
 		Mode:         cfg.Logger.Mode,
@@ -52,84 +54,118 @@ func main() {
 		ColorEnabled: cfg.Logger.ColorEnabled,
 	})
 
-	// 3. Register graceful shutdown
+	// Register graceful shutdown
 	registerGracefulShutdown(logger)
 
-	// 4. Initialize encrypter
+	// Encrypter
 	encrypterInstance := encrypter.New(cfg.Encrypter.Key)
 
-	// 5. Initialize PostgreSQL
 	ctx := context.Background()
-	postgresDB, err := configPostgre.Connect(ctx, cfg.Postgres)
+
+	// Qdrant
+	qdrantClient, err := qdrant.Connect(ctx, cfg.Qdrant)
+	if err != nil {
+		logger.Error(ctx, "Failed to connect to Qdrant: ", err)
+		return
+	}
+	defer qdrant.Disconnect()
+	logger.Infof(ctx, "Qdrant connected to %s:%d", cfg.Qdrant.Host, cfg.Qdrant.Port)
+
+	// Voyage - Embedding
+	voyageClient, err := voyage.NewVoyage(voyage.VoyageConfig{APIKey: cfg.Voyage.APIKey})
+	if err != nil {
+		logger.Error(ctx, "Failed to initialize Voyage client: ", err)
+		return
+	}
+	logger.Info(ctx, "Voyage client initialized")
+
+	geminiClient, err := gemini.NewGemini(gemini.GeminiConfig{APIKey: cfg.Gemini.APIKey, Model: cfg.Gemini.Model})
+	if err != nil {
+		logger.Error(ctx, "Failed to initialize Gemini client: ", err)
+		return
+	}
+	logger.Info(ctx, "Gemini client initialized")
+
+	// PostgreSQL - Metadata, conversation history
+	postgresDB, err := postgre.Connect(ctx, cfg.Postgres)
 	if err != nil {
 		logger.Error(ctx, "Failed to connect to PostgreSQL: ", err)
 		return
 	}
-	defer configPostgre.Disconnect(ctx, postgresDB)
-	logger.Infof(ctx, "PostgreSQL connected successfully to %s:%d/%s", cfg.Postgres.Host, cfg.Postgres.Port, cfg.Postgres.DBName)
+	defer postgre.Disconnect(ctx, postgresDB)
+	logger.Infof(ctx, "PostgreSQL connected to %s:%d/%s (schema: %s)", cfg.Postgres.Host, cfg.Postgres.Port, cfg.Postgres.DBName, cfg.Postgres.Schema)
 
-	// 6. Initialize Discord (optional)
+	// Redis - Caching, rate limiting
+	redisClient, err := redis.Connect(ctx, cfg.Redis)
+	if err != nil {
+		logger.Error(ctx, "Failed to connect to Redis: ", err)
+		return
+	}
+	defer redis.Disconnect()
+	logger.Infof(ctx, "Redis connected to %s:%d (DB %d)", cfg.Redis.Host, cfg.Redis.Port, cfg.Redis.DB)
+
+	// MinIO - Report storage (PDF/DOCX)
+	minioClient, err := minio.Connect(ctx, &cfg.MinIO)
+	if err != nil {
+		logger.Error(ctx, "Failed to connect to MinIO: ", err)
+		return
+	}
+	defer minio.Disconnect()
+	logger.Infof(ctx, "MinIO connected to %s (bucket: %s)", cfg.MinIO.Endpoint, cfg.MinIO.Bucket)
+
+	// Kafka - Event publishing (optional)
+	kafkaProducer, err := kafka.Connect(cfg.Kafka)
+	if err != nil {
+		logger.Warnf(ctx, "Kafka not configured or unavailable (optional): %v", err)
+		kafkaProducer = nil
+	} else {
+		defer kafka.Disconnect()
+		logger.Infof(ctx, "Kafka producer connected to %v, topic: %s", cfg.Kafka.Brokers, cfg.Kafka.Topic)
+	}
+
+	// Discord - Monitoring & Notification
 	discordClient, err := discord.New(logger, &discord.DiscordWebhook{
 		ID:    cfg.Discord.WebhookID,
 		Token: cfg.Discord.WebhookToken,
 	})
 	if err != nil {
 		logger.Warnf(ctx, "Discord webhook not configured (optional): %v", err)
-		discordClient = nil // Continue without Discord
+		discordClient = nil
 	} else {
-		logger.Infof(ctx, "Discord webhook initialized successfully")
+		logger.Info(ctx, "Discord webhook initialized")
 	}
 
-	// 7. Initialize Redis
-	redisClient, err := pkgRedis.New(pkgRedis.Config{
-		Host:     cfg.Redis.Host,
-		Port:     cfg.Redis.Port,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
-	})
-	if err != nil {
-		logger.Error(ctx, "Failed to connect to Redis: ", err)
-		return
-	}
-	logger.Infof(ctx, "Redis connected successfully to %s:%d (DB %d)", cfg.Redis.Host, cfg.Redis.Port, cfg.Redis.DB)
-
-	// 9. Initialize JWT Manager
-	jwtManager, err := initializeJWTManager(ctx, logger, cfg)
+	// JWT Manager (verify tokens from cookie/header)
+	jwtManager, err := jwt.New(jwt.Config{SecretKey: cfg.JWT.SecretKey, Issuer: cfg.JWT.Issuer, Audience: cfg.JWT.Audience, TTL: time.Duration(cfg.JWT.TTL) * time.Second})
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize JWT manager: ", err)
 		return
 	}
-	logger.Infof(ctx, "JWT Manager initialized with algorithm: %s", cfg.JWT.Algorithm)
+	logger.Infof(ctx, "JWT Manager initialized")
 
-	// 10. Initialize Redirect Validator
-	// Validates OAuth redirect URLs against whitelist to prevent open redirect attacks
-	redirectValidator := authUsecase.NewRedirectValidator(cfg.AccessControl.AllowedRedirectURLs)
-	logger.Infof(ctx, "Redirect validator initialized with %d allowed URLs", len(cfg.AccessControl.AllowedRedirectURLs))
-
-	// 11. Initialize HTTP server
-	// 11. Initialize HTTP server
-	// Main application server that handles all HTTP requests and routes
+	// HTTP server
 	httpServer, err := httpserver.New(logger, httpserver.Config{
-		// Server Configuration
 		Logger:      logger,
 		Host:        cfg.HTTPServer.Host,
 		Port:        cfg.HTTPServer.Port,
 		Mode:        cfg.HTTPServer.Mode,
 		Environment: cfg.Environment.Name,
 
-		// Database Configuration
 		PostgresDB: postgresDB,
 
-		// Authentication & Security Configuration
-		Config:            cfg,
-		JWTManager:        jwtManager,
-		RedisClient:       redisClient,
-		RedirectValidator: redirectValidator,
-		CookieConfig:      cfg.Cookie,
-		Encrypter:         encrypterInstance,
+		Config:       cfg,
+		JWTManager:   jwtManager,
+		RedisClient:  redisClient,
+		CookieConfig: cfg.Cookie,
+		Encrypter:    encrypterInstance,
 
-		// Monitoring & Notification Configuration
 		Discord: discordClient,
+
+		QdrantClient:  qdrantClient,
+		VoyageClient:  voyageClient,
+		GeminiClient:  geminiClient,
+		MinIOClient:   minioClient,
+		KafkaProducer: kafkaProducer,
 	})
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize HTTP server: ", err)
@@ -154,15 +190,4 @@ func registerGracefulShutdown(logger log.Logger) {
 		logger.Info(context.Background(), "Cleanup completed")
 		os.Exit(0)
 	}()
-}
-
-// initializeJWTManager initializes JWT manager with HS256 symmetric key
-func initializeJWTManager(ctx context.Context, logger log.Logger, cfg *config.Config) (*pkgJWT.Manager, error) {
-	// Create JWT manager with secret key from config
-	return pkgJWT.New(pkgJWT.Config{
-		SecretKey: cfg.JWT.SecretKey,
-		Issuer:    cfg.JWT.Issuer,
-		Audience:  cfg.JWT.Audience,
-		TTL:       time.Duration(cfg.JWT.TTL) * time.Second,
-	})
 }

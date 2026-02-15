@@ -2,6 +2,7 @@ package voyage
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	pkghttp "knowledge-srv/pkg/http"
@@ -14,13 +15,16 @@ type IVoyage interface {
 }
 
 // NewVoyage creates a new Voyage client. APIKey must be set; Embed returns an error if it is empty.
-func NewVoyage(cfg VoyageConfig) IVoyage {
+func NewVoyage(cfg VoyageConfig) (IVoyage, error) {
+	if cfg.APIKey == "" {
+		return nil, fmt.Errorf("voyage: API key is required")
+	}
 	return &voyageImpl{
 		apiKey: cfg.APIKey,
 		httpClient: pkghttp.NewClient(pkghttp.ClientConfig{
 			Timeout:   30 * time.Second,
-			Retries:  3,
+			Retries:   3,
 			RetryWait: 1 * time.Second,
 		}),
-	}
+	}, nil
 }

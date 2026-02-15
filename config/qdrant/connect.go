@@ -11,14 +11,14 @@ import (
 )
 
 var (
-	instance *qdrant.Client
+	instance qdrant.IQdrant
 	once     sync.Once
 	mu       sync.RWMutex
 	initErr  error
 )
 
 // Connect initializes and connects to Qdrant using singleton pattern.
-func Connect(ctx context.Context, cfg config.QdrantConfig) (*qdrant.Client, error) {
+func Connect(ctx context.Context, cfg config.QdrantConfig) (qdrant.IQdrant, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -41,7 +41,7 @@ func Connect(ctx context.Context, cfg config.QdrantConfig) (*qdrant.Client, erro
 			Timeout: time.Duration(cfg.Timeout) * time.Second,
 		}
 
-		client, e := qdrant.New(clientCfg)
+		client, e := qdrant.NewQdrant(clientCfg)
 		if e != nil {
 			err = fmt.Errorf("failed to initialize Qdrant client: %w", e)
 			initErr = err
@@ -55,7 +55,7 @@ func Connect(ctx context.Context, cfg config.QdrantConfig) (*qdrant.Client, erro
 }
 
 // GetClient returns the singleton Qdrant client instance.
-func GetClient() *qdrant.Client {
+func GetClient() qdrant.IQdrant {
 	mu.RLock()
 	defer mu.RUnlock()
 

@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	instance *kafka.Producer
+	instance kafka.IProducer
 	once     sync.Once
 	mu       sync.RWMutex
 	initErr  error
 )
 
 // Connect initializes and connects to Kafka using singleton pattern.
-func Connect(cfg config.KafkaConfig) (*kafka.Producer, error) {
+func Connect(cfg config.KafkaConfig) (kafka.IProducer, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -50,7 +50,7 @@ func Connect(cfg config.KafkaConfig) (*kafka.Producer, error) {
 }
 
 // GetClient returns the singleton Kafka producer instance.
-func GetClient() *kafka.Producer {
+func GetClient() kafka.IProducer {
 	mu.RLock()
 	defer mu.RUnlock()
 

@@ -32,16 +32,17 @@ func Connect(ctx context.Context, cfg *config.MinIOConfig) (minio.MinIO, error) 
 
 	var err error
 	once.Do(func() {
-		// NewMinIO takes *config.MinIOConfig and returns interface MinIO
-		client := minio.NewMinIO(cfg)
-
-		// Connect to verify
+		client, e := minio.NewMinIO(cfg)
+		if e != nil {
+			err = fmt.Errorf("failed to create MinIO client: %w", e)
+			initErr = err
+			return
+		}
 		if e := client.Connect(ctx); e != nil {
 			err = fmt.Errorf("failed to connect to MinIO: %w", e)
 			initErr = err
 			return
 		}
-
 		instance = client
 	})
 
@@ -68,10 +69,21 @@ func HealthCheck(ctx context.Context) error {
 		return fmt.Errorf("MinIO client not initialized")
 	}
 
-	// MinIO interface doesn't expose Ping explicitly in pkg/minio/new.go,
-	// but Connect performs the check. Assuming Connect can be called idempotent
-	// or we rely on internal state.
-	// Alternatively, pkg/minio might handle keep-alive.
-	// For now, check if instance is not nil.
+	return instance.HealthCheck(ctx)
+}
+
+// Disconnect closes the MinIO client and resets the singleton.
+func Disconnect() error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if instance != nil {
+		if err := instance.Close(); err != nil {
+			return err
+		}
+		instance = nil
+		once = sync.Once{}
+		initErr = nil
+	}
 	return nil
 }
