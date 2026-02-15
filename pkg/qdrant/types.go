@@ -1,14 +1,30 @@
 package qdrant
 
-import "time"
+import (
+	"time"
 
-// Config holds Qdrant configuration
-type Config struct {
+	pb "github.com/qdrant/go-client/qdrant"
+	"google.golang.org/grpc"
+)
+
+// Config is an alias for QdrantConfig (backward compatibility with config layer).
+type Config = QdrantConfig
+
+// QdrantConfig holds Qdrant configuration.
+type QdrantConfig struct {
 	Host    string
 	Port    int
 	UseTLS  bool
 	APIKey  string
 	Timeout time.Duration
+}
+
+// qdrantImpl implements IQdrant and wraps the Qdrant gRPC client.
+type qdrantImpl struct {
+	conn              *grpc.ClientConn
+	pointsClient      pb.PointsClient
+	collectionsClient pb.CollectionsClient
+	defaultTimeout    time.Duration
 }
 
 // Point represents a vector point in Qdrant

@@ -16,7 +16,7 @@ var (
 	ErrConnectionFailed   = errors.New("connection failed")
 )
 
-// WrapError wraps an error with additional context
+// WrapError wraps an error with additional context.
 func WrapError(err error, msg string) error {
 	if err == nil {
 		return nil

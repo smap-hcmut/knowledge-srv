@@ -6,7 +6,23 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-// ExchangeArgs is a struct that contains the arguments for creating an exchange
+// connectionImpl implements IConnection.
+type connectionImpl struct {
+	url                 string
+	retryWithoutTimeout bool
+	conn                *amqp.Connection
+	isRetrying          bool
+	reconnects          []chan bool
+}
+
+// channelImpl implements IChannel.
+type channelImpl struct {
+	conn       *connectionImpl
+	ch         *amqp.Channel
+	reconnects []chan bool
+}
+
+// ExchangeArgs holds arguments for ExchangeDeclare.
 type ExchangeArgs struct {
 	Name       string
 	Type       string
@@ -21,7 +37,7 @@ func (e ExchangeArgs) spread() (name, kind string, durable, autoDelete, internal
 	return e.Name, e.Type, e.Durable, e.AutoDelete, e.Internal, e.NoWait, e.Args
 }
 
-// QueueArgs is a struct that contains the arguments for creating a queue
+// QueueArgs holds arguments for QueueDeclare.
 type QueueArgs struct {
 	Name       string
 	Durable    bool
@@ -35,10 +51,10 @@ func (q QueueArgs) spread() (name string, durable, autoDelete, exclusive, noWait
 	return q.Name, q.Durable, q.AutoDelete, q.Exclusive, q.NoWait, q.Args
 }
 
-// Publishing is a struct that contains the arguments for publishing a message
+// Publishing is an alias for amqp.Publishing.
 type Publishing = amqp.Publishing
 
-// PublishArgs is a struct that contains the arguments for publishing a message
+// PublishArgs holds arguments for Publish.
 type PublishArgs struct {
 	Exchange   string
 	RoutingKey string
@@ -51,7 +67,7 @@ func (p PublishArgs) spread(ctx context.Context) (c context.Context, exchange, k
 	return ctx, p.Exchange, p.RoutingKey, p.Mandatory, p.Immediate, p.Msg
 }
 
-// ConsumeArgs is a struct that contains the arguments for consuming a message
+// ConsumeArgs holds arguments for Consume.
 type ConsumeArgs struct {
 	Queue     string
 	Consumer  string
@@ -66,7 +82,7 @@ func (c ConsumeArgs) spread() (queue, consumer string, autoAck, exclusive, noLoc
 	return c.Queue, c.Consumer, c.AutoAck, c.Exclusive, c.NoLocal, c.NoWait, c.Args
 }
 
-// QueueBindArgs is a struct that contains the arguments for binding a queue
+// QueueBindArgs holds arguments for QueueBind.
 type QueueBindArgs struct {
 	Queue      string
 	Exchange   string

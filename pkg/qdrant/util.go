@@ -6,36 +6,58 @@ import (
 	pb "github.com/qdrant/go-client/qdrant"
 )
 
-// Validate validates the Qdrant configuration
-func (cfg Config) Validate() error {
-	if cfg.Host == "" {
-		return fmt.Errorf("%w: host is required", ErrInvalidConfig)
+// valueToInterface converts a qdrant Value to a Go interface{} (for payload extraction).
+func valueToInterface(v *pb.Value) interface{} {
+	if v == nil {
+		return nil
 	}
-	if cfg.Port <= 0 || cfg.Port > 65535 {
-		return fmt.Errorf("%w: invalid port number", ErrInvalidConfig)
+	switch v.GetKind().(type) {
+	case *pb.Value_NullValue:
+		return nil
+	case *pb.Value_DoubleValue:
+		return v.GetDoubleValue()
+	case *pb.Value_IntegerValue:
+		return v.GetIntegerValue()
+	case *pb.Value_StringValue:
+		return v.GetStringValue()
+	case *pb.Value_BoolValue:
+		return v.GetBoolValue()
+	case *pb.Value_StructValue:
+		st := v.GetStructValue()
+		if st == nil {
+			return nil
+		}
+		m := make(map[string]interface{})
+		for key, val := range st.GetFields() {
+			m[key] = valueToInterface(val)
+		}
+		return m
+	case *pb.Value_ListValue:
+		list := v.GetListValue()
+		if list == nil {
+			return nil
+		}
+		vals := list.GetValues()
+		s := make([]interface{}, len(vals))
+		for i, val := range vals {
+			s[i] = valueToInterface(val)
+		}
+		return s
+	default:
+		return nil
 	}
-	return nil
 }
 
-// GetDefaultConfig returns a default Qdrant configuration
-func GetDefaultConfig() Config {
-	return Config{
-		Host:   "localhost",
-		Port:   6334,
-		UseTLS: false,
-	}
-}
-
-// GetDistanceMetric returns the appropriate distance metric
+// GetDistanceMetric returns the appropriate distance metric for the given string (use Distance* constants).
 func GetDistanceMetric(metric string) pb.Distance {
 	switch metric {
-	case "cosine":
+	case DistanceCosine:
 		return pb.Distance_Cosine
-	case "euclidean":
+	case DistanceEuclidean:
 		return pb.Distance_Euclid
-	case "dot":
+	case DistanceDot:
 		return pb.Distance_Dot
-	case "manhattan":
+	case DistanceManhattan:
 		return pb.Distance_Manhattan
 	default:
 		return pb.Distance_Cosine
