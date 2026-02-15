@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 
-	"identity-srv/pkg/locale"
+	"knowledge-srv/pkg/locale"
 )
 
 func NewEmail(ctx context.Context, e EmailMeta, data interface{}) (Email, error) {

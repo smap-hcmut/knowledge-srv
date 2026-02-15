@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"identity-srv/internal/model"
+	"knowledge-srv/internal/model"
 )
 
 // NewScope creates a new scope.

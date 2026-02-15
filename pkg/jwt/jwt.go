@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"identity-srv/pkg/scope"
+	"knowledge-srv/pkg/scope"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
