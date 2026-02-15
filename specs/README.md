@@ -33,7 +33,7 @@ Thư mục này chứa các tài liệu chi tiết về data models, API specifi
 **Mục đích:** Chi tiết TẤT CẢ dependencies của Knowledge Service
 
 **Nội dung:**
-- ✅ 6 dependencies BẮT BUỘC (Qdrant, OpenAI, PostgreSQL, Redis, Project Service, MinIO)
+- ✅ 6 dependencies BẮT BUỘC (Qdrant, Voyage AI, Gemini, PostgreSQL, Redis, Project Service, MinIO)
 - ✅ 3 dependencies OPTIONAL (Kafka, Prometheus, Jaeger)
 - ✅ Vai trò từng dependency
 - ✅ Code examples kết nối
@@ -48,7 +48,25 @@ Thư mục này chứa các tài liệu chi tiết về data models, API specifi
 
 ---
 
-### 3. **analytics_post_example.json**
+### 3. **MODEL_PROVIDERS_COMPARISON.md** ⭐ MỚI
+**Mục đích:** So sánh và lý do chọn Voyage AI + Gemini thay vì OpenAI
+
+**Nội dung:**
+- ✅ So sánh chi tiết: Voyage AI vs OpenAI (embedding)
+- ✅ So sánh chi tiết: Gemini vs GPT-4 (LLM)
+- ✅ Cost analysis: Tiết kiệm 80-99%!
+- ✅ Performance benchmarks
+- ✅ Implementation guide
+- ✅ Migration checklist
+
+**Key Highlights:**
+- Voyage AI: SOTA retrieval, $0.10/1M tokens
+- Gemini 1.5 Pro: FREE tier, 2M context
+- Total savings: $6,000-7,500/month!
+
+---
+
+### 4. **analytics_post_example.json**
 **Mục đích:** Ví dụ JSON data thực tế của analytics output
 
 **Nội dung:**
