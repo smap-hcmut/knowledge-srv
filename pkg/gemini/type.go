@@ -1,5 +1,20 @@
 package gemini
 
+import pkghttp "knowledge-srv/pkg/http"
+
+// GeminiConfig holds the configuration for the Gemini client
+type GeminiConfig struct {
+	APIKey string
+	Model  string
+}
+
+// geminiImpl implements IGemini using the Google Gemini API.
+type geminiImpl struct {
+	apiKey     string
+	model      string
+	httpClient pkghttp.IClient
+}
+
 // Request defines the request body for Generate Content API
 type Request struct {
 	Contents []Content `json:"contents"`

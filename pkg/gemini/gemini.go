@@ -5,36 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
-
-	pkghttp "knowledge-srv/pkg/http"
+	"strings"
 )
 
-// Gemini interacts with Google Gemini API
-type Gemini struct {
-	apiKey     string
-	model      string
-	httpClient *pkghttp.Client
-}
-
-// NewGemini creates a new Gemini client
-func NewGemini(apiKey, model string) *Gemini {
-	if model == "" {
-		model = DefaultModel
+// Generate generates content based on the prompt.
+func (g *geminiImpl) Generate(ctx context.Context, prompt string) (string, error) {
+	if g.apiKey == "" {
+		return "", fmt.Errorf("gemini: API key is required")
 	}
-	return &Gemini{
-		apiKey: apiKey,
-		model:  model,
-		httpClient: pkghttp.NewClient(pkghttp.ClientConfig{
-			Timeout:   60 * time.Second,
-			Retries:   3,
-			RetryWait: 1 * time.Second,
-		}),
-	}
-}
-
-// Generate generates content based on the prompt
-func (g *Gemini) Generate(ctx context.Context, prompt string) (string, error) {
 	url := fmt.Sprintf("%s/%s:generateContent?key=%s", BaseURL, g.model, g.apiKey)
 
 	req := Request{
@@ -65,10 +43,9 @@ func (g *Gemini) Generate(ctx context.Context, prompt string) (string, error) {
 		return "", fmt.Errorf("no content generated")
 	}
 
-	var generatedText string
+	var b strings.Builder
 	for _, part := range resp.Candidates[0].Content.Parts {
-		generatedText += part.Text
+		b.WriteString(part.Text)
 	}
-
-	return generatedText, nil
+	return b.String(), nil
 }
