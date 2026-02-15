@@ -1,9 +1,24 @@
 package minio
 
 import (
+	"context"
 	"io"
+	"sync"
 	"time"
+
+	"knowledge-srv/config"
+
+	"github.com/minio/minio-go/v7"
 )
+
+// implMinIO implements MinIO.
+type implMinIO struct {
+	minioClient    *minio.Client
+	config         *config.MinIOConfig
+	mu             sync.RWMutex
+	connected      bool
+	asyncUploadMgr *asyncUploadManager
+}
 
 // FileInfo represents metadata about a file stored in MinIO.
 type FileInfo struct {
@@ -17,12 +32,6 @@ type FileInfo struct {
 	LastModified time.Time         `json:"last_modified"`
 	Metadata     map[string]string `json:"metadata"`
 	URL          string            `json:"url,omitempty"`
-
-	// Compression metadata
-	IsCompressed     bool    `json:"is_compressed"`
-	CompressedSize   int64   `json:"compressed_size,omitempty"`
-	UncompressedSize int64   `json:"uncompressed_size,omitempty"`
-	CompressionRatio float64 `json:"compression_ratio,omitempty"`
 }
 
 // UploadRequest contains the parameters for uploading a file to MinIO.
@@ -34,10 +43,6 @@ type UploadRequest struct {
 	Size         int64             `json:"size"`
 	ContentType  string            `json:"content_type"`
 	Metadata     map[string]string `json:"metadata"`
-
-	// Compression options
-	EnableCompression bool `json:"enable_compression"`
-	CompressionLevel  int  `json:"compression_level,omitempty"` // 0=none, 1=fastest, 2=default, 3=best
 }
 
 // DownloadRequest contains the parameters for downloading a file from MinIO.
@@ -104,4 +109,76 @@ type BucketInfo struct {
 	Name         string    `json:"name"`
 	CreationDate time.Time `json:"creation_date"`
 	Region       string    `json:"region"`
+}
+
+// UploadStatus represents the status of an async upload.
+type UploadStatus string
+
+const (
+	UploadStatusPending   UploadStatus = "pending"
+	UploadStatusUploading UploadStatus = "uploading"
+	UploadStatusCompleted UploadStatus = "completed"
+	UploadStatusFailed    UploadStatus = "failed"
+	UploadStatusCancelled UploadStatus = "cancelled"
+)
+
+// AsyncUploadTask represents a single async upload task.
+type AsyncUploadTask struct {
+	ID           string
+	Request      *UploadRequest
+	ResultChan   chan *AsyncUploadResult
+	ProgressChan chan *UploadProgress
+	CreatedAt    time.Time
+	ctx          context.Context
+	cancel       context.CancelFunc
+}
+
+// AsyncUploadResult contains the result of an async upload.
+type AsyncUploadResult struct {
+	TaskID    string
+	FileInfo  *FileInfo
+	Error     error
+	Duration  time.Duration
+	StartTime time.Time
+	EndTime   time.Time
+}
+
+// UploadProgress represents the progress of an upload.
+type UploadProgress struct {
+	TaskID        string       `json:"task_id"`
+	BytesUploaded int64        `json:"bytes_uploaded"`
+	TotalBytes    int64        `json:"total_bytes"`
+	Percentage    float64      `json:"percentage"`
+	Status        UploadStatus `json:"status"`
+	Error         string       `json:"error,omitempty"`
+	UpdatedAt     time.Time    `json:"updated_at"`
+}
+
+// asyncUploadManager manages async upload operations.
+type asyncUploadManager struct {
+	minio         *implMinIO
+	workerPool    int
+	uploadQueue   chan *AsyncUploadTask
+	statusTracker *uploadStatusTracker
+	ctx           context.Context
+	cancel        context.CancelFunc
+	wg            sync.WaitGroup
+	started       bool
+	mu            sync.RWMutex
+}
+
+// uploadStatusTracker tracks the status of async uploads.
+type uploadStatusTracker struct {
+	statuses map[string]*UploadProgress
+	results  map[string]*AsyncUploadResult
+	mu       sync.RWMutex
+}
+
+// progressReader wraps an io.Reader to track upload progress.
+type progressReader struct {
+	Reader     io.Reader
+	TotalBytes int64
+	bytesRead  int64
+	OnProgress func(bytesRead int64)
+	mu         sync.Mutex
 }

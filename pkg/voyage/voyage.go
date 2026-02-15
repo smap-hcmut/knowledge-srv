@@ -5,39 +5,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
-
-	pkghttp "knowledge-srv/pkg/http"
 )
 
-// Voyage interacts with Voyage AI API
-type Voyage struct {
-	apiKey     string
-	httpClient *pkghttp.Client
-}
-
-// NewVoyage creates a new Voyage AI client
-func NewVoyage(apiKey string) *Voyage {
-	return &Voyage{
-		apiKey: apiKey,
-		httpClient: pkghttp.NewClient(pkghttp.ClientConfig{
-			Timeout:   30 * time.Second,
-			Retries:   3,
-			RetryWait: 1 * time.Second,
-		}),
+// Embed generates embeddings for the given texts.
+func (v *voyageImpl) Embed(ctx context.Context, texts []string) ([][]float32, error) {
+	if v.apiKey == "" {
+		return nil, fmt.Errorf("voyage: API key is required")
 	}
-}
+	if len(texts) == 0 {
+		return nil, fmt.Errorf("voyage: at least one text is required")
+	}
 
-// Embed generates embeddings for the given texts
-func (v *Voyage) Embed(ctx context.Context, texts []string) ([][]float32, error) {
 	req := Request{
 		Input: texts,
 		Model: Model,
 	}
 
-	headers := map[string]string{
-		"Authorization": "Bearer " + v.apiKey,
-	}
+	headers := map[string]string{"Authorization": "Bearer " + v.apiKey}
 
 	body, statusCode, err := v.httpClient.Post(ctx, Endpoint, req, headers)
 	if err != nil {

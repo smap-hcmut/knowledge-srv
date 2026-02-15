@@ -1,5 +1,18 @@
 package voyage
 
+import pkghttp "knowledge-srv/pkg/http"
+
+// VoyageConfig holds the configuration for the Voyage client.
+type VoyageConfig struct {
+	APIKey string
+}
+
+// voyageImpl implements IVoyage using the Voyage AI API.
+type voyageImpl struct {
+	apiKey     string
+	httpClient pkghttp.IClient
+}
+
 // Request defines the request body for Embedding API
 type Request struct {
 	Input []string `json:"input"`
