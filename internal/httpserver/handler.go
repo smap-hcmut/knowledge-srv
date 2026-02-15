@@ -15,6 +15,10 @@ func (srv HTTPServer) mapHandlers() error {
 
 	srv.registerMiddlewares(mw)
 	srv.registerSystemRoutes()
+	
+	if err := srv.registerDomainRoutes(mw); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -48,4 +52,19 @@ func (srv HTTPServer) registerSystemRoutes() {
 		ginSwagger.URL("doc.json"), // Use relative path
 		ginSwagger.DefaultModelsExpandDepth(-1),
 	))
+}
+
+// registerDomainRoutes initializes and registers all domain routes
+func (srv HTTPServer) registerDomainRoutes(mw middleware.Middleware) error {
+	ctx := context.Background()
+	
+	// Base route group
+	api := srv.gin.Group("/knowledge")
+	
+	// Setup indexing domain
+	if err := srv.setupIndexingDomain(ctx, api, mw); err != nil {
+		return err
+	}
+	
+	return nil
 }
