@@ -6,6 +6,10 @@ help: ## Show this help message
 	@echo 'Available targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+models: ## Generate models
+	@echo "Generating models"
+	@sqlboiler psql
+
 run-api: ## Run API server locally
 	go run cmd/api/main.go
 

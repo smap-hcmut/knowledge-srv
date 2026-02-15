@@ -1,11 +1,9 @@
 package model
 
 const (
-	ScopeTypeAccess = "access"
-	SMAPAPI         = "identity-srv"
-	RoleAdmin       = "ADMIN"
-	RoleAnalyst     = "ANALYST"
-	RoleViewer      = "VIEWER"
+	RoleAdmin   = "ADMIN"
+	RoleAnalyst = "ANALYST"
+	RoleViewer  = "VIEWER"
 )
 
 type Scope struct {

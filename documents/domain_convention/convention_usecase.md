@@ -40,13 +40,48 @@ The UseCase layer follows the **File Responsibility Principle**: every file has 
 
 ### Implementation Files (`usecase/`)
 
-| File           | Contents                                                                                                               |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `new.go`       | **Factory ONLY**: `implUseCase` struct + `New()` + optional setter methods. **No interfaces, no types, no constants.** |
-| `<entity>.go`  | Interface method implementations for a specific entity (e.g., `event.go`, `user.go`)                                   |
-| `<concern>.go` | Logic separated by business concern (e.g., `session.go`, `notification.go`, `oauth.go`)                                |
-| `helpers.go`   | Shared private helper methods used across multiple logic files                                                         |
-| `types.go`     | Private struct definitions internal to the usecase package (NOT public Input/Output types)                             |
+| File          | Contents                                                                                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `new.go`      | **Factory ONLY**: `implUseCase` struct + `New()` + optional setter methods. **No interfaces, no types, no constants.** |
+| `<method>.go` | Each public interface method gets its own file (e.g., `index.go` for `Index()`, `retry_failed.go` for `RetryFailed()`) |
+| `helpers.go`  | ALL private helper methods (validation, formatting, parsing, etc.) used by public methods                              |
+| `types.go`    | Private struct definitions internal to the usecase package (NOT public Input/Output types)                             |
+
+**File Naming Rules:**
+
+- ✅ Public method `Index()` → file `index.go`
+- ✅ Public method `RetryFailed()` → file `retry_failed.go` (snake_case)
+- ✅ Public method `GetStatistics()` → file `get_statistics.go`
+- ❌ NEVER create separate files for helpers (e.g., `validation.go`, `embedding.go`, `qdrant.go`) → ALL go to `helpers.go`
+
+**Example: Bad vs Good Structure**
+
+❌ **BAD** (Too many small files):
+
+```text
+usecase/
+├── new.go
+├── index.go
+├── index_record.go        ← Helper for index
+├── batch.go               ← Helper for batch processing
+├── validation.go          ← Validation helpers
+├── embedding.go           ← Embedding helpers
+├── qdrant.go              ← Qdrant helpers
+├── helpers.go             ← Content hash helper
+└── retry_reconcile.go     ← Multiple methods in one file
+```
+
+✅ **GOOD** (Clean structure):
+
+```text
+usecase/
+├── new.go                 ← Factory
+├── index.go               ← Index() method
+├── retry_failed.go        ← RetryFailed() method
+├── reconcile.go           ← Reconcile() method
+├── get_statistics.go      ← GetStatistics() method
+└── helpers.go             ← ALL private helpers
+```
 
 ### Example: Complex Module
 
@@ -56,13 +91,14 @@ internal/authentication/
 ├── types.go                # OAuthCallbackInput, TokenValidationResult, etc.
 ├── errors.go               # ErrUserNotFound, ErrDomainNotAllowed, etc.
 └── usecase/
-    ├── new.go              # implUsecase struct + New() + setters
-    ├── authentication.go   # GetCurrentUser, Logout, ValidateToken
-    ├── oauth.go            # ProcessOAuthCallback, InitiateOAuthLogin
-    ├── helpers.go          # createSession, generateToken (private)
-    ├── session.go          # SessionManager (concern-based split)
-    └── types.go            # Private types used only within usecase package
+    ├── new.go              # implUsecase struct + New() + setters (50 lines)
+    ├── get_current_user.go # GetCurrentUser() + validateSession (80 lines)
+    ├── logout.go           # Logout() + cleanupSession (60 lines)
+    ├── validate_token.go   # ValidateToken() + parseToken + checkExpiry (120 lines)
+    └── process_oauth_callback.go  # ProcessOAuthCallback() + createSession + validateDomain + generateToken (200 lines)
 ```
+
+**Note:** Each method file is self-contained with ALL its private helpers.
 
 ### Splitting Decision Tree
 
@@ -71,9 +107,8 @@ graph TD
     A["New struct/interface?"] -->|Public Input/Output| B["types.go (module root)"]
     A -->|Private helper struct| C["usecase/types.go"]
     A -->|Dependency interface| D["Import from pkg/ or define in interface.go"]
-    E["New method?"] -->|Interface method| F["usecase/<entity>.go"]
-    E -->|Private helper| G["usecase/helpers.go"]
-    E -->|Distinct business concern| H["usecase/<concern>.go"]
+    E["New method?"] -->|Public interface method| F["usecase/<method_name>.go"]
+    E -->|Private helper function| G["usecase/helpers.go"]
 ```
 
 ---

@@ -125,7 +125,10 @@ func SetScopeToContext(ctx context.Context, scope model.Scope) context.Context {
 }
 
 // GetScopeFromContext returns model.Scope from context.
-func GetScopeFromContext(ctx context.Context) (model.Scope, bool) {
+func GetScopeFromContext(ctx context.Context) model.Scope {
 	scope, ok := ctx.Value(ScopeCtxKey{}).(model.Scope)
-	return scope, ok
+	if !ok {
+		return model.Scope{}
+	}
+	return scope
 }
