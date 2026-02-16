@@ -14,7 +14,7 @@ const collectionName = "smap_analytics"
 func (r *implRepository) Search(ctx context.Context, opt repository.SearchOptions) ([]point.SearchOutput, error) {
 	pkgResults, err := r.client.SearchWithFilter(ctx, collectionName, opt.Vector, opt.Limit, opt.Filter)
 	if err != nil {
-		r.l.Errorf(ctx, "point.repository.qdrant.Search: %v", err)
+		r.l.Errorf(ctx, "point.repository.qdrant.Search: Failed to search points: %v", err)
 		return nil, err
 	}
 
@@ -39,7 +39,7 @@ func (r *implRepository) Upsert(ctx context.Context, opt repository.UpsertOption
 		}
 	}
 	if err := r.client.UpsertPoints(ctx, collectionName, pkgPoints); err != nil {
-		r.l.Errorf(ctx, "point.repository.qdrant.Upsert: %v", err)
+		r.l.Errorf(ctx, "point.repository.qdrant.Upsert: Failed to upsert points: %v", err)
 		return err
 	}
 	return nil

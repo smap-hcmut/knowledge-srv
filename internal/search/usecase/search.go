@@ -44,7 +44,7 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		if err := json.Unmarshal(cachedData, &cached); err == nil {
 			cached.CacheHit = true
 			cached.ProcessingTimeMs = time.Since(startTime).Milliseconds()
-			uc.l.Debugf(ctx, "search.usecase.Search: cache hit")
+			uc.l.Debugf(ctx, "search.usecase.Search: cache hit for key %s", cacheKey)
 			return cached, nil
 		}
 	}
@@ -110,7 +110,7 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	// Step 10: Cache results (Tầng 3)
 	if data, err := json.Marshal(output); err == nil {
 		if err := uc.cacheRepo.SaveSearchResults(ctx, cacheKey, data); err != nil {
-			uc.l.Warnf(ctx, "search.usecase.Search: Failed to cache results: %v", err)
+			uc.l.Warnf(ctx, "search.usecase.Search: Failed to save cache: %v", err)
 		}
 	}
 

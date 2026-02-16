@@ -21,7 +21,7 @@ func (r *implCacheRepository) GetCampaignProjects(ctx context.Context, campaignI
 	}
 	var projectIDs []string
 	if err := json.Unmarshal([]byte(data), &projectIDs); err != nil {
-		r.l.Errorf(ctx, "search.repository.redis.GetCampaignProjects: unmarshal error: %v", err)
+		r.l.Errorf(ctx, "search.repository.redis.GetCampaignProjects: Failed to unmarshal project IDs: %v", err)
 		return nil, err
 	}
 	return projectIDs, nil
@@ -34,7 +34,7 @@ func (r *implCacheRepository) SaveCampaignProjects(ctx context.Context, campaign
 		return err
 	}
 	if err := r.redis.GetClient().Set(ctx, key, data, 10*time.Minute).Err(); err != nil {
-		r.l.Errorf(ctx, "search.repository.redis.SaveCampaignProjects: %v", err)
+		r.l.Errorf(ctx, "search.repository.redis.SaveCampaignProjects: Failed to save to cache: %v", err)
 		return err
 	}
 	return nil
@@ -54,7 +54,7 @@ func (r *implCacheRepository) GetSearchResults(ctx context.Context, cacheKey str
 
 func (r *implCacheRepository) SaveSearchResults(ctx context.Context, cacheKey string, data []byte) error {
 	if err := r.redis.GetClient().Set(ctx, cacheKey, data, 5*time.Minute).Err(); err != nil {
-		r.l.Errorf(ctx, "search.repository.redis.SaveSearchResults: %v", err)
+		r.l.Errorf(ctx, "search.repository.redis.SaveSearchResults: Failed to save to cache: %v", err)
 		return err
 	}
 	return nil
@@ -72,7 +72,7 @@ func (r *implCacheRepository) InvalidateSearchCache(ctx context.Context, project
 	for {
 		keys, nextCursor, err := client.Scan(ctx, cursor, pattern, 100).Result()
 		if err != nil {
-			r.l.Errorf(ctx, "search.repository.redis.InvalidateSearchCache: scan error: %v", err)
+			r.l.Errorf(ctx, "search.repository.redis.InvalidateSearchCache: Failed to scan cache: %v", err)
 			return err
 		}
 		if len(keys) > 0 {
@@ -81,7 +81,7 @@ func (r *implCacheRepository) InvalidateSearchCache(ctx context.Context, project
 				pipe.Del(ctx, key)
 			}
 			if _, err := pipe.Exec(ctx); err != nil && err != goredis.Nil {
-				r.l.Errorf(ctx, "search.repository.redis.InvalidateSearchCache: pipeline error: %v", err)
+				r.l.Errorf(ctx, "search.repository.redis.InvalidateSearchCache: Failed to execute pipeline: %v", err)
 				return err
 			}
 		}

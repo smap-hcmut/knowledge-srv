@@ -21,14 +21,14 @@ func (h *handler) Chat(c *gin.Context) {
 
 	req, sc, err := h.processChatRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.handlers.Chat.processChatRequest: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.Chat: processChatRequest failed: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
 
 	o, err := h.uc.Chat(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.handlers.Chat.uc.Chat: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.Chat: usecase Chat failed: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}
@@ -51,14 +51,14 @@ func (h *handler) GetConversation(c *gin.Context) {
 
 	req, sc, err := h.processGetConversationRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.handlers.GetConversation.processGetConversationRequest: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.GetConversation: processGetConversationRequest failed: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
 
 	o, err := h.uc.GetConversation(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.handlers.GetConversation.uc.GetConversation: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.GetConversation: usecase GetConversation failed: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}
@@ -83,14 +83,14 @@ func (h *handler) ListConversations(c *gin.Context) {
 
 	req, sc, err := h.processListConversationsRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.handlers.ListConversations.processListConversationsRequest: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.ListConversations: processListConversationsRequest failed: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
 
 	o, err := h.uc.ListConversations(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.handlers.ListConversations.uc.ListConversations: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.ListConversations: usecase ListConversations failed: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}
@@ -113,14 +113,14 @@ func (h *handler) GetSuggestions(c *gin.Context) {
 
 	req, sc, err := h.processGetSuggestionsRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.handlers.GetSuggestions.processGetSuggestionsRequest: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.GetSuggestions: processGetSuggestionsRequest failed: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
 
 	o, err := h.uc.GetSuggestions(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.handlers.GetSuggestions.uc.GetSuggestions: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.GetSuggestions: usecase GetSuggestions failed: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}

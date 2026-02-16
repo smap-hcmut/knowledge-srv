@@ -10,7 +10,7 @@ import (
 
 func (uc *implUseCase) Generate(ctx context.Context, input embedding.GenerateInput) (embedding.GenerateOutput, error) {
 	if input.Text == "" {
-		uc.l.Errorf(ctx, "embedding.usecase.Generate: empty text")
+		uc.l.Errorf(ctx, "embedding.usecase.Generate: empty text provided")
 		return embedding.GenerateOutput{}, embedding.ErrEmptyText
 	}
 
@@ -30,7 +30,7 @@ func (uc *implUseCase) Generate(ctx context.Context, input embedding.GenerateInp
 		return embedding.GenerateOutput{}, err
 	}
 	if len(vectors) == 0 {
-		uc.l.Errorf(ctx, "embedding.usecase.Generate: no vector returned")
+		uc.l.Errorf(ctx, "embedding.usecase.Generate: no vector returned from Voyage")
 		return embedding.GenerateOutput{}, embedding.ErrNoVectorReturned
 	}
 	vector := vectors[0]
@@ -49,7 +49,7 @@ func (uc *implUseCase) Generate(ctx context.Context, input embedding.GenerateInp
 
 func (uc *implUseCase) GenerateMany(ctx context.Context, input embedding.GenerateManyInput) (embedding.GenerateManyOutput, error) {
 	if len(input.Texts) == 0 {
-		uc.l.Errorf(ctx, "embedding.usecase.GenerateMany: empty texts")
+		uc.l.Errorf(ctx, "embedding.usecase.GenerateMany: empty texts provided")
 		return embedding.GenerateManyOutput{}, embedding.ErrEmptyTexts
 	}
 	results := make([][]float32, len(input.Texts))
@@ -80,7 +80,7 @@ func (uc *implUseCase) GenerateMany(ctx context.Context, input embedding.Generat
 		return embedding.GenerateManyOutput{}, err
 	}
 	if len(vectors) != len(missTexts) {
-		uc.l.Errorf(ctx, "embedding.usecase.GenerateMany: mismatch vector count")
+		uc.l.Errorf(ctx, "embedding.usecase.GenerateMany: vector count mismatch (expected %d, got %d)", len(missTexts), len(vectors))
 		return embedding.GenerateManyOutput{}, embedding.ErrMismatchVectorCount
 	}
 
