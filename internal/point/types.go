@@ -41,3 +41,14 @@ type ScrollInput struct {
 	WithPayload bool
 	Offset      *string
 }
+
+type FacetInput struct {
+	Key    string
+	Filter *Filter
+	Limit  uint64
+}
+
+type FacetOutput struct {
+	Value string
+	Count uint64
+}

@@ -14,4 +14,5 @@ type QdrantRepository interface {
 	Count(ctx context.Context, opt CountOptions) (uint64, error)
 	Delete(ctx context.Context, opt DeleteOptions) error
 	Scroll(ctx context.Context, opt ScrollOptions) ([]model.Point, error)
+	Facet(ctx context.Context, opt FacetOptions) ([]point.FacetOutput, error)
 }

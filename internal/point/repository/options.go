@@ -33,3 +33,9 @@ type ScrollOptions struct {
 	WithPayload bool
 	Offset      *string
 }
+
+type FacetOptions struct {
+	Key    string
+	Filter *qdrant.Filter
+	Limit  uint64
+}

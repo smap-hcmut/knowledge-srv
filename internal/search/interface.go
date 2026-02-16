@@ -8,4 +8,5 @@ import (
 //go:generate mockery --name UseCase
 type UseCase interface {
 	Search(ctx context.Context, sc model.Scope, input SearchInput) (SearchOutput, error)
+	Aggregate(ctx context.Context, sc model.Scope, input AggregateInput) (AggregateOutput, error)
 }

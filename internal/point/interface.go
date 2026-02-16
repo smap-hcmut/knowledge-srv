@@ -12,4 +12,5 @@ type UseCase interface {
 	Count(ctx context.Context, input CountInput) (uint64, error)
 	Delete(ctx context.Context, input DeleteInput) error
 	Scroll(ctx context.Context, input ScrollInput) ([]model.Point, error)
+	Facet(ctx context.Context, input FacetInput) ([]FacetOutput, error)
 }
