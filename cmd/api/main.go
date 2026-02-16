@@ -9,6 +9,7 @@ import (
 	"knowledge-srv/config/postgre"
 	"knowledge-srv/config/qdrant"
 	"knowledge-srv/config/redis"
+	_ "knowledge-srv/docs" // Swagger docs - blank import to trigger init()
 	"knowledge-srv/internal/httpserver"
 	"knowledge-srv/pkg/discord"
 	"knowledge-srv/pkg/encrypter"
@@ -24,9 +25,8 @@ import (
 // @title       SMAP Knowledge Service API
 // @description SMAP Knowledge Service API documentation.
 // @version     1
-// @host        smap.tantai.dev
-// @schemes     https
-// @BasePath    /knowledge
+// @host        localhost:8080
+// @schemes     http
 //
 // @securityDefinitions.apikey CookieAuth
 // @in cookie
