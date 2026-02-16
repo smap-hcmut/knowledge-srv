@@ -12,7 +12,6 @@ type implRepository struct {
 	l  log.Logger
 }
 
-// New - Factory function
 func New(db *sql.DB, l log.Logger) repository.PostgresRepository {
 	return &implRepository{
 		db: db,

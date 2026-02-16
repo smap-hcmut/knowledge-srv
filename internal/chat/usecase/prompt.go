@@ -16,7 +16,6 @@ const systemPrompt = `Bạn là trợ lý phân tích dữ liệu SMAP. Nhiệm 
 - Trả lời bằng tiếng Việt, ngắn gọn, chính xác
 - Phân tích sentiment và xu hướng nếu được hỏi`
 
-// buildPrompt - Build complete LLM prompt with token management
 func (uc *implUseCase) buildPrompt(question string, docs []search.SearchResult, history []model.Message) string {
 	var b strings.Builder
 

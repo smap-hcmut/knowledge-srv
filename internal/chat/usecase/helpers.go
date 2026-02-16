@@ -5,7 +5,6 @@ import (
 	"knowledge-srv/internal/search"
 )
 
-// extractCitations - Extract citation objects from search results
 func (uc *implUseCase) extractCitations(results []search.SearchResult) []chat.Citation {
 	citations := make([]chat.Citation, 0, len(results))
 	for _, r := range results {
@@ -24,7 +23,6 @@ func (uc *implUseCase) extractCitations(results []search.SearchResult) []chat.Ci
 	return citations
 }
 
-// generateTitle - Auto-generate conversation title from first message
 func (uc *implUseCase) generateTitle(message string) string {
 	if len(message) <= 50 {
 		return message
@@ -32,7 +30,6 @@ func (uc *implUseCase) generateTitle(message string) string {
 	return message[:50] + "..."
 }
 
-// generateSuggestions - Generate follow-up suggestions based on search results
 func (uc *implUseCase) generateSuggestions(query string, output search.SearchOutput) []string {
 	suggestions := make([]string, 0, 3)
 

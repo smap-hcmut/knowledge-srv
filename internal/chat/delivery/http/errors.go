@@ -8,27 +8,13 @@ import (
 )
 
 var (
-	errConversationNotFound = pkgErrors.NewHTTPError(
-		404, "Conversation not found",
-	)
-	errCampaignRequired = pkgErrors.NewHTTPError(
-		400, "Campaign ID is required",
-	)
-	errMessageTooShort = pkgErrors.NewHTTPError(
-		400, "Message too short (min 3 characters)",
-	)
-	errMessageTooLong = pkgErrors.NewHTTPError(
-		400, "Message too long (max 2000 characters)",
-	)
-	errLLMFailed = pkgErrors.NewHTTPError(
-		500, "AI generation failed",
-	)
-	errSearchFailed = pkgErrors.NewHTTPError(
-		500, "Search failed",
-	)
-	errConversationArchived = pkgErrors.NewHTTPError(
-		400, "Conversation is archived",
-	)
+	errConversationNotFound = pkgErrors.NewHTTPError(404, "Conversation not found")
+	errCampaignRequired     = pkgErrors.NewHTTPError(400, "Campaign ID is required")
+	errMessageTooShort      = pkgErrors.NewHTTPError(400, "Message too short (min 3 characters)")
+	errMessageTooLong       = pkgErrors.NewHTTPError(400, "Message too long (max 2000 characters)")
+	errLLMFailed            = pkgErrors.NewHTTPError(500, "AI generation failed")
+	errSearchFailed         = pkgErrors.NewHTTPError(500, "Search failed")
+	errConversationArchived = pkgErrors.NewHTTPError(400, "Conversation is archived")
 )
 
 func (h *handler) mapError(err error) error {

@@ -6,10 +6,6 @@ import (
 	"knowledge-srv/internal/chat"
 )
 
-// =====================================================
-// Request DTOs
-// =====================================================
-
 type chatReq struct {
 	CampaignID     string         `json:"campaign_id" binding:"required"`
 	ConversationID string         `json:"conversation_id,omitempty"`
@@ -79,10 +75,6 @@ func (r getSuggestionsReq) toInput() chat.GetSuggestionsInput {
 	}
 }
 
-// =====================================================
-// Response DTOs
-// =====================================================
-
 type chatResp struct {
 	ConversationID string         `json:"conversation_id"`
 	Answer         string         `json:"answer"`
@@ -137,10 +129,6 @@ type smartSuggestionResp struct {
 	Category    string `json:"category"`
 	Description string `json:"description"`
 }
-
-// =====================================================
-// Response Builders
-// =====================================================
 
 func (h *handler) newChatResp(o chat.ChatOutput) chatResp {
 	resp := chatResp{

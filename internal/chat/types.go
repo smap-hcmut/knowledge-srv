@@ -14,12 +14,11 @@ const (
 
 type ChatInput struct {
 	CampaignID     string
-	ConversationID string // "" = new conversation, non-empty = multi-turn
+	ConversationID string
 	Message        string
 	Filters        ChatFilters
 }
 
-// ChatFilters - Optional search filters cho chat
 type ChatFilters struct {
 	Sentiments []string
 	Aspects    []string
@@ -29,28 +28,20 @@ type ChatFilters struct {
 	RiskLevels []string
 }
 
-// GetConversationInput - Input cho GetConversation
 type GetConversationInput struct {
 	ConversationID string
 }
 
-// ListConversationsInput - Input cho ListConversations
 type ListConversationsInput struct {
 	CampaignID string
 	Limit      int
 	Offset     int
 }
 
-// GetSuggestionsInput - Input cho GetSuggestions
 type GetSuggestionsInput struct {
 	CampaignID string
 }
 
-// =====================================================
-// Output Types
-// =====================================================
-
-// ChatOutput - Output cho Chat method
 type ChatOutput struct {
 	ConversationID string
 	Answer         string
@@ -59,7 +50,6 @@ type ChatOutput struct {
 	SearchMetadata SearchMeta
 }
 
-// Citation - Trích dẫn từ search results
 type Citation struct {
 	ID             string
 	Content        string
@@ -68,7 +58,6 @@ type Citation struct {
 	Sentiment      string
 }
 
-// SearchMeta - Metadata thống kê xử lý
 type SearchMeta struct {
 	TotalDocsSearched int
 	DocsUsed          int
@@ -76,7 +65,6 @@ type SearchMeta struct {
 	ModelUsed         string
 }
 
-// ConversationOutput - Output cho conversation detail/list
 type ConversationOutput struct {
 	ID            string
 	CampaignID    string
@@ -89,7 +77,6 @@ type ConversationOutput struct {
 	CreatedAt     time.Time
 }
 
-// MessageOutput - Output cho single message
 type MessageOutput struct {
 	ID             string
 	Role           string
@@ -101,14 +88,12 @@ type MessageOutput struct {
 	CreatedAt      time.Time
 }
 
-// SuggestionOutput - Output cho GetSuggestions
 type SuggestionOutput struct {
 	Suggestions []SmartSuggestion
 }
 
-// SmartSuggestion - Gợi ý câu hỏi thông minh
 type SmartSuggestion struct {
 	Query       string
-	Category    string // "trending_negative", "sentiment_shift", "comparison", "insight"
+	Category    string
 	Description string
 }

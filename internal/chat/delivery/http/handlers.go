@@ -6,92 +6,124 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Chat - Handler cho POST /api/v1/chat
+// @Summary Chat with knowledge service
+// @Description Send a message and receive an answer with citations
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param body body chatReq true "Chat request"
+// @Success 200 {object} chatResp
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
+// @Router /api/v1/chat [post]
 func (h *handler) Chat(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	req, sc, err := h.processChatRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "processChatRequest failed: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.handlers.Chat.processChatRequest: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
 
-	input := req.toInput()
-
-	output, err := h.uc.Chat(ctx, sc, input)
+	o, err := h.uc.Chat(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "Chat failed: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.handlers.Chat.uc.Chat: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}
 
-	resp := h.newChatResp(output)
-	response.OK(c, resp)
+	response.OK(c, h.newChatResp(o))
 }
 
-// GetConversation - Handler cho GET /api/v1/conversations/:conversation_id
+// @Summary Get conversation detail
+// @Description Return full conversation info and messages
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversation_id path string true "Conversation ID"
+// @Success 200 {object} conversationResp
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
+// @Router /api/v1/conversations/{conversation_id} [get]
 func (h *handler) GetConversation(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	req, sc, err := h.processGetConversationRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "processGetConversationRequest failed: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.handlers.GetConversation.processGetConversationRequest: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
 
-	output, err := h.uc.GetConversation(ctx, sc, req.toInput())
+	o, err := h.uc.GetConversation(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "GetConversation failed: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.handlers.GetConversation.uc.GetConversation: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}
 
-	resp := h.newConversationResp(output)
-	response.OK(c, resp)
+	response.OK(c, h.newConversationResp(o))
 }
 
-// ListConversations - Handler cho GET /api/v1/campaigns/:campaign_id/conversations
+// @Summary List conversations by campaign
+// @Description Paginate conversations for a given campaign
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param campaign_id path string true "Campaign ID"
+// @Param limit query int false "Number of records per page (default 20)"
+// @Param offset query int false "Number of records to skip (default 0)"
+// @Success 200 {array} conversationResp
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
+// @Router /api/v1/campaigns/{campaign_id}/conversations [get]
 func (h *handler) ListConversations(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	req, sc, err := h.processListConversationsRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "processListConversationsRequest failed: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.handlers.ListConversations.processListConversationsRequest: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
 
-	output, err := h.uc.ListConversations(ctx, sc, req.toInput())
+	o, err := h.uc.ListConversations(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "ListConversations failed: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.handlers.ListConversations.uc.ListConversations: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}
 
-	resp := h.newListConversationsResp(output)
-	response.OK(c, resp)
+	response.OK(c, h.newListConversationsResp(o))
 }
 
-// GetSuggestions - Handler cho GET /api/v1/campaigns/:campaign_id/suggestions
+// @Summary Get smart suggestions
+// @Description Return a list of suggested queries for a campaign
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param campaign_id path string true "Campaign ID"
+// @Success 200 {object} suggestionsResp
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
+// @Router /api/v1/campaigns/{campaign_id}/suggestions [get]
 func (h *handler) GetSuggestions(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	req, sc, err := h.processGetSuggestionsRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "processGetSuggestionsRequest failed: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.handlers.GetSuggestions.processGetSuggestionsRequest: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
 
-	output, err := h.uc.GetSuggestions(ctx, sc, req.toInput())
+	o, err := h.uc.GetSuggestions(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "GetSuggestions failed: %v", err)
+		h.l.Errorf(ctx, "chat.delivery.http.handlers.GetSuggestions.uc.GetSuggestions: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}
 
-	resp := h.newSuggestionsResp(output)
-	response.OK(c, resp)
+	response.OK(c, h.newSuggestionsResp(o))
 }

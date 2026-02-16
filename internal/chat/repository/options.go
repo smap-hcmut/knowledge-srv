@@ -2,32 +2,28 @@ package repository
 
 import "encoding/json"
 
-// CreateConversationOptions - Options cho CreateConversation
 type CreateConversationOptions struct {
 	CampaignID string
 	UserID     string
 	Title      string
 }
 
-// ListConversationsOptions - Options cho ListConversations
 type ListConversationsOptions struct {
 	CampaignID string
 	UserID     string
-	Status     string // optional filter
+	Status     string
 	Limit      int
 	Offset     int
 }
 
-// UpdateLastMessageOptions - Options cho UpdateConversationLastMessage
 type UpdateLastMessageOptions struct {
 	ConversationID string
 	MessageCount   int
 }
 
-// CreateMessageOptions - Options cho CreateMessage
 type CreateMessageOptions struct {
 	ConversationID string
-	Role           string // "user" | "assistant"
+	Role           string
 	Content        string
 	Citations      json.RawMessage
 	SearchMetadata json.RawMessage
@@ -35,9 +31,8 @@ type CreateMessageOptions struct {
 	FiltersUsed    json.RawMessage
 }
 
-// ListMessagesOptions - Options cho ListMessages
 type ListMessagesOptions struct {
 	ConversationID string
-	Limit          int  // max messages to load (default 20)
-	OrderASC       bool // true = oldest first
+	Limit          int
+	OrderASC       bool
 }

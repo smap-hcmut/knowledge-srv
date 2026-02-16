@@ -3,157 +3,100 @@ package postgre
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
+
+	"github.com/aarondl/null/v8"
+	"github.com/aarondl/sqlboiler/v4/boil"
 
 	"knowledge-srv/internal/chat/repository"
 	"knowledge-srv/internal/model"
-
-	"github.com/google/uuid"
+	"knowledge-srv/internal/sqlboiler"
+	"knowledge-srv/pkg/util"
 )
 
-// CreateConversation - Tạo conversation mới
+// CreateConversation - Insert conversation record (returns created entity)
 func (r *implRepository) CreateConversation(ctx context.Context, opt repository.CreateConversationOptions) (model.Conversation, error) {
-	id := uuid.New().String()
-	now := time.Now()
+	dbConv := buildCreateConversation(opt)
 
-	query := `
-		INSERT INTO knowledge.conversations (id, campaign_id, user_id, title, status, message_count, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		RETURNING id, campaign_id, user_id, title, status, message_count, last_message_at, created_at, updated_at
-	`
-
-	var conv model.Conversation
-	var lastMessageAt sql.NullTime
-
-	err := r.db.QueryRowContext(ctx, query,
-		id, opt.CampaignID, opt.UserID, opt.Title, "ACTIVE", 0, now, now,
-	).Scan(
-		&conv.ID, &conv.CampaignID, &conv.UserID, &conv.Title,
-		&conv.Status, &conv.MessageCount, &lastMessageAt,
-		&conv.CreatedAt, &conv.UpdatedAt,
-	)
-	if err != nil {
-		return model.Conversation{}, fmt.Errorf("CreateConversation: %w", err)
+	if err := dbConv.Insert(ctx, r.db, boil.Infer()); err != nil {
+		r.l.Errorf(ctx, "chat.repository.postgre.CreateConversation: Failed to insert conversation: %v", err)
+		return model.Conversation{}, repository.ErrFailedToInsert
 	}
 
-	if lastMessageAt.Valid {
-		conv.LastMessageAt = &lastMessageAt.Time
+	if conv := model.NewConversationFromDB(dbConv); conv != nil {
+		return *conv, nil
 	}
-
-	return conv, nil
+	return model.Conversation{}, nil
 }
 
-// GetConversationByID - Lấy conversation theo ID
+// GetConversationByID - Get conversation by primary key
 func (r *implRepository) GetConversationByID(ctx context.Context, id string) (model.Conversation, error) {
-	query := `
-		SELECT id, campaign_id, user_id, title, status, message_count, last_message_at, created_at, updated_at
-		FROM knowledge.conversations
-		WHERE id = $1
-	`
-
-	var conv model.Conversation
-	var lastMessageAt sql.NullTime
-
-	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&conv.ID, &conv.CampaignID, &conv.UserID, &conv.Title,
-		&conv.Status, &conv.MessageCount, &lastMessageAt,
-		&conv.CreatedAt, &conv.UpdatedAt,
-	)
+	dbConv, err := sqlboiler.FindConversation(ctx, r.db, id)
+	if err == sql.ErrNoRows {
+		return model.Conversation{}, nil // Not found
+	}
 	if err != nil {
-		return model.Conversation{}, fmt.Errorf("GetConversationByID: %w", err)
+		r.l.Errorf(ctx, "chat.repository.postgre.GetConversationByID: Failed to get conversation: %v", err)
+		return model.Conversation{}, repository.ErrFailedToGet
 	}
 
-	if lastMessageAt.Valid {
-		conv.LastMessageAt = &lastMessageAt.Time
+	if conv := model.NewConversationFromDB(dbConv); conv != nil {
+		return *conv, nil
 	}
-
-	return conv, nil
+	return model.Conversation{}, nil
 }
 
-// ListConversations - Liệt kê conversations theo campaign + user
+// ListConversations - List conversations by campaign + user
 func (r *implRepository) ListConversations(ctx context.Context, opt repository.ListConversationsOptions) ([]model.Conversation, error) {
-	query := `
-		SELECT id, campaign_id, user_id, title, status, message_count, last_message_at, created_at, updated_at
-		FROM knowledge.conversations
-		WHERE campaign_id = $1 AND user_id = $2
-	`
-	args := []interface{}{opt.CampaignID, opt.UserID}
-	argIdx := 3
+	mods := r.buildListConversationsQuery(opt)
 
-	if opt.Status != "" {
-		query += fmt.Sprintf(" AND status = $%d", argIdx)
-		args = append(args, opt.Status)
-		argIdx++
-	}
-
-	query += " ORDER BY last_message_at DESC NULLS LAST, created_at DESC"
-
-	if opt.Limit > 0 {
-		query += fmt.Sprintf(" LIMIT $%d", argIdx)
-		args = append(args, opt.Limit)
-		argIdx++
-	}
-	if opt.Offset > 0 {
-		query += fmt.Sprintf(" OFFSET $%d", argIdx)
-		args = append(args, opt.Offset)
-	}
-
-	rows, err := r.db.QueryContext(ctx, query, args...)
+	dbConvs, err := sqlboiler.Conversations(mods...).All(ctx, r.db)
 	if err != nil {
-		return nil, fmt.Errorf("ListConversations: %w", err)
-	}
-	defer rows.Close()
-
-	var conversations []model.Conversation
-	for rows.Next() {
-		var conv model.Conversation
-		var lastMessageAt sql.NullTime
-
-		if err := rows.Scan(
-			&conv.ID, &conv.CampaignID, &conv.UserID, &conv.Title,
-			&conv.Status, &conv.MessageCount, &lastMessageAt,
-			&conv.CreatedAt, &conv.UpdatedAt,
-		); err != nil {
-			return nil, fmt.Errorf("ListConversations scan: %w", err)
-		}
-
-		if lastMessageAt.Valid {
-			conv.LastMessageAt = &lastMessageAt.Time
-		}
-		conversations = append(conversations, conv)
+		r.l.Errorf(ctx, "chat.repository.postgre.ListConversations: Failed to list conversations: %v", err)
+		return nil, repository.ErrFailedToList
 	}
 
-	return conversations, rows.Err()
+	return util.MapSlice(dbConvs, model.NewConversationFromDB), nil
 }
 
-// UpdateConversationLastMessage - Cập nhật message_count và last_message_at
+// UpdateConversationLastMessage - Update message_count and last_message_at
 func (r *implRepository) UpdateConversationLastMessage(ctx context.Context, opt repository.UpdateLastMessageOptions) error {
-	now := time.Now()
-	query := `
-		UPDATE knowledge.conversations
-		SET message_count = $1, last_message_at = $2, updated_at = $3
-		WHERE id = $4
-	`
-
-	_, err := r.db.ExecContext(ctx, query, opt.MessageCount, now, now, opt.ConversationID)
+	dbConv, err := sqlboiler.FindConversation(ctx, r.db, opt.ConversationID)
 	if err != nil {
-		return fmt.Errorf("UpdateConversationLastMessage: %w", err)
+		r.l.Errorf(ctx, "chat.repository.postgre.UpdateConversationLastMessage: Failed to find conversation: %v", err)
+		return repository.ErrFailedToUpdate
 	}
+
+	now := time.Now()
+	dbConv.MessageCount = opt.MessageCount
+	dbConv.LastMessageAt = null.TimeFrom(now)
+	dbConv.UpdatedAt = null.TimeFrom(now)
+
+	_, err = dbConv.Update(ctx, r.db, boil.Infer())
+	if err != nil {
+		r.l.Errorf(ctx, "chat.repository.postgre.UpdateConversationLastMessage: Failed to update conversation: %v", err)
+		return repository.ErrFailedToUpdate
+	}
+
 	return nil
 }
 
-// ArchiveConversation - Archive conversation
+// ArchiveConversation - Archive conversation by setting status to ARCHIVED
 func (r *implRepository) ArchiveConversation(ctx context.Context, id string) error {
-	query := `
-		UPDATE knowledge.conversations
-		SET status = 'ARCHIVED', updated_at = $1
-		WHERE id = $2
-	`
-
-	_, err := r.db.ExecContext(ctx, query, time.Now(), id)
+	dbConv, err := sqlboiler.FindConversation(ctx, r.db, id)
 	if err != nil {
-		return fmt.Errorf("ArchiveConversation: %w", err)
+		r.l.Errorf(ctx, "chat.repository.postgre.ArchiveConversation: Failed to find conversation: %v", err)
+		return repository.ErrFailedToUpdate
 	}
+
+	dbConv.Status = "ARCHIVED"
+	dbConv.UpdatedAt = null.TimeFrom(time.Now())
+
+	_, err = dbConv.Update(ctx, r.db, boil.Infer())
+	if err != nil {
+		r.l.Errorf(ctx, "chat.repository.postgre.ArchiveConversation: Failed to archive conversation: %v", err)
+		return repository.ErrFailedToUpdate
+	}
+
 	return nil
 }
