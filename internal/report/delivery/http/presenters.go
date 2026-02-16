@@ -68,21 +68,21 @@ type generateReportResp struct {
 }
 
 type reportResp struct {
-	ID                string          `json:"id"`
-	CampaignID        string          `json:"campaign_id"`
-	UserID            string          `json:"user_id"`
-	Title             string          `json:"title"`
-	ReportType        string          `json:"report_type"`
-	Status            string          `json:"status"`
-	ErrorMessage      string          `json:"error_message,omitempty"`
-	FileFormat        string          `json:"file_format,omitempty"`
-	FileSizeBytes     int64           `json:"file_size_bytes,omitempty"`
-	TotalDocsAnalyzed int             `json:"total_docs_analyzed,omitempty"`
-	SectionsCount     int             `json:"sections_count,omitempty"`
-	GenerationTimeMs  int64           `json:"generation_time_ms,omitempty"`
-	Filters           json.RawMessage `json:"filters,omitempty"`
-	CompletedAt       *string         `json:"completed_at,omitempty"`
-	CreatedAt         string          `json:"created_at"`
+	ID                string      `json:"id"`
+	CampaignID        string      `json:"campaign_id"`
+	UserID            string      `json:"user_id"`
+	Title             string      `json:"title"`
+	ReportType        string      `json:"report_type"`
+	Status            string      `json:"status"`
+	ErrorMessage      string      `json:"error_message,omitempty"`
+	FileFormat        string      `json:"file_format,omitempty"`
+	FileSizeBytes     int64       `json:"file_size_bytes,omitempty"`
+	TotalDocsAnalyzed int         `json:"total_docs_analyzed,omitempty"`
+	SectionsCount     int         `json:"sections_count,omitempty"`
+	GenerationTimeMs  int64       `json:"generation_time_ms,omitempty"`
+	Filters           interface{} `json:"filters,omitempty" swaggertype:"object"`
+	CompletedAt       *string     `json:"completed_at,omitempty"`
+	CreatedAt         string      `json:"created_at"`
 }
 
 type downloadResp struct {
@@ -101,7 +101,7 @@ func (h *handler) newGenerateReportResp(o report.GenerateOutput) generateReportR
 }
 
 func (h *handler) newReportResp(o report.ReportOutput) reportResp {
-	return reportResp{
+	resp := reportResp{
 		ID:                o.ID,
 		CampaignID:        o.CampaignID,
 		UserID:            o.UserID,
@@ -114,10 +114,17 @@ func (h *handler) newReportResp(o report.ReportOutput) reportResp {
 		TotalDocsAnalyzed: o.TotalDocsAnalyzed,
 		SectionsCount:     o.SectionsCount,
 		GenerationTimeMs:  o.GenerationTimeMs,
-		Filters:           o.Filters,
 		CompletedAt:       o.CompletedAt,
 		CreatedAt:         o.CreatedAt,
 	}
+	// Convert json.RawMessage to interface{} for Swagger compatibility
+	if len(o.Filters) > 0 {
+		var filters interface{}
+		if err := json.Unmarshal(o.Filters, &filters); err == nil {
+			resp.Filters = filters
+		}
+	}
+	return resp
 }
 
 func (h *handler) newDownloadResp(o report.DownloadOutput) downloadResp {
