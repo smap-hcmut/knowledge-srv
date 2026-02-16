@@ -1,45 +1,31 @@
 package http
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 
-	"knowledge-srv/internal/model"
 	"knowledge-srv/pkg/scope"
 )
 
-// processIndexByFileRequest - Validate + set scope to context
-func (h *handler) processIndexByFileRequest(c *gin.Context) (indexByFileReq, error) {
-	var req indexByFileReq
+func (h *handler) processIndexReq(c *gin.Context) (IndexReq, error) {
+	var req IndexReq
 
-	// Bind JSON
 	if err := c.ShouldBindJSON(&req); err != nil {
+		h.l.Errorf(c, "indexing.delivery.http.processIndexReq: ShouldBindJSON failed: %v", err)
 		return req, err
 	}
 
-	// Custom validate
 	if err := req.validate(); err != nil {
+		h.l.Errorf(c, "indexing.delivery.http.processIndexReq: validate failed: %v", err)
 		return req, err
 	}
 
-	// Extract scope from context or create default (service-to-service)
 	sc := scope.GetScopeFromContext(c.Request.Context())
 	if sc.UserID == "" {
-		// Default scope for internal service calls
-		sc = h.createDefaultScope()
+		h.l.Errorf(c, "indexing.delivery.http.processIndexReq: GetScopeFromContext failed: scope not found")
+		return req, errors.New("scope not found")
 	}
-
-	// Set scope to context for downstream layers
-	ctx := scope.SetScopeToContext(c.Request.Context(), sc)
-	c.Request = c.Request.WithContext(ctx)
 
 	return req, nil
-}
-
-// createDefaultScope - Create default scope for internal API calls
-func (h *handler) createDefaultScope() model.Scope {
-	return model.Scope{
-		UserID:   "system",
-		Username: "analytics-service",
-		Role:     "SYSTEM",
-	}
 }
