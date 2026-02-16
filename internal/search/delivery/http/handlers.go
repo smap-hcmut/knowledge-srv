@@ -6,7 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Search - Handler cho POST /api/v1/search
+// Search - Search for analytics posts with filters
+// @Summary Search analytics posts
+// @Description Search for analytics posts by query with optional filters (sentiments, aspects, platforms, dates, risk levels)
+// @Tags Search
+// @Accept json
+// @Produce json
+// @Param body body searchReq true "Search request"
+// @Success 200 {object} searchResp
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
+// @Router /api/v1/search [post]
 func (h *handler) Search(c *gin.Context) {
 	ctx := c.Request.Context()
 

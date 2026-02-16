@@ -39,11 +39,14 @@ func (h *handler) Index(c *gin.Context) {
 
 // RetryFailed - Handler cho POST /internal/index/retry
 // @Summary Retry failed indexing records
+// @Description Retry indexing for records that previously failed
 // @Tags Indexing (Internal)
 // @Accept json
 // @Produce json
 // @Param body body RetryFailedReq true "Retry request"
 // @Success 200 {object} RetryFailedResp
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
 // @Router /internal/index/retry [post]
 func (h *handler) RetryFailed(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -67,11 +70,14 @@ func (h *handler) RetryFailed(c *gin.Context) {
 
 // Reconcile - Handler cho POST /internal/index/reconcile
 // @Summary Reconcile stale pending records
+// @Description Reconcile records that have been in PENDING status for too long
 // @Tags Indexing (Internal)
 // @Accept json
 // @Produce json
 // @Param body body ReconcileReq true "Reconcile request"
 // @Success 200 {object} ReconcileResp
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
 // @Router /internal/index/reconcile [post]
 func (h *handler) Reconcile(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -95,10 +101,13 @@ func (h *handler) Reconcile(c *gin.Context) {
 
 // GetStatistics - Handler cho GET /internal/index/statistics/:project_id
 // @Summary Get indexing statistics for a project
+// @Description Get indexing statistics including total indexed, failed, pending records for a project
 // @Tags Indexing (Internal)
 // @Produce json
 // @Param project_id path string true "Project ID"
 // @Success 200 {object} StatisticsResp
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
 // @Router /internal/index/statistics/{project_id} [get]
 func (h *handler) GetStatistics(c *gin.Context) {
 	ctx := c.Request.Context()
