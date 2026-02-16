@@ -76,5 +76,10 @@ func (srv HTTPServer) registerDomainRoutes(mw middleware.Middleware) error {
 		return err
 	}
 
+	// Setup chat domain (depends on searchUC from search domain)
+	if err := srv.setupChatDomain(ctx, api, mw); err != nil {
+		return err
+	}
+
 	return nil
 }
