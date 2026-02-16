@@ -20,7 +20,7 @@ func (uc *implUseCase) GetConversation(ctx context.Context, sc model.Scope, inpu
 		OrderASC:       true,
 	})
 	if err != nil {
-		uc.l.Warnf(ctx, "chat.usecase.GetConversation.ListMessages: %v", err)
+		uc.l.Warnf(ctx, "chat.usecase.GetConversation: ListMessages failed: %v", err)
 	}
 
 	return uc.toConversationOutput(conv, msgs), nil

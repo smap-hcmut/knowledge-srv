@@ -14,13 +14,13 @@ func (r *implRepository) Get(ctx context.Context, opt repository.GetOptions) ([]
 	key := fmt.Sprintf("%s%s", Prefix, opt.Key)
 	data, err := r.redis.GetClient().Get(ctx, key).Result()
 	if err != nil {
-		r.l.Errorf(ctx, "embedding.repository.redis.Get: %v", err)
+		r.l.Errorf(ctx, "embedding.repository.redis.Get: Failed to get from cache: %v", err)
 		return nil, err
 	}
 
 	var vector []float32
 	if err := json.Unmarshal([]byte(data), &vector); err != nil {
-		r.l.Errorf(ctx, "embedding.repository.redis.Get: unmarshal error: %v", err)
+		r.l.Errorf(ctx, "embedding.repository.redis.Get: Failed to unmarshal vector: %v", err)
 		return nil, err
 	}
 	return vector, nil
@@ -30,7 +30,7 @@ func (r *implRepository) Save(ctx context.Context, opt repository.SaveOptions) e
 	key := fmt.Sprintf("%s%s", Prefix, opt.Key)
 	data, err := json.Marshal(opt.Vector)
 	if err != nil {
-		r.l.Errorf(ctx, "embedding.repository.redis.Save: %v", err)
+		r.l.Errorf(ctx, "embedding.repository.redis.Save: Failed to marshal vector: %v", err)
 		return err
 	}
 
@@ -41,7 +41,7 @@ func (r *implRepository) Save(ctx context.Context, opt repository.SaveOptions) e
 	}
 
 	if err := r.redis.GetClient().Set(ctx, key, data, ttl).Err(); err != nil {
-		r.l.Errorf(ctx, "embedding.repository.redis.Save: %v", err)
+		r.l.Errorf(ctx, "embedding.repository.redis.Save: Failed to save to cache: %v", err)
 		return err
 	}
 	return nil

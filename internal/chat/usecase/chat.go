@@ -17,7 +17,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 	startTime := time.Now()
 
 	if err := uc.validateChatInput(input); err != nil {
-		uc.l.Errorf(ctx, "chat.usecase.Chat.validateChatInput: %v", err)
+		uc.l.Errorf(ctx, "chat.usecase.Chat: validateChatInput failed: %v", err)
 		return chat.ChatOutput{}, err
 	}
 
@@ -33,18 +33,18 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 			Title:      title,
 		})
 		if err != nil {
-			uc.l.Errorf(ctx, "chat.usecase.Chat.CreateConversation: %v", err)
+			uc.l.Errorf(ctx, "chat.usecase.Chat: CreateConversation failed: %v", err)
 			return chat.ChatOutput{}, fmt.Errorf("create conversation: %w", err)
 		}
 		conversation = conv
 	} else {
 		conv, err := uc.repo.GetConversationByID(ctx, input.ConversationID)
 		if err != nil {
-			uc.l.Errorf(ctx, "chat.usecase.Chat.GetConversationByID: %v", err)
+			uc.l.Errorf(ctx, "chat.usecase.Chat: GetConversationByID failed: %v", err)
 			return chat.ChatOutput{}, chat.ErrConversationNotFound
 		}
 		if conv.Status == "ARCHIVED" {
-			uc.l.Errorf(ctx, "chat.usecase.Chat.GetConversationByID: conversation is archived")
+			uc.l.Errorf(ctx, "chat.usecase.Chat: conversation is archived")
 			return chat.ChatOutput{}, chat.ErrConversationArchived
 		}
 		conversation = conv
@@ -56,7 +56,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 			OrderASC:       true,
 		})
 		if err != nil {
-			uc.l.Warnf(ctx, "chat.usecase.Chat.ListMessages: %v", err)
+			uc.l.Warnf(ctx, "chat.usecase.Chat: ListMessages failed: %v", err)
 		}
 		history = msgs
 	}
@@ -83,7 +83,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 
 	searchOutput, err := uc.searchUC.Search(ctx, sc, searchInput)
 	if err != nil {
-		uc.l.Errorf(ctx, "chat.usecase.Chat.Search: %v", err)
+		uc.l.Errorf(ctx, "chat.usecase.Chat: Search failed: %v", err)
 		return chat.ChatOutput{}, fmt.Errorf("%w: %v", chat.ErrSearchFailed, err)
 	}
 
@@ -93,7 +93,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 	// Step 4: Call LLM
 	answer, err := uc.gemini.Generate(ctx, prompt)
 	if err != nil {
-		uc.l.Errorf(ctx, "chat.usecase.Chat.LLM: %v", err)
+		uc.l.Errorf(ctx, "chat.usecase.Chat: LLM failed: %v", err)
 		return chat.ChatOutput{}, fmt.Errorf("%w: %v", chat.ErrLLMFailed, err)
 	}
 
@@ -112,7 +112,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		FiltersUsed:    filtersJSON,
 	})
 	if err != nil {
-		uc.l.Warnf(ctx, "chat.usecase.Chat.CreateMessage: %v", err)
+		uc.l.Warnf(ctx, "chat.usecase.Chat: CreateMessage failed: %v", err)
 	}
 
 	// Step 8: Save assistant message
@@ -135,7 +135,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		Suggestions:    suggestionsJSON,
 	})
 	if err != nil {
-		uc.l.Warnf(ctx, "chat.usecase.Chat.CreateMessage: %v", err)
+		uc.l.Warnf(ctx, "chat.usecase.Chat: CreateMessage failed: %v", err)
 	}
 
 	// Step 9: Update conversation metadata

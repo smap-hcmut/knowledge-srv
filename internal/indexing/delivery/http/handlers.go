@@ -22,7 +22,7 @@ func (h *handler) Index(c *gin.Context) {
 
 	req, err := h.processIndexReq(c)
 	if err != nil {
-		h.l.Errorf(ctx, "indexing.delivery.http.Index: processIndexRequest failed: %v", err)
+		h.l.Errorf(ctx, "indexing.delivery.http.Index: processIndexReq failed: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
@@ -50,7 +50,7 @@ func (h *handler) RetryFailed(c *gin.Context) {
 
 	req, err := h.processRetryFailedReq(c)
 	if err != nil {
-		h.l.Errorf(ctx, "indexing.delivery.http.RetryFailed: processRequest failed: %v", err)
+		h.l.Errorf(ctx, "indexing.delivery.http.RetryFailed: processRetryFailedReq failed: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
@@ -78,7 +78,7 @@ func (h *handler) Reconcile(c *gin.Context) {
 
 	req, err := h.processReconcileReq(c)
 	if err != nil {
-		h.l.Errorf(ctx, "indexing.delivery.http.Reconcile: processRequest failed: %v", err)
+		h.l.Errorf(ctx, "indexing.delivery.http.Reconcile: processReconcileReq failed: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
@@ -105,7 +105,7 @@ func (h *handler) GetStatistics(c *gin.Context) {
 
 	projectID := c.Param("project_id")
 	if projectID == "" {
-		h.l.Errorf(ctx, "indexing.delivery.http.GetStatistics: missing project_id")
+		h.l.Errorf(ctx, "indexing.delivery.http.GetStatistics: missing project_id parameter")
 		response.Error(c, ErrMissingProjectID, h.discord)
 		return
 	}

@@ -42,7 +42,7 @@ func (uc *implUseCase) RetryFailed(
 			},
 		})
 		if updateErr != nil {
-			uc.l.Warnf(ctx, "indexing.usecase.RetryFailed: Failed to update doc %s: %v", doc.ID, updateErr)
+			uc.l.Warnf(ctx, "indexing.usecase.RetryFailed: Failed to update document %s: %v", doc.ID, updateErr)
 			failed++
 			continue
 		}

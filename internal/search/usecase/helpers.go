@@ -15,7 +15,7 @@ func (uc *implUseCase) resolveCampaignProjects(ctx context.Context, campaignID s
 	// Check cache
 	projectIDs, err := uc.cacheRepo.GetCampaignProjects(ctx, campaignID)
 	if err == nil && len(projectIDs) > 0 {
-		uc.l.Debugf(ctx, "search.usecase.resolveCampaignProjects: cache hit, %d projects", len(projectIDs))
+		uc.l.Debugf(ctx, "search.usecase.resolveCampaignProjects: cache hit for campaign %s, %d projects", campaignID, len(projectIDs))
 		return projectIDs, nil
 	}
 
@@ -32,7 +32,7 @@ func (uc *implUseCase) resolveCampaignProjects(ctx context.Context, campaignID s
 
 	// Save to cache
 	if err := uc.cacheRepo.SaveCampaignProjects(ctx, campaignID, campaign.ProjectIDs); err != nil {
-		uc.l.Warnf(ctx, "search.usecase.resolveCampaignProjects: cache save failed: %v", err)
+		uc.l.Warnf(ctx, "search.usecase.resolveCampaignProjects: Failed to save cache: %v", err)
 	}
 
 	return campaign.ProjectIDs, nil

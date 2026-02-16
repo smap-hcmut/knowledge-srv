@@ -13,7 +13,7 @@ func (h *handler) Search(c *gin.Context) {
 	// 1. Process request
 	req, sc, err := h.processSearchRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "processSearchRequest failed: %v", err)
+		h.l.Errorf(ctx, "search.delivery.http.Search: processSearchRequest failed: %v", err)
 		response.Error(c, err, h.discord)
 		return
 	}
@@ -24,7 +24,7 @@ func (h *handler) Search(c *gin.Context) {
 	// 3. Call UseCase
 	output, err := h.uc.Search(ctx, sc, input)
 	if err != nil {
-		h.l.Errorf(ctx, "Search failed: %v", err)
+		h.l.Errorf(ctx, "search.delivery.http.Search: usecase Search failed: %v", err)
 		response.Error(c, h.mapError(err), h.discord)
 		return
 	}

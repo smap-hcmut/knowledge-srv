@@ -16,19 +16,19 @@ import (
 func (c *consumer) handleBatchCompletedMessage(msg *sarama.ConsumerMessage) error {
 	ctx := context.Background()
 
-	c.l.Infof(ctx, "Processing batch completed message from partition %d, offset %d",
+	c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Processing message from partition %d, offset %d",
 		msg.Partition, msg.Offset)
 
 	// 1. Unmarshal message
 	var message kafkaDelivery.BatchCompletedMessage
 	if err := json.Unmarshal(msg.Value, &message); err != nil {
-		c.l.Warnf(ctx, "Invalid message format (skipping): %v", err)
+		c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Invalid message format (skipping): %v", err)
 		return nil // Skip invalid messages
 	}
 
 	// 2. Validate message (format only; business rules stay in usecase)
 	if message.BatchID == "" || message.FileURL == "" {
-		c.l.Warnf(ctx, "Invalid message: missing required fields (skipping)")
+		c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Invalid message: missing required fields (skipping)")
 		return nil
 	}
 
@@ -45,11 +45,11 @@ func (c *consumer) handleBatchCompletedMessage(msg *sarama.ConsumerMessage) erro
 	// 5. Call UseCase (scope already in context)
 	output, err := c.uc.Index(ctx, input)
 	if err != nil {
-		c.l.Errorf(ctx, "Failed to process batch: %v", err)
+		c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: usecase Index failed: %v", err)
 		return fmt.Errorf("usecase error: %w", err)
 	}
 
-	c.l.Infof(ctx, "Successfully processed batch %s: indexed=%d, failed=%d, skipped=%d",
+	c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Successfully processed batch %s: indexed=%d, failed=%d, skipped=%d",
 		message.BatchID, output.Indexed, output.Failed, output.Skipped)
 	return nil
 }

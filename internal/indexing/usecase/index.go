@@ -276,7 +276,7 @@ func (uc *implUseCase) parseJSONL(ctx context.Context, reader io.Reader) ([]inde
 
 		var record indexing.AnalyticsPost
 		if err := json.Unmarshal(line, &record); err != nil {
-			uc.l.Warnf(ctx, "Failed to parse line %d: %v", lineNum, err)
+			uc.l.Warnf(ctx, "indexing.usecase.Index: Failed to parse line %d: %v", lineNum, err)
 			continue
 		}
 
@@ -450,6 +450,6 @@ func (uc *implUseCase) writeToDLQ(
 		FailedAt:     time.Now(),
 	})
 	if err != nil {
-		uc.l.Warnf(ctx, "indexing.usecase.writeToDLQ: Failed to write to DLQ: %v", err)
+		uc.l.Warnf(ctx, "indexing.usecase.Index: writeToDLQ failed: %v", err)
 	}
 }
