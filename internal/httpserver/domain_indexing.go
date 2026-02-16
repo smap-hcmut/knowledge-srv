@@ -7,7 +7,6 @@ import (
 
 	indexingHTTP "knowledge-srv/internal/indexing/delivery/http"
 	indexingPostgre "knowledge-srv/internal/indexing/repository/postgre"
-	indexingQdrant "knowledge-srv/internal/indexing/repository/qdrant"
 	indexingRedis "knowledge-srv/internal/indexing/repository/redis"
 	indexingUsecase "knowledge-srv/internal/indexing/usecase"
 	"knowledge-srv/internal/middleware"
@@ -15,19 +14,18 @@ import (
 
 // setupIndexingDomain initializes indexing domain (repo -> usecase -> delivery)
 func (srv *HTTPServer) setupIndexingDomain(ctx context.Context, r *gin.RouterGroup, mw middleware.Middleware) error {
-	// Repositories (collection name là const trong qdrant package)
+	// Repositories
 	postgreRepo := indexingPostgre.New(srv.postgresDB, srv.l)
-	vectorRepo := indexingQdrant.New(srv.qdrantClient, srv.l)
 	cacheRepo := indexingRedis.New(srv.redisClient, srv.l)
 
 	// UseCase
 	uc := indexingUsecase.New(
 		srv.l,
 		postgreRepo,
-		vectorRepo,
+		srv.pointUC,
+		srv.embeddingUC,
 		cacheRepo,
 		srv.minioClient,
-		srv.voyageClient,
 	)
 
 	// HTTP Handler

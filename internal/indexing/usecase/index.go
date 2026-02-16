@@ -13,9 +13,11 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/indexing"
 	repo "knowledge-srv/internal/indexing/repository"
 	"knowledge-srv/internal/model"
+	"knowledge-srv/internal/point"
 	"knowledge-srv/pkg/minio"
 )
 
@@ -52,6 +54,9 @@ func (uc *implUseCase) Index(ctx context.Context, input indexing.IndexInput) (in
 	result := uc.processBatch(ctx, input, records)
 
 	// Step 5: Invalidate cache (nếu có records thành công)
+	// Keeps using CacheRepository (Redis) because InvalidateSearchCache is specific to existing Redis repo logic
+	// Ideally this should move to Search or Point domain too, but kept here for scope minimization.
+	// Actually, point domain doesn't expose Invalidate.
 	if result.Indexed > 0 {
 		if err := uc.cacheRepo.InvalidateSearchCache(ctx, input.ProjectID); err != nil {
 			uc.l.Warnf(ctx, "indexing.usecase.Index: Failed to invalidate cache: %v", err)
@@ -190,9 +195,13 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 		}
 	}
 
-	// Step 5: Embed content
+	// Step 5: Embed content (Via Embedding Domain)
 	embeddingStart := time.Now()
-	vector, err := uc.embedContent(ctx, record.Content)
+	// Call Embedding Domain directly
+	generateOutput, err := uc.embeddingUC.Generate(ctx, embedding.GenerateInput{
+		Text: record.Content,
+	})
+	vector := generateOutput.Vector
 	embeddingTime := int(time.Since(embeddingStart).Milliseconds())
 
 	if err != nil {
@@ -208,9 +217,18 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 	// Step 6: Prepare Qdrant payload
 	payload := uc.prepareQdrantPayload(record)
 
-	// Step 7: Upsert to Qdrant
+	// Step 7: Upsert to Qdrant (Via Point Domain)
 	upsertStart := time.Now()
-	err = uc.upsertToQdrant(ctx, pointID, vector, payload)
+	// Call Point Domain
+	err = uc.pointUC.Upsert(ctx, point.UpsertInput{
+		Points: []model.Point{
+			{
+				ID:      pointID,
+				Vector:  vector,
+				Payload: payload,
+			},
+		},
+	})
 	upsertTime := int(time.Since(upsertStart).Milliseconds())
 
 	if err != nil {
@@ -315,35 +333,6 @@ func (uc *implUseCase) generateContentHash(content string) string {
 	return fmt.Sprintf("%x", hash)
 }
 
-// embedContent - Generate embedding with cache (via CacheRepository)
-func (uc *implUseCase) embedContent(ctx context.Context, content string) ([]float32, error) {
-	contentHash := uc.generateContentHash(content)
-
-	cachedVector, err := uc.cacheRepo.GetEmbedding(ctx, contentHash)
-	if err == nil && cachedVector != nil {
-		uc.l.Debugf(ctx, "indexing.usecase.embedContent: Embedding cache hit")
-		return cachedVector, nil
-	}
-
-	vectors, err := uc.voyage.Embed(ctx, []string{content})
-	if err != nil {
-		uc.l.Errorf(ctx, "indexing.usecase.embedContent: Failed to embed content: %v", err)
-		return nil, fmt.Errorf("%w: %v", indexing.ErrEmbeddingFailed, err)
-	}
-
-	if len(vectors) == 0 {
-		return nil, fmt.Errorf("%w: no vectors returned", indexing.ErrEmbeddingFailed)
-	}
-
-	vector := vectors[0]
-
-	if err := uc.cacheRepo.SaveEmbedding(ctx, contentHash, vector); err != nil {
-		uc.l.Warnf(ctx, "indexing.usecase.embedContent: Failed to save embedding to cache: %v", err)
-	}
-
-	return vector, nil
-}
-
 // prepareQdrantPayload - Build Qdrant payload from analytics post
 func (uc *implUseCase) prepareQdrantPayload(record indexing.AnalyticsPost) map[string]interface{} {
 	payload := map[string]interface{}{
@@ -412,23 +401,6 @@ func (uc *implUseCase) prepareQdrantPayload(record indexing.AnalyticsPost) map[s
 	payload["metadata"] = metadata
 
 	return payload
-}
-
-// upsertToQdrant - Upsert point via vector repo (collection name nằm ở tầng repo)
-func (uc *implUseCase) upsertToQdrant(
-	ctx context.Context,
-	pointID string,
-	vector []float32,
-	payload map[string]interface{},
-) error {
-	if err := uc.vectorRepo.UpsertPoint(ctx, repo.UpsertPointOptions{
-		PointID: pointID,
-		Vector:  vector,
-		Payload: payload,
-	}); err != nil {
-		return fmt.Errorf("%w: %v", indexing.ErrQdrantUpsertFailed, err)
-	}
-	return nil
 }
 
 // truncateContent - Truncate content to max length

@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"knowledge-srv/config"
+	"knowledge-srv/internal/embedding"
+	"knowledge-srv/internal/point"
 	"knowledge-srv/pkg/discord"
 	"knowledge-srv/pkg/encrypter"
 	"knowledge-srv/pkg/gemini"
@@ -44,6 +46,10 @@ type HTTPServer struct {
 
 	// Monitoring & Notification Configuration
 	discord discord.IDiscord
+
+	// Core Domains (Shared)
+	pointUC     point.UseCase
+	embeddingUC embedding.UseCase
 }
 
 type Config struct {
