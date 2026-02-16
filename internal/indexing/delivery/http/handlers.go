@@ -6,7 +6,7 @@ import (
 	"knowledge-srv/pkg/response"
 )
 
-// Index - Handler cho POST /internal/index/by-file
+// Index - Handler cho POST /internal/index
 // @Summary Index batch từ MinIO file
 // @Description Internal API cho Analytics Service trigger indexing
 // @Tags Indexing (Internal)
@@ -16,7 +16,7 @@ import (
 // @Success 200 {object} IndexResp
 // @Failure 400 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /internal/index/by-file [post]
+// @Router /internal/index [post]
 func (h *handler) Index(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -35,4 +35,87 @@ func (h *handler) Index(c *gin.Context) {
 	}
 
 	response.OK(c, h.newIndexResp(o))
+}
+
+// RetryFailed - Handler cho POST /internal/index/retry
+// @Summary Retry failed indexing records
+// @Tags Indexing (Internal)
+// @Accept json
+// @Produce json
+// @Param body body RetryFailedReq true "Retry request"
+// @Success 200 {object} RetryFailedResp
+// @Router /internal/index/retry [post]
+func (h *handler) RetryFailed(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, err := h.processRetryFailedReq(c)
+	if err != nil {
+		h.l.Errorf(ctx, "indexing.delivery.http.RetryFailed: processRequest failed: %v", err)
+		response.Error(c, err, h.discord)
+		return
+	}
+
+	o, err := h.uc.RetryFailed(ctx, req.toInput())
+	if err != nil {
+		h.l.Errorf(ctx, "indexing.delivery.http.RetryFailed: RetryFailed failed: %v", err)
+		response.Error(c, h.mapError(err), h.discord)
+		return
+	}
+
+	response.OK(c, h.newRetryFailedResp(o))
+}
+
+// Reconcile - Handler cho POST /internal/index/reconcile
+// @Summary Reconcile stale pending records
+// @Tags Indexing (Internal)
+// @Accept json
+// @Produce json
+// @Param body body ReconcileReq true "Reconcile request"
+// @Success 200 {object} ReconcileResp
+// @Router /internal/index/reconcile [post]
+func (h *handler) Reconcile(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, err := h.processReconcileReq(c)
+	if err != nil {
+		h.l.Errorf(ctx, "indexing.delivery.http.Reconcile: processRequest failed: %v", err)
+		response.Error(c, err, h.discord)
+		return
+	}
+
+	o, err := h.uc.Reconcile(ctx, req.toInput())
+	if err != nil {
+		h.l.Errorf(ctx, "indexing.delivery.http.Reconcile: Reconcile failed: %v", err)
+		response.Error(c, h.mapError(err), h.discord)
+		return
+	}
+
+	response.OK(c, h.newReconcileResp(o))
+}
+
+// GetStatistics - Handler cho GET /internal/index/statistics/:project_id
+// @Summary Get indexing statistics for a project
+// @Tags Indexing (Internal)
+// @Produce json
+// @Param project_id path string true "Project ID"
+// @Success 200 {object} StatisticsResp
+// @Router /internal/index/statistics/{project_id} [get]
+func (h *handler) GetStatistics(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	projectID := c.Param("project_id")
+	if projectID == "" {
+		h.l.Errorf(ctx, "indexing.delivery.http.GetStatistics: missing project_id")
+		response.Error(c, ErrMissingProjectID, h.discord)
+		return
+	}
+
+	o, err := h.uc.GetStatistics(ctx, projectID)
+	if err != nil {
+		h.l.Errorf(ctx, "indexing.delivery.http.GetStatistics: GetStatistics failed: %v", err)
+		response.Error(c, h.mapError(err), h.discord)
+		return
+	}
+
+	response.OK(c, h.newStatisticsResp(o))
 }

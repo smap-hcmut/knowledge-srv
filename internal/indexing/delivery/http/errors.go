@@ -1,6 +1,8 @@
 package http
 
 import (
+	"errors"
+
 	"knowledge-srv/internal/indexing"
 	pkgErrors "knowledge-srv/pkg/errors"
 )
@@ -11,6 +13,7 @@ var (
 	errFileParseFailed    = pkgErrors.NewHTTPError(30003, "Failed to parse JSONL file")
 	errEmbeddingFailed    = pkgErrors.NewHTTPError(30004, "Failed to generate embedding")
 	errQdrantFailed       = pkgErrors.NewHTTPError(30005, "Failed to upsert to Qdrant")
+	ErrMissingProjectID   = pkgErrors.NewHTTPError(30006, "Missing project_id parameter")
 )
 
 var NotFound = []error{
@@ -18,16 +21,16 @@ var NotFound = []error{
 }
 
 func (h handler) mapError(err error) error {
-	switch err {
-	case indexing.ErrFileNotFound:
+	switch {
+	case errors.Is(err, indexing.ErrFileNotFound):
 		return errFileNotFound
-	case indexing.ErrFileDownloadFailed:
+	case errors.Is(err, indexing.ErrFileDownloadFailed):
 		return errFileDownloadFailed
-	case indexing.ErrFileParseFailed:
+	case errors.Is(err, indexing.ErrFileParseFailed):
 		return errFileParseFailed
-	case indexing.ErrEmbeddingFailed:
+	case errors.Is(err, indexing.ErrEmbeddingFailed):
 		return errEmbeddingFailed
-	case indexing.ErrQdrantUpsertFailed:
+	case errors.Is(err, indexing.ErrQdrantUpsertFailed):
 		return errQdrantFailed
 	default:
 		return err

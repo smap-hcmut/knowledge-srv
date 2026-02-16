@@ -10,6 +10,9 @@ import (
 
 type Handler interface {
 	Index(c *gin.Context)
+	RetryFailed(c *gin.Context)
+	Reconcile(c *gin.Context)
+	GetStatistics(c *gin.Context)
 }
 
 type handler struct {

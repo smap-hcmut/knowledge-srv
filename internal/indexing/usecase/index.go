@@ -53,7 +53,7 @@ func (uc *implUseCase) Index(ctx context.Context, input indexing.IndexInput) (in
 
 	// Step 5: Invalidate cache (nếu có records thành công)
 	if result.Indexed > 0 {
-		if err := uc.invalidateSearchCache(ctx, input.ProjectID); err != nil {
+		if err := uc.cacheRepo.InvalidateSearchCache(ctx, input.ProjectID); err != nil {
 			uc.l.Warnf(ctx, "indexing.usecase.Index: Failed to invalidate cache: %v", err)
 		}
 	}
@@ -197,6 +197,7 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 
 	if err != nil {
 		uc.updateFailedStatus(ctx, trackingDoc.ID, indexing.EMBEDDING_ERROR, err.Error(), embeddingTime, 0)
+		uc.writeToDLQ(ctx, record, ip.BatchID, indexing.EMBEDDING_ERROR, err.Error(), trackingDoc.RetryCount)
 		return indexing.IndexRecordResult{
 			Status:       "failed",
 			ErrorType:    indexing.EMBEDDING_ERROR,
@@ -214,6 +215,7 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 
 	if err != nil {
 		uc.updateFailedStatus(ctx, trackingDoc.ID, indexing.QDRANT_ERROR, err.Error(), embeddingTime, upsertTime)
+		uc.writeToDLQ(ctx, record, ip.BatchID, indexing.QDRANT_ERROR, err.Error(), trackingDoc.RetryCount)
 		return indexing.IndexRecordResult{
 			Status:       "failed",
 			ErrorType:    indexing.QDRANT_ERROR,
@@ -313,11 +315,11 @@ func (uc *implUseCase) generateContentHash(content string) string {
 	return fmt.Sprintf("%x", hash)
 }
 
-// embedContent - Generate embedding with Redis cache
+// embedContent - Generate embedding with cache (via CacheRepository)
 func (uc *implUseCase) embedContent(ctx context.Context, content string) ([]float32, error) {
-	cacheKey := uc.getEmbeddingCacheKey(content)
+	contentHash := uc.generateContentHash(content)
 
-	cachedVector, err := uc.getEmbeddingFromCache(ctx, cacheKey)
+	cachedVector, err := uc.cacheRepo.GetEmbedding(ctx, contentHash)
 	if err == nil && cachedVector != nil {
 		uc.l.Debugf(ctx, "indexing.usecase.embedContent: Embedding cache hit")
 		return cachedVector, nil
@@ -335,48 +337,11 @@ func (uc *implUseCase) embedContent(ctx context.Context, content string) ([]floa
 
 	vector := vectors[0]
 
-	if err := uc.saveEmbeddingToCache(ctx, cacheKey, vector, 7*24*time.Hour); err != nil {
+	if err := uc.cacheRepo.SaveEmbedding(ctx, contentHash, vector); err != nil {
 		uc.l.Warnf(ctx, "indexing.usecase.embedContent: Failed to save embedding to cache: %v", err)
 	}
 
 	return vector, nil
-}
-
-// getEmbeddingCacheKey - Generate cache key
-func (uc *implUseCase) getEmbeddingCacheKey(content string) string {
-	hash := sha256.Sum256([]byte(content))
-	return fmt.Sprintf("embedding:%x", hash)
-}
-
-// getEmbeddingFromCache - Get from Redis
-func (uc *implUseCase) getEmbeddingFromCache(ctx context.Context, key string) ([]float32, error) {
-	data, err := uc.redis.Get(ctx, key)
-	if err != nil {
-		uc.l.Errorf(ctx, "indexing.usecase.getEmbeddingFromCache: Failed to get embedding from cache: %v", err)
-		return nil, err
-	}
-
-	var vector []float32
-	if err := json.Unmarshal([]byte(data), &vector); err != nil {
-		uc.l.Errorf(ctx, "indexing.usecase.getEmbeddingFromCache: Failed to unmarshal embedding: %v", err)
-		return nil, err
-	}
-
-	return vector, nil
-}
-
-// saveEmbeddingToCache - Save to Redis
-func (uc *implUseCase) saveEmbeddingToCache(ctx context.Context, key string, vector []float32, ttl time.Duration) error {
-	data, err := json.Marshal(vector)
-	if err != nil {
-		uc.l.Errorf(ctx, "indexing.usecase.saveEmbeddingToCache: Failed to marshal embedding: %v", err)
-		return err
-	}
-	if err := uc.redis.Set(ctx, key, string(data), ttl); err != nil {
-		uc.l.Errorf(ctx, "indexing.usecase.saveEmbeddingToCache: Failed to set embedding in cache: %v", err)
-		return err
-	}
-	return nil
 }
 
 // prepareQdrantPayload - Build Qdrant payload from analytics post
@@ -493,8 +458,26 @@ func (uc *implUseCase) updateFailedStatus(
 	})
 }
 
-// invalidateSearchCache - Invalidate search cache for project
-func (uc *implUseCase) invalidateSearchCache(ctx context.Context, projectID string) error {
-	uc.l.Debugf(ctx, "Cache invalidation skipped (DeleteByPattern not implemented)")
-	return nil
+// writeToDLQ - Write failed record to Dead Letter Queue
+func (uc *implUseCase) writeToDLQ(
+	ctx context.Context,
+	record indexing.AnalyticsPost,
+	batchID string,
+	errorType, errorMessage string,
+	retryCount int,
+) {
+	_, err := uc.postgreRepo.CreateDLQ(ctx, repo.CreateDLQOptions{
+		AnalyticsID:  record.ID,
+		ProjectID:    record.ProjectID,
+		SourceID:     record.SourceID,
+		ContentHash:  uc.generateContentHash(record.Content),
+		ErrorType:    errorType,
+		ErrorMessage: errorMessage,
+		RetryCount:   retryCount,
+		BatchID:      &batchID,
+		FailedAt:     time.Now(),
+	})
+	if err != nil {
+		uc.l.Warnf(ctx, "indexing.usecase.writeToDLQ: Failed to write to DLQ: %v", err)
+	}
 }

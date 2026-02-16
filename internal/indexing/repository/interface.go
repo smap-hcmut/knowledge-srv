@@ -37,3 +37,10 @@ type DLQRepository interface {
 type QdrantRepository interface {
 	UpsertPoint(ctx context.Context, opt UpsertPointOptions) error
 }
+
+//go:generate mockery --name CacheRepository
+type CacheRepository interface {
+	GetEmbedding(ctx context.Context, contentHash string) ([]float32, error)
+	SaveEmbedding(ctx context.Context, contentHash string, vector []float32) error
+	InvalidateSearchCache(ctx context.Context, projectID string) error
+}
