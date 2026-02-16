@@ -1,88 +1,75 @@
 package search
 
-// =====================================================
-// Input Types
-// =====================================================
+const (
+	MinScore       = 0.65
+	MaxResults     = 10
+	MinQueryLength = 3
+	MaxQueryLength = 1000
+)
 
-// SearchInput - Input cho method Search
 type SearchInput struct {
-	CampaignID string        // Campaign scope (resolve → project_ids)
-	Query      string        // Search query text
-	Filters    SearchFilters // Optional filters
-	Limit      int           // Max results (default 10, max 50)
-	MinScore   float64       // Min relevance score (default 0.65)
+	CampaignID string
+	Query      string
+	Filters    SearchFilters
+	Limit      int
+	MinScore   float64
 }
 
-// SearchFilters - Multi-criteria filters
 type SearchFilters struct {
-	Sentiments    []string // Filter by overall_sentiment: POSITIVE, NEGATIVE, NEUTRAL, MIXED
-	Aspects       []string // Filter by aspect name: DESIGN, BATTERY, PRICE, ...
-	Platforms     []string // Filter by platform: tiktok, youtube, facebook, ...
-	DateFrom      *int64   // Unix timestamp — start of date range
-	DateTo        *int64   // Unix timestamp — end of date range
-	RiskLevels    []string // Filter by risk_level: LOW, MEDIUM, HIGH, CRITICAL
-	MinEngagement *float64 // Min engagement_score
+	Sentiments    []string
+	Aspects       []string
+	Platforms     []string
+	DateFrom      *int64
+	DateTo        *int64
+	RiskLevels    []string
+	MinEngagement *float64
 }
 
-// =====================================================
-// Output Types
-// =====================================================
-
-// SearchOutput - Kết quả search
 type SearchOutput struct {
-	Results           []SearchResult // Ranked results
-	TotalFound        int            // Total matching documents
-	Aggregations      Aggregations   // Aggregated stats
-	NoRelevantContext bool           // True khi không đủ relevant docs → hallucination control
-	CacheHit          bool           // True nếu kết quả từ cache
-	ProcessingTimeMs  int64          // Processing time
+	Results           []SearchResult
+	TotalFound        int
+	Aggregations      Aggregations
+	NoRelevantContext bool
+	CacheHit          bool
+	ProcessingTimeMs  int64
 }
 
-// SearchResult - 1 document tìm được
 type SearchResult struct {
-	ID               string                 // analytics_id (= Qdrant point ID)
-	Score            float64                // Relevance score (0.0 - 1.0)
-	Content          string                 // Content text (truncated)
-	ProjectID        string                 // project_id
-	Platform         string                 // Platform name
-	OverallSentiment string                 // POSITIVE | NEGATIVE | NEUTRAL | MIXED
-	SentimentScore   float64                // -1.0 to 1.0
-	Aspects          []AspectResult         // Aspects matched
-	Keywords         []string               // Keywords
-	RiskLevel        string                 // LOW | MEDIUM | HIGH | CRITICAL
-	EngagementScore  float64                // 0.0 to 1.0
-	ContentCreatedAt int64                  // Unix timestamp
-	Metadata         map[string]interface{} // Author, engagement, etc.
+	ID               string
+	Score            float64
+	Content          string
+	ProjectID        string
+	Platform         string
+	OverallSentiment string
+	SentimentScore   float64
+	Aspects          []AspectResult
+	Keywords         []string
+	RiskLevel        string
+	EngagementScore  float64
+	ContentCreatedAt int64
+	Metadata         map[string]interface{}
 }
 
-// AspectResult - Aspect trong search result
 type AspectResult struct {
-	Aspect            string  // Aspect name
-	AspectDisplayName string  // Display name
-	Sentiment         string  // Sentiment of this aspect
-	SentimentScore    float64 // Score
+	Aspect            string
+	AspectDisplayName string
+	Sentiment         string
+	SentimentScore    float64
 	Keywords          []string
 }
 
-// =====================================================
-// Aggregation Types
-// =====================================================
-
-// Aggregations - Tổng hợp thống kê
 type Aggregations struct {
-	BySentiment []SentimentAgg // Phân bố sentiment
-	ByAspect    []AspectAgg    // Phân bố aspects
-	ByPlatform  []PlatformAgg  // Phân bố platforms
+	BySentiment []SentimentAgg
+	ByAspect    []AspectAgg
+	ByPlatform  []PlatformAgg
 }
 
-// SentimentAgg - Aggregation by sentiment
 type SentimentAgg struct {
-	Sentiment  string // POSITIVE, NEGATIVE, NEUTRAL, MIXED
+	Sentiment  string
 	Count      int
 	Percentage float64
 }
 
-// AspectAgg - Aggregation by aspect
 type AspectAgg struct {
 	Aspect            string
 	AspectDisplayName string
@@ -90,7 +77,6 @@ type AspectAgg struct {
 	AvgSentimentScore float64
 }
 
-// PlatformAgg - Aggregation by platform
 type PlatformAgg struct {
 	Platform   string
 	Count      int
