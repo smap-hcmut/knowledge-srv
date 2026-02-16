@@ -39,7 +39,6 @@ func (h *handler) Chat(c *gin.Context) {
 // @Summary Get conversation detail
 // @Description Return full conversation info and messages
 // @Tags Chat
-// @Accept json
 // @Produce json
 // @Param conversation_id path string true "Conversation ID"
 // @Success 200 {object} conversationResp
@@ -69,7 +68,6 @@ func (h *handler) GetConversation(c *gin.Context) {
 // @Summary List conversations by campaign
 // @Description Paginate conversations for a given campaign
 // @Tags Chat
-// @Accept json
 // @Produce json
 // @Param campaign_id path string true "Campaign ID"
 // @Param limit query int false "Number of records per page (default 20)"
@@ -101,7 +99,6 @@ func (h *handler) ListConversations(c *gin.Context) {
 // @Summary Get smart suggestions
 // @Description Return a list of suggested queries for a campaign
 // @Tags Chat
-// @Accept json
 // @Produce json
 // @Param campaign_id path string true "Campaign ID"
 // @Success 200 {object} suggestionsResp
