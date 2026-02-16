@@ -26,14 +26,14 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	// Apply defaults
 	limit := input.Limit
 	if limit <= 0 {
-		limit = uc.cfg.MaxResults
+		limit = search.MaxResults
 	}
 	if limit > 50 {
 		limit = 50
 	}
 	minScore := input.MinScore
 	if minScore <= 0 {
-		minScore = uc.cfg.MinScore
+		minScore = search.MinScore
 	}
 
 	// Step 1: Check Tầng 3 — Search Results Cache
@@ -125,10 +125,10 @@ func (uc *implUseCase) validateInput(input search.SearchInput) error {
 	if input.CampaignID == "" {
 		return search.ErrCampaignNotFound
 	}
-	if len(input.Query) < uc.cfg.MinQueryLength {
+	if len(input.Query) < search.MinQueryLength {
 		return search.ErrQueryTooShort
 	}
-	if len(input.Query) > uc.cfg.MaxQueryLength {
+	if len(input.Query) > search.MaxQueryLength {
 		return search.ErrQueryTooLong
 	}
 	return nil
