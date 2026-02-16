@@ -15,7 +15,7 @@ func (srv HTTPServer) mapHandlers() error {
 
 	srv.registerMiddlewares(mw)
 	srv.registerSystemRoutes()
-	
+
 	if err := srv.registerDomainRoutes(mw); err != nil {
 		return err
 	}
@@ -57,14 +57,24 @@ func (srv HTTPServer) registerSystemRoutes() {
 // registerDomainRoutes initializes and registers all domain routes
 func (srv HTTPServer) registerDomainRoutes(mw middleware.Middleware) error {
 	ctx := context.Background()
-	
+
 	// Base route group
 	api := srv.gin.Group("/knowledge")
-	
+
+	// Setup core domains first
+	if err := srv.setupCoreDomains(ctx); err != nil {
+		return err
+	}
+
 	// Setup indexing domain
 	if err := srv.setupIndexingDomain(ctx, api, mw); err != nil {
 		return err
 	}
-	
+
+	// Setup search domain
+	if err := srv.setupSearchDomain(ctx, api, mw); err != nil {
+		return err
+	}
+
 	return nil
 }

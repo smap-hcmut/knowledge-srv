@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	embeddingRepo "knowledge-srv/internal/embedding/repository/redis"
+	embeddingUsecase "knowledge-srv/internal/embedding/usecase"
 	indexingConsumer "knowledge-srv/internal/indexing/delivery/kafka/consumer"
 	indexingPostgre "knowledge-srv/internal/indexing/repository/postgre"
-	indexingQdrant "knowledge-srv/internal/indexing/repository/qdrant"
 	indexingRedis "knowledge-srv/internal/indexing/repository/redis"
 	indexingUsecase "knowledge-srv/internal/indexing/usecase"
+	pointRepo "knowledge-srv/internal/point/repository/qdrant"
+	pointUsecase "knowledge-srv/internal/point/usecase"
 )
 
 // domainConsumers holds references to all domain consumers for cleanup (interface, like http.Handler)
@@ -18,18 +21,35 @@ type domainConsumers struct {
 
 // setupDomains initializes all domain layers (repositories, usecases, consumers)
 func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, error) {
-	// Initialize indexing domain (collection name là const trong qdrant package)
+	// 1. Core Domains (Embedding, Point)
+	// Embedding
+	embeddingCacheRepo := embeddingRepo.New(srv.redisClient, srv.l)
+	embeddingUC := embeddingUsecase.New(
+		embeddingCacheRepo,
+		srv.voyageClient,
+		srv.l,
+	)
+
+	// Point
+	pointQdrantRepo := pointRepo.New(srv.qdrantClient, srv.l)
+	pointUC := pointUsecase.New(
+		pointQdrantRepo,
+		srv.l,
+	)
+
+	// 2. Indexing Domain
 	postgreRepo := indexingPostgre.New(srv.postgresDB, srv.l)
-	vectorRepo := indexingQdrant.New(srv.qdrantClient, srv.l)
 	cacheRepo := indexingRedis.New(srv.redisClient, srv.l)
+
 	indexingUC := indexingUsecase.New(
 		srv.l,
 		postgreRepo,
-		vectorRepo,
+		pointUC,
+		embeddingUC,
 		cacheRepo,
 		srv.minioClient,
-		srv.voyageClient,
 	)
+
 	indexingCons, err := indexingConsumer.New(indexingConsumer.Config{
 		Logger:      srv.l,
 		KafkaConfig: srv.kafkaConfig,

@@ -3,50 +3,10 @@ package redis
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
-	"time"
 
 	goredis "github.com/redis/go-redis/v9"
 )
-
-const embeddingCacheTTL = 7 * 24 * time.Hour
-
-// GetEmbedding retrieves a cached embedding vector by content hash.
-func (r *implCacheRepository) GetEmbedding(ctx context.Context, contentHash string) ([]float32, error) {
-	key := embeddingCacheKey(contentHash)
-
-	data, err := r.redis.Get(ctx, key)
-	if err != nil {
-		r.l.Errorf(ctx, "indexing.repository.redis.GetEmbedding: Failed to get embedding from cache: %v", err)
-		return nil, err
-	}
-
-	var vector []float32
-	if err := json.Unmarshal([]byte(data), &vector); err != nil {
-		r.l.Errorf(ctx, "indexing.repository.redis.GetEmbedding: Failed to unmarshal embedding from cache: %v", err)
-		return nil, err
-	}
-
-	return vector, nil
-}
-
-// SaveEmbedding stores an embedding vector in cache with a fixed TTL.
-func (r *implCacheRepository) SaveEmbedding(ctx context.Context, contentHash string, vector []float32) error {
-	key := embeddingCacheKey(contentHash)
-
-	data, err := json.Marshal(vector)
-	if err != nil {
-		r.l.Errorf(ctx, "indexing.repository.redis.SaveEmbedding: Failed to marshal embedding: %v", err)
-		return err
-	}
-
-	if err := r.redis.Set(ctx, key, string(data), embeddingCacheTTL); err != nil {
-		r.l.Errorf(ctx, "indexing.repository.redis.SaveEmbedding: Failed to set embedding in cache: %v", err)
-		return err
-	}
-	return nil
-}
 
 // InvalidateSearchCache removes all search-related cache keys for a project
 // using Redis SCAN + pipelined DELETE.
