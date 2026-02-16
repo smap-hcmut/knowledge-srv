@@ -81,5 +81,10 @@ func (srv HTTPServer) registerDomainRoutes(mw middleware.Middleware) error {
 		return err
 	}
 
+	// Setup report domain (depends on searchUC, geminiClient, minioClient)
+	if err := srv.setupReportDomain(ctx, api, mw); err != nil {
+		return err
+	}
+
 	return nil
 }
