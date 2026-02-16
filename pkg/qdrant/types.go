@@ -49,3 +49,16 @@ type CollectionInfo struct {
 	PointsCount uint64
 	Status      string
 }
+
+// GroupResult represents a group of search results
+type GroupResult struct {
+	ID    interface{} // Group Key (string or int)
+	Hits  []SearchResult
+	Count uint64
+}
+
+// FacetResult represents a facet value and its count
+type FacetResult struct {
+	Value interface{}
+	Count uint64
+}

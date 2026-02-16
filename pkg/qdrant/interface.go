@@ -41,6 +41,8 @@ type SearchOps interface {
 	Search(ctx context.Context, colName string, vector []float32, limit uint64) ([]SearchResult, error)
 	SearchWithFilter(ctx context.Context, colName string, vector []float32, limit uint64, filter *pb.Filter) ([]SearchResult, error)
 	SearchBatch(ctx context.Context, colName string, vectors [][]float32, limit uint64) ([][]SearchResult, error)
+	SearchGroups(ctx context.Context, colName string, vector []float32, limit uint64, groupBy string, groupLimit uint64, filter *pb.Filter) ([]GroupResult, error)
+	Facet(ctx context.Context, colName string, key string, limit uint64, filter *pb.Filter) ([]FacetResult, error)
 }
 
 // New creates a new Qdrant client. Returns an implementation of IQdrant.

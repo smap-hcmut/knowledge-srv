@@ -82,3 +82,19 @@ type PlatformAgg struct {
 	Count      int
 	Percentage float64
 }
+
+type AggregateInput struct {
+	CampaignID string
+}
+
+type AggregateOutput struct {
+	TotalDocs          uint64
+	SentimentBreakdown map[string]uint64
+	PlatformBreakdown  map[string]uint64
+	TopNegativeAspects []AspectCount
+}
+
+type AspectCount struct {
+	Aspect string
+	Count  uint64
+}
