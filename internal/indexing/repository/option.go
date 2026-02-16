@@ -149,3 +149,10 @@ type ListDLQOptions struct {
 	// Sorting
 	OrderBy string // e.g., "created_at DESC"
 }
+
+// UpsertPointOptions - Options for UpsertPoint operation
+type UpsertPointOptions struct {
+	PointID string
+	Vector  []float32
+	Payload map[string]interface{}
+}

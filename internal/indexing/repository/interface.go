@@ -7,8 +7,8 @@ import (
 	"knowledge-srv/pkg/paginator"
 )
 
-//go:generate mockery --name Repository
-type Repository interface {
+//go:generate mockery --name PostgresRepository
+type PostgresRepository interface {
 	DocumentRepository
 	DLQRepository
 }
@@ -31,4 +31,9 @@ type DLQRepository interface {
 	GetOneDLQ(ctx context.Context, opt GetOneDLQOptions) (model.IndexingDLQ, error)
 	ListDLQs(ctx context.Context, opt ListDLQOptions) ([]model.IndexingDLQ, error)
 	MarkResolvedDLQ(ctx context.Context, id string) error
+}
+
+//go:generate mockery --name QdrantRepository
+type QdrantRepository interface {
+	UpsertPoint(ctx context.Context, opt UpsertPointOptions) error
 }

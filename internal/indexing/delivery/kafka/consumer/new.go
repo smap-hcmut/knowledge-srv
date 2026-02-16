@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"context"
 	"fmt"
 
 	"knowledge-srv/config"
@@ -9,25 +10,28 @@ import (
 	"knowledge-srv/pkg/log"
 )
 
-// Config holds the configuration for indexing consumer
+// Consumer is the delivery interface for Kafka. Same idea as http.Handler: caller depends on interface, not concrete type.
+type Consumer interface {
+	ConsumeBatchCompleted(ctx context.Context) error
+	Close() error
+}
+
 type Config struct {
 	Logger      log.Logger
 	KafkaConfig config.KafkaConfig
 	UseCase     indexing.UseCase
 }
 
-// Consumer manages Kafka consumer groups for indexing domain
-type Consumer struct {
+// consumer implements Consumer (thin layer: receive msg → normalize → delegate to usecase).
+type consumer struct {
 	l           log.Logger
 	kafkaConfig config.KafkaConfig
 	uc          indexing.UseCase
 
-	// Consumer group for analytics batch completed
 	batchCompletedGroup pkgKafka.IConsumer
 }
 
-// New creates a new indexing consumer
-func New(cfg Config) (*Consumer, error) {
+func New(cfg Config) (Consumer, error) {
 	if cfg.Logger == nil {
 		return nil, fmt.Errorf("logger is required")
 	}
@@ -38,35 +42,32 @@ func New(cfg Config) (*Consumer, error) {
 		return nil, fmt.Errorf("kafka brokers are required")
 	}
 
-	return &Consumer{
+	return &consumer{
 		l:           cfg.Logger,
 		kafkaConfig: cfg.KafkaConfig,
 		uc:          cfg.UseCase,
 	}, nil
 }
 
-// Close closes all consumer groups
-func (c *Consumer) Close() error {
+func (c *consumer) Close() error {
 	if c.batchCompletedGroup != nil {
 		if err := c.batchCompletedGroup.Close(); err != nil {
-			return fmt.Errorf("failed to close batch completed group: %w", err)
+			c.l.Errorf(context.Background(), "indexing.delivery.kafka.consumer.Close: failed to close batch completed group: %v", err)
+			return ErrConsumerGroupNotFound
 		}
 	}
-
 	return nil
 }
 
-// createConsumerGroup creates a new Kafka consumer group
-func (c *Consumer) createConsumerGroup(groupID string) (pkgKafka.IConsumer, error) {
+func (c *consumer) createConsumerGroup(groupID string) (pkgKafka.IConsumer, error) {
 	consumerConfig := pkgKafka.ConsumerConfig{
 		Brokers: c.kafkaConfig.Brokers,
 		GroupID: groupID,
 	}
-
 	group, err := pkgKafka.NewConsumer(consumerConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create consumer group %s: %w", groupID, err)
+		c.l.Errorf(context.Background(), "indexing.delivery.kafka.consumer.createConsumerGroup: failed to create consumer group %s: %v", groupID, err)
+		return nil, ErrCreateConsumerGroupFailed
 	}
-
 	return group, nil
 }

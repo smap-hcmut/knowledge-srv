@@ -2,13 +2,13 @@ package consumer
 
 import (
 	"context"
+	"knowledge-srv/internal/indexing/delivery/kafka"
 )
 
 // ConsumeBatchCompleted starts consuming analytics.batch.completed messages
-func (c *Consumer) ConsumeBatchCompleted(ctx context.Context, topic string) error {
+func (c *consumer) ConsumeBatchCompleted(ctx context.Context) error {
 	// Create consumer group
-	groupID := "knowledge-indexing-batch"
-	group, err := c.createConsumerGroup(groupID)
+	group, err := c.createConsumerGroup(kafka.GroupIDBatchCompleted)
 	if err != nil {
 		return err
 	}
@@ -26,8 +26,8 @@ func (c *Consumer) ConsumeBatchCompleted(ctx context.Context, topic string) erro
 			case <-ctx.Done():
 				return
 			default:
-				if err := group.ConsumeWithContext(ctx, []string{topic}, handler); err != nil {
-					c.l.Errorf(ctx, "Consumer error: %v", err)
+				if err := group.ConsumeWithContext(ctx, []string{kafka.TopicBatchCompleted}, handler); err != nil {
+					c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.ConsumeBatchCompleted: Consumer error: %v", err)
 				}
 			}
 		}
@@ -36,11 +36,11 @@ func (c *Consumer) ConsumeBatchCompleted(ctx context.Context, topic string) erro
 	// Start error handler
 	go func() {
 		for err := range group.Errors() {
-			c.l.Errorf(ctx, "Consumer group error: %v", err)
+			c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.ConsumeBatchCompleted: Consumer group error: %v", err)
 		}
 	}()
 
-	c.l.Infof(ctx, "Started consuming topic: %s (group: %s)", topic, groupID)
+	c.l.Infof(ctx, "indexing.delivery.kafka.consumer.ConsumeBatchCompleted: Started consuming topic: %s (group: %s)", kafka.TopicBatchCompleted, kafka.GroupIDBatchCompleted)
 
 	return nil
 }

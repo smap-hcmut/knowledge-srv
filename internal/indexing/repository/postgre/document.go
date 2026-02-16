@@ -3,7 +3,6 @@ package postgre
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/aarondl/null/v8"
@@ -17,7 +16,7 @@ import (
 )
 
 // CreateDocument - Insert single record (returns created entity)
-func (r *implRepository) CreateDocument(ctx context.Context, opt repo.CreateDocumentOptions) (model.IndexedDocument, error) {
+func (r *implPostgresRepository) CreateDocument(ctx context.Context, opt repo.CreateDocumentOptions) (model.IndexedDocument, error) {
 	dbDoc := &sqlboiler.IndexedDocument{
 		AnalyticsID:    opt.AnalyticsID,
 		ProjectID:      opt.ProjectID,
@@ -52,7 +51,8 @@ func (r *implRepository) CreateDocument(ctx context.Context, opt repo.CreateDocu
 	}
 
 	if err := dbDoc.Insert(ctx, r.db, boil.Infer()); err != nil {
-		return model.IndexedDocument{}, fmt.Errorf("CreateDocument: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.CreateDocument: Failed to insert document: %v", err)
+		return model.IndexedDocument{}, repo.ErrFailedToInsert
 	}
 
 	if doc := model.NewIndexedDocumentFromDB(dbDoc); doc != nil {
@@ -62,13 +62,15 @@ func (r *implRepository) CreateDocument(ctx context.Context, opt repo.CreateDocu
 }
 
 // DetailDocument - Get by ID only (primary key lookup)
-func (r *implRepository) DetailDocument(ctx context.Context, id string) (model.IndexedDocument, error) {
+func (r *implPostgresRepository) DetailDocument(ctx context.Context, id string) (model.IndexedDocument, error) {
 	dbDoc, err := sqlboiler.FindIndexedDocument(ctx, r.db, id)
 	if err == sql.ErrNoRows {
+		r.l.Errorf(ctx, "indexing.repository.postgre.DetailDocument: Document not found: %v", err)
 		return model.IndexedDocument{}, nil // Not found
 	}
 	if err != nil {
-		return model.IndexedDocument{}, fmt.Errorf("DetailDocument: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.DetailDocument: Failed to get document: %v", err)
+		return model.IndexedDocument{}, repo.ErrFailedToGet
 	}
 
 	if doc := model.NewIndexedDocumentFromDB(dbDoc); doc != nil {
@@ -78,15 +80,17 @@ func (r *implRepository) DetailDocument(ctx context.Context, id string) (model.I
 }
 
 // GetOneDocument - Get single record by filters
-func (r *implRepository) GetOneDocument(ctx context.Context, opt repo.GetOneDocumentOptions) (model.IndexedDocument, error) {
+func (r *implPostgresRepository) GetOneDocument(ctx context.Context, opt repo.GetOneDocumentOptions) (model.IndexedDocument, error) {
 	mods := r.buildGetOneQuery(opt)
 
 	dbDoc, err := sqlboiler.IndexedDocuments(mods...).One(ctx, r.db)
 	if err == sql.ErrNoRows {
+		r.l.Errorf(ctx, "indexing.repository.postgre.GetOneDocument: Document not found: %v", err)
 		return model.IndexedDocument{}, nil // Not found
 	}
 	if err != nil {
-		return model.IndexedDocument{}, fmt.Errorf("GetOneDocument: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.GetOneDocument: Failed to get document: %v", err)
+		return model.IndexedDocument{}, repo.ErrFailedToGet
 	}
 
 	if doc := model.NewIndexedDocumentFromDB(dbDoc); doc != nil {
@@ -96,19 +100,21 @@ func (r *implRepository) GetOneDocument(ctx context.Context, opt repo.GetOneDocu
 }
 
 // GetDocuments - List with pagination (returns data + paginator)
-func (r *implRepository) GetDocuments(ctx context.Context, opt repo.GetDocumentsOptions) ([]model.IndexedDocument, paginator.Paginator, error) {
+func (r *implPostgresRepository) GetDocuments(ctx context.Context, opt repo.GetDocumentsOptions) ([]model.IndexedDocument, paginator.Paginator, error) {
 	// 1. Count total
 	countMods := r.buildGetCountQuery(opt)
 	total, err := sqlboiler.IndexedDocuments(countMods...).Count(ctx, r.db)
 	if err != nil {
-		return nil, paginator.Paginator{}, fmt.Errorf("GetDocuments count: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.GetDocuments: Failed to get documents count: %v", err)
+		return nil, paginator.Paginator{}, repo.ErrFailedToList
 	}
 
 	// 2. Get data
 	mods := r.buildGetQuery(opt)
 	dbDocs, err := sqlboiler.IndexedDocuments(mods...).All(ctx, r.db)
 	if err != nil {
-		return nil, paginator.Paginator{}, fmt.Errorf("GetDocuments: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.GetDocuments: Failed to get documents: %v", err)
+		return nil, paginator.Paginator{}, repo.ErrFailedToList
 	}
 
 	// 3. Build paginator
@@ -123,19 +129,20 @@ func (r *implRepository) GetDocuments(ctx context.Context, opt repo.GetDocuments
 }
 
 // ListDocuments - List without pagination
-func (r *implRepository) ListDocuments(ctx context.Context, opt repo.ListDocumentsOptions) ([]model.IndexedDocument, error) {
+func (r *implPostgresRepository) ListDocuments(ctx context.Context, opt repo.ListDocumentsOptions) ([]model.IndexedDocument, error) {
 	mods := r.buildListQuery(opt)
 
 	dbDocs, err := sqlboiler.IndexedDocuments(mods...).All(ctx, r.db)
 	if err != nil {
-		return nil, fmt.Errorf("ListDocuments: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.ListDocuments: Failed to get documents: %v", err)
+		return nil, repo.ErrFailedToList
 	}
 
 	return util.MapSlice(dbDocs, model.NewIndexedDocumentFromDB), nil
 }
 
 // UpsertDocument - Insert or update (returns entity)
-func (r *implRepository) UpsertDocument(ctx context.Context, opt repo.UpsertDocumentOptions) (model.IndexedDocument, error) {
+func (r *implPostgresRepository) UpsertDocument(ctx context.Context, opt repo.UpsertDocumentOptions) (model.IndexedDocument, error) {
 	dbDoc := &sqlboiler.IndexedDocument{
 		AnalyticsID:    opt.AnalyticsID,
 		ProjectID:      opt.ProjectID,
@@ -172,7 +179,8 @@ func (r *implRepository) UpsertDocument(ctx context.Context, opt repo.UpsertDocu
 		[]string{"analytics_id"}, // Conflict columns
 		boil.Infer(), boil.Infer())
 	if err != nil {
-		return model.IndexedDocument{}, fmt.Errorf("UpsertDocument: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.UpsertDocument: Failed to upsert document: %v", err)
+		return model.IndexedDocument{}, repo.ErrFailedToUpsert
 	}
 
 	// Return upserted entity
@@ -183,10 +191,11 @@ func (r *implRepository) UpsertDocument(ctx context.Context, opt repo.UpsertDocu
 }
 
 // UpdateDocumentStatus - Update status and metrics (returns updated entity)
-func (r *implRepository) UpdateDocumentStatus(ctx context.Context, opt repo.UpdateDocumentStatusOptions) (model.IndexedDocument, error) {
+func (r *implPostgresRepository) UpdateDocumentStatus(ctx context.Context, opt repo.UpdateDocumentStatusOptions) (model.IndexedDocument, error) {
 	dbDoc, err := sqlboiler.FindIndexedDocument(ctx, r.db, opt.ID)
 	if err != nil {
-		return model.IndexedDocument{}, fmt.Errorf("UpdateDocumentStatus: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.UpdateDocumentStatus: Failed to update document status: %v", err)
+		return model.IndexedDocument{}, repo.ErrFailedToUpdateStatus
 	}
 
 	// Update fields
@@ -214,7 +223,8 @@ func (r *implRepository) UpdateDocumentStatus(ctx context.Context, opt repo.Upda
 
 	_, err = dbDoc.Update(ctx, r.db, boil.Infer())
 	if err != nil {
-		return model.IndexedDocument{}, fmt.Errorf("UpdateDocumentStatus: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.UpdateDocumentStatus: Failed to update document status: %v", err)
+		return model.IndexedDocument{}, repo.ErrFailedToUpdateStatus
 	}
 
 	// Return updated entity
@@ -225,7 +235,7 @@ func (r *implRepository) UpdateDocumentStatus(ctx context.Context, opt repo.Upda
 }
 
 // CountDocumentsByProject - Get statistics per project
-func (r *implRepository) CountDocumentsByProject(ctx context.Context, projectID string) (repo.DocumentProjectStats, error) {
+func (r *implPostgresRepository) CountDocumentsByProject(ctx context.Context, projectID string) (repo.DocumentProjectStats, error) {
 	// Use raw SQL for aggregation
 	query := `
 		SELECT
@@ -250,7 +260,8 @@ func (r *implRepository) CountDocumentsByProject(ctx context.Context, projectID 
 		&avgIndexTimeMs,
 	)
 	if err != nil {
-		return repo.DocumentProjectStats{}, fmt.Errorf("CountDocumentsByProject: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.CountDocumentsByProject: Failed to count documents by project: %v", err)
+		return repo.DocumentProjectStats{}, repo.ErrFailedToCount
 	}
 
 	stats.ProjectID = projectID

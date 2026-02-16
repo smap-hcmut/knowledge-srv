@@ -7,40 +7,43 @@
 
 Repositories often become "God Objects" with 1000+ lines. To prevent this, strict file splitting is **ENFORCED**.
 
-### The Triad
+### 1.1 Per-entity files (PostgreSQL / SQLBoiler)
 
-For every entity (e.g., `IndexedDocument`), you MUST have 3 files in `repository/<driver>/`:
+For each **entity** (table) in `repository/<driver>/` you have:
 
-1.  **`<entity>.go` (The Coordinator)**:
-    - **Responsibility**: Orchestrates the flow.
-    - **Code**: calls `buildQuery` -> calls Driver -> calls `toDomain`.
-2.  **`<entity>_query.go` (The Builder)**:
-    - **Responsibility**: Pure logic. Constructs filters (`bson.M` or `qm.QueryMod`).
-    - **Code**: `if id != "" { filter["_id"] = id }`
-3.  **`<entity>_mapper.go` (The Mapper)** (optional if using `internal/model` mappers):
-    - **Responsibility**: Converts Data Models <-> Domain Models.
-    - **Code**: `return models.IndexedDocument{ ID: dbDoc.ID }`
+1. **`<entity>.go` (Coordinator)**
+   - Methods gọi `buildXxxQuery(opt)` → driver → map sang `model.Entity`.
+   - Ví dụ: `document.go` cho bảng indexed_documents, `dlq.go` cho indexing_dlq.
+
+2. **`<entity>_query.go` (Builder)**
+   - Chỉ build query: trả về `[]qm.QueryMod` (hoặc filter tương đương).
+   - Không gọi DB, không map domain.
+   - Ví dụ: `document_query.go`, `dlq_query.go`.
+
+3. **Mapper**
+   - Dùng `internal/model.NewXxxFromDB(dbRow)` (và `util.MapSlice` nếu cần).
+   - Không bắt buộc file riêng `<entity>_mapper.go` nếu đã map trong `<entity>.go`.
 
 ---
 
 ## 2. Standard Method Names (MANDATORY)
 
-Repository methods MUST follow these **exact names**. Do NOT invent custom names.
+Repository methods follow **standard verb + entity** naming. Khi một interface gộp nhiều entity (Document + DLQ), dùng **suffix entity** (CreateDocument, GetOneDLQ, ...) để tránh trùng tên.
 
-### 2.1 CRUD Operations
+### 2.1 CRUD (pattern: Verb + Entity)
 
-| Method           | Purpose                 | Signature Example                                                           |
-| ---------------- | ----------------------- | --------------------------------------------------------------------------- |
-| **`Create`**     | Insert single record    | `Create(ctx, opt CreateOptions) (model.Entity, error)`                      |
-| **`CreateMany`** | Bulk insert (rare)      | `CreateMany(ctx, opts []CreateOptions) ([]model.Entity, error)`             |
-| **`Upsert`**     | Insert or update        | `Upsert(ctx, opt UpsertOptions) (model.Entity, error)`                      |
-| **`Detail`**     | Get by ID only          | `Detail(ctx, id string) (model.Entity, error)`                              |
-| **`GetOne`**     | Get by filters (unique) | `GetOne(ctx, opt GetOneOptions) (model.Entity, error)`                      |
-| **`Get`**        | List with pagination    | `Get(ctx, opt GetOptions) ([]model.Entity, paginator.Paginator, error)`     |
-| **`List`**       | List without pagination | `List(ctx, opt ListOptions) ([]model.Entity, error)`                        |
-| **`Update`**     | Update by ID            | `Update(ctx, opt UpdateOptions) (model.Entity, error)`                      |
-| **`Delete`**     | Delete single by ID     | `Delete(ctx, id string) error`                                              |
-| **`Deletes`**    | Delete multiple         | `Deletes(ctx, ids []string) error`                                          |
+| Verb           | Purpose             | Document (indexed_documents)                         | DLQ (indexing_dlq)       |
+| -------------- | ------------------- | ---------------------------------------------------- | ------------------------ |
+| Create         | Insert single       | CreateDocument(ctx, opt)                             | CreateDLQ(ctx, opt)      |
+| Upsert         | Insert or update    | UpsertDocument(ctx, opt)                             | —                        |
+| Detail         | Get by ID only      | DetailDocument(ctx, id)                              | —                        |
+| GetOne         | Get by filters      | GetOneDocument(ctx, opt)                             | GetOneDLQ(ctx, opt)      |
+| Get            | List + pagination   | GetDocuments(ctx, opt) → ([]model, paginator, error) | —                        |
+| List           | List no pagination  | ListDocuments(ctx, opt)                              | ListDLQs(ctx, opt)       |
+| Update\*       | Update by ID/status | UpdateDocumentStatus(ctx, opt)                       | MarkResolvedDLQ(ctx, id) |
+| Delete/Deletes | Delete              | (nếu cần)                                            | —                        |
+
+\* Có thể dùng tên cụ thể: UpdateDocumentStatus, MarkResolvedDLQ.
 
 **Important Notes:**
 
@@ -49,20 +52,15 @@ Repository methods MUST follow these **exact names**. Do NOT invent custom names
 - ✅ **Return entities**: `Create`, `Update`, `Upsert` return the modified entity (value type)
 - ✅ **`Get` returns `paginator.Paginator`**: NOT `int` for total count
 
-### 2.2 Specialized Queries
+### 2.2 Specialized (theo entity)
 
-For specialized queries, use descriptive names with context:
+Ví dụ Document: `CountDocumentsByProject(ctx, projectID string) (DocumentProjectStats, error)`.
 
-| Method             | Purpose               | Example                                              |
-| ------------------ | --------------------- | ---------------------------------------------------- |
-| **`Count`**        | Count records         | `CountByProject(ctx, projectID string) (int, error)` |
-| **`UpdateStatus`** | Update specific field | `UpdateStatus(ctx, id string, status string) error`  |
+### 2.3 Qdrant (vector store)
 
-**Avoid creating:**
+- `UpsertPoint(ctx, opt UpsertPointOptions) error` — collection name là const/config ở tầng repo qdrant, không truyền từ usecase.
 
-- ❌ `ExistsByX` methods → Use `GetOne` instead
-- ❌ `FindByX` methods → Use `GetOne` or `List` instead
-- ❌ Custom query methods → Use `GetOne`, `List`, or `Get` with Options
+**Tránh:** `ExistsByX` (dùng GetOne), `FindByX` (dùng GetOne/List), method đặc thù thay cho GetOne/List/Get.
 
 ---
 
@@ -82,55 +80,24 @@ UseCase (domain models)
 
 ### 3.2 Naming Convention
 
-Options MUST be defined in `repository/option.go` with suffix `Options`:
+Options định nghĩa trong `repository/option.go`, suffix `Options`. Khi nhiều entity: dùng prefix/suffix entity (CreateDocumentOptions, GetOneDLQOptions, UpsertPointOptions).
 
 ```go
-// repository/option.go
+// repository/option.go — Document
+type CreateDocumentOptions struct { AnalyticsID, ProjectID, SourceID, QdrantPointID, CollectionName, ContentHash, Status, ... }
+type UpsertDocumentOptions struct { ... }
+type GetOneDocumentOptions struct { AnalyticsID string; ContentHash string }  // AND khi cả hai có
+type GetDocumentsOptions struct { Status, ProjectID, BatchID, ErrorTypes, MaxRetry, StaleBefore, Limit, Offset, OrderBy }
+type ListDocumentsOptions struct { Status, ProjectID, BatchID, ErrorTypes, MaxRetry, StaleBefore, Limit, OrderBy }
+type UpdateDocumentStatusOptions struct { ID, Status, Metrics DocumentStatusMetrics }
 
-type CreateOptions struct {
-    AnalyticsID string
-    ProjectID   string
-    SourceID    string
-    // ... all fields needed for creation
-}
+// DLQ
+type CreateDLQOptions struct { ... }
+type GetOneDLQOptions struct { ID, AnalyticsID, ContentHash }
+type ListDLQOptions struct { ProjectID, ErrorTypes, ResolvedOnly, UnresolvedOnly, Limit, OrderBy }
 
-type UpsertOptions struct {
-    AnalyticsID string
-    ProjectID   string
-    SourceID    string
-    // ... all fields needed for upsert
-}
-
-type GetOneOptions struct {
-    AnalyticsID string  // optional filter
-    ContentHash string  // optional filter
-    // If both provided, they will be combined with AND
-}
-
-type GetOptions struct {
-    // Filters
-    Status      string
-    ProjectID   string
-    ErrorTypes  []string
-
-    // Pagination (REQUIRED for Get)
-    Limit  int
-    Offset int
-
-    // Sorting
-    OrderBy string // e.g., "created_at DESC"
-}
-
-type ListOptions struct {
-    // Filters only, NO pagination
-    Status     string
-    ProjectID  string
-    MaxRetry   int
-    ErrorTypes []string
-
-    // Optional limit for safety
-    Limit int // default: no limit, but can cap at 1000
-}
+// Qdrant
+type UpsertPointOptions struct { PointID string; Vector []float32; Payload map[string]interface{} }
 ```
 
 ### 3.3 Rules
@@ -158,113 +125,101 @@ We use **SQLBoiler**. It generates type-safe Go structs from the DB schema.
 ### 4.1 Directory Structure
 
 ```text
-repository/postgre/
-├── new.go                    # Factory
-├── indexed_document.go       # Coordinator: Create, GetOne, List, etc.
-├── indexed_document_query.go # Builder: buildGetOneQuery, buildListQuery
-├── dlq.go                    # Coordinator for DLQ entity
-├── dlq_query.go              # Builder for DLQ
+repository/
+├── interface.go   # PostgresRepository (Document + DLQ), QdrantRepository
+├── option.go      # Tất cả Options (CreateDocumentOptions, UpsertPointOptions, ...)
+├── errors.go      # ErrFailedToInsert, ErrFailedToGet, ... (domain repo errors)
+├── postgre/
+│   ├── new.go           # New(db, log) PostgresRepository
+│   ├── document.go      # CreateDocument, DetailDocument, GetOneDocument, GetDocuments, ListDocuments, UpsertDocument, UpdateDocumentStatus, CountDocumentsByProject
+│   ├── document_query.go # buildGetOneQuery, buildGetCountQuery, buildGetQuery, buildListQuery
+│   ├── dlq.go           # CreateDLQ, GetOneDLQ, ListDLQs, MarkResolvedDLQ
+│   └── dlq_query.go     # buildGetOneDLQQuery, buildListDLQQuery
+└── qdrant/
+    ├── new.go    # New(client, log) QdrantRepository
+    └── point.go  # UpsertPoint (collection name const trong package)
 ```
 
 ### 4.2 Method Implementation Pattern
 
-#### Example: `Create`
+#### Example: CreateDocument
 
 ```go
-// indexed_document.go
-func (r *implRepository) Create(ctx context.Context, opt CreateOptions) error {
-    // Convert Options to SQLBoiler model
+// document.go
+func (r *implPostgresRepository) CreateDocument(ctx context.Context, opt repo.CreateDocumentOptions) (model.IndexedDocument, error) {
     dbDoc := &sqlboiler.IndexedDocument{
-        AnalyticsID:    opt.AnalyticsID,
-        ProjectID:      opt.ProjectID,
-        SourceID:       opt.SourceID,
-        QdrantPointID:  opt.QdrantPointID,
-        CollectionName: opt.CollectionName,
-        ContentHash:    opt.ContentHash,
-        Status:         opt.Status,
-        // ... map other fields
+        AnalyticsID: opt.AnalyticsID,
+        ProjectID:   opt.ProjectID,
+        // ... map from opt
     }
-
-    // Insert using SQLBoiler
-    return dbDoc.Insert(ctx, r.db, boil.Infer())
+    if err := dbDoc.Insert(ctx, r.db, boil.Infer()); err != nil {
+        return model.IndexedDocument{}, repo.ErrFailedToInsert
+    }
+    if doc := model.NewIndexedDocumentFromDB(dbDoc); doc != nil {
+        return *doc, nil
+    }
+    return model.IndexedDocument{}, nil
 }
 ```
 
-#### Example: `Detail` (Get by ID only)
+#### Example: DetailDocument (Get by ID only)
 
 ```go
-// indexed_document.go
-func (r *implRepository) Detail(ctx context.Context, id string) (*model.IndexedDocument, error) {
-    // SQLBoiler's FindX method queries by primary key
+// document.go
+func (r *implPostgresRepository) DetailDocument(ctx context.Context, id string) (model.IndexedDocument, error) {
     dbDoc, err := sqlboiler.FindIndexedDocument(ctx, r.db, id)
     if err == sql.ErrNoRows {
-        return nil, nil // or return ErrNotFound
+        return model.IndexedDocument{}, nil
     }
     if err != nil {
-        return nil, fmt.Errorf("Detail: %w", err)
+        return model.IndexedDocument{}, repo.ErrFailedToGet
     }
-
-    return model.NewIndexedDocumentFromDB(dbDoc), nil
+    if doc := model.NewIndexedDocumentFromDB(dbDoc); doc != nil {
+        return *doc, nil
+    }
+    return model.IndexedDocument{}, nil
 }
 ```
 
-#### Example: `GetOne` (Get by filters)
+#### Example: GetOneDocument + buildGetOneQuery
 
 ```go
-// indexed_document.go
-func (r *implRepository) GetOne(ctx context.Context, opt GetOneOptions) (*model.IndexedDocument, error) {
-    // Build query mods
+// document.go
+func (r *implPostgresRepository) GetOneDocument(ctx context.Context, opt repo.GetOneDocumentOptions) (model.IndexedDocument, error) {
     mods := r.buildGetOneQuery(opt)
-
-    // Execute
     dbDoc, err := sqlboiler.IndexedDocuments(mods...).One(ctx, r.db)
     if err == sql.ErrNoRows {
-        return nil, nil
+        return model.IndexedDocument{}, nil
     }
-    if err != nil {
-        return nil, fmt.Errorf("GetOne: %w", err)
-    }
-
-    return model.NewIndexedDocumentFromDB(dbDoc), nil
+    // ...
 }
 
-// indexed_document_query.go
-func (r *implRepository) buildGetOneQuery(opt GetOneOptions) []qm.QueryMod {
-    mods := []qm.QueryMod{}
-
-    // Apply ALL provided filters (AND condition)
-    // Business logic to choose which filter belongs in UseCase
+// document_query.go
+func (r *implPostgresRepository) buildGetOneQuery(opt repo.GetOneDocumentOptions) []qm.QueryMod {
+    var mods []qm.QueryMod
     if opt.AnalyticsID != "" {
         mods = append(mods, qm.Where("analytics_id = ?", opt.AnalyticsID))
     }
     if opt.ContentHash != "" {
         mods = append(mods, qm.Where("content_hash = ?", opt.ContentHash))
     }
-
     return mods
 }
 ```
 
-#### Example: `Get` (with pagination)
+#### Example: GetDocuments (with pagination)
 
 ```go
-// indexed_document.go
-func (r *implRepository) Get(ctx context.Context, opt GetOptions) ([]model.IndexedDocument, int, error) {
-    // 1. Count total
+// document.go
+func (r *implPostgresRepository) GetDocuments(ctx context.Context, opt repo.GetDocumentsOptions) ([]model.IndexedDocument, paginator.Paginator, error) {
     countMods := r.buildGetCountQuery(opt)
     total, err := sqlboiler.IndexedDocuments(countMods...).Count(ctx, r.db)
-    if err != nil {
-        return nil, 0, fmt.Errorf("Get count: %w", err)
-    }
-
-    // 2. Get data
+    // ...
     mods := r.buildGetQuery(opt)
     dbDocs, err := sqlboiler.IndexedDocuments(mods...).All(ctx, r.db)
-    if err != nil {
-        return nil, 0, fmt.Errorf("Get: %w", err)
-    }
-
-    return r.toDomainList(dbDocs), int(total), nil
+    // ...
+    pag := paginator.Paginator{ Total: int64(total), Count: int64(len(dbDocs)), PerPage: int64(opt.Limit), CurrentPage: (opt.Offset/opt.Limit)+1 }
+    return util.MapSlice(dbDocs, model.NewIndexedDocumentFromDB), pag, nil
 }
 
 // indexed_document_query.go
@@ -298,38 +253,24 @@ func (r *implRepository) buildGetQuery(opt GetOptions) []qm.QueryMod {
 }
 ```
 
-#### Example: `List` (no pagination)
+#### Example: ListDocuments (no pagination)
 
 ```go
-// indexed_document.go
-func (r *implRepository) List(ctx context.Context, opt ListOptions) ([]model.IndexedDocument, error) {
+// document.go
+func (r *implPostgresRepository) ListDocuments(ctx context.Context, opt repo.ListDocumentsOptions) ([]model.IndexedDocument, error) {
     mods := r.buildListQuery(opt)
-
     dbDocs, err := sqlboiler.IndexedDocuments(mods...).All(ctx, r.db)
     if err != nil {
-        return nil, fmt.Errorf("List: %w", err)
+        return nil, repo.ErrFailedToList
     }
-
-    return r.toDomainList(dbDocs), nil
+    return util.MapSlice(dbDocs, model.NewIndexedDocumentFromDB), nil
 }
 
-// indexed_document_query.go
-func (r *implRepository) buildListQuery(opt ListOptions) []qm.QueryMod {
-    mods := []qm.QueryMod{}
-
-    // Filters
-    if opt.Status != "" {
-        mods = append(mods, qm.Where("status = ?", opt.Status))
-    }
-    if opt.MaxRetry > 0 {
-        mods = append(mods, qm.Where("retry_count < ?", opt.MaxRetry))
-    }
-
-    // Safety limit (optional)
-    if opt.Limit > 0 {
-        mods = append(mods, qm.Limit(opt.Limit))
-    }
-
+// document_query.go
+func (r *implPostgresRepository) buildListQuery(opt repo.ListDocumentsOptions) []qm.QueryMod {
+    var mods []qm.QueryMod
+    if opt.Status != "" { mods = append(mods, qm.Where("status = ?", opt.Status)) }
+    if opt.Limit > 0 { mods = append(mods, qm.Limit(opt.Limit)) }
     return mods
 }
 ```
@@ -360,18 +301,16 @@ func (r *implRepository) ExistsByAnalyticsID(ctx context.Context, analyticsID st
 
 ```go
 // In UseCase
-doc, err := repo.GetOne(ctx, repository.GetOneOptions{
+doc, err := repo.GetOneDocument(ctx, repository.GetOneDocumentOptions{
     AnalyticsID: analyticsID,
 })
 if err != nil {
     return err
 }
-
-if doc != nil {
+if doc.ID != "" {
     // Record exists
     return ErrDuplicate
 }
-
 // Record does not exist, proceed...
 ```
 
@@ -393,92 +332,54 @@ if doc != nil {
 
 ---
 
-## 6. Exists vs GetOne vs Detail - Performance
+## 6. Exists vs GetOne vs Detail
 
-### Comparison
+- **Không dùng method `Exists`**: Dùng `GetOne` rồi kiểm tra entity rỗng (ID == "" hoặc so sánh với zero value).
+- **`DetailDocument(ctx, id)`**: Lấy theo primary key (FindX). Trả về `model.IndexedDocument` (value); not found → zero value.
+- **`GetOneDocument(ctx, opt)`**: Lấy theo filter (AnalyticsID, ContentHash, ...). Trả về value; not found → zero value.
 
-| Method       | Query                   | Returns        | Use Case               | Performance            |
-| ------------ | ----------------------- | -------------- | ---------------------- | ---------------------- |
-| **`Exists`** | `SELECT EXISTS(...)`    | `bool`         | Check if record exists | ⚡ Fastest (1 bit)     |
-| **`Detail`** | `SELECT * WHERE id = ?` | `model.Entity` | Get by ID              | ⚡⚡ Fast (indexed)    |
-| **`GetOne`** | `SELECT * WHERE ...`    | `model.Entity` | Get by any filter      | ⚡⚡ Fast (if indexed) |
-
-### Example Implementation
-
-```go
-// Exists - Use SQLBoiler's Exists() method
-func (r *implRepository) ExistsByAnalyticsID(ctx context.Context, analyticsID string) (bool, error) {
-    return sqlboiler.IndexedDocuments(
-        qm.Where("analytics_id = ?", analyticsID),
-    ).Exists(ctx, r.db)
-}
-
-// Detail - Use SQLBoiler's FindX() method (primary key lookup)
-func (r *implRepository) Detail(ctx context.Context, id string) (*model.IndexedDocument, error) {
-    dbDoc, err := sqlboiler.FindIndexedDocument(ctx, r.db, id)
-    if err == sql.ErrNoRows {
-        return nil, nil
-    }
-    if err != nil {
-        return nil, fmt.Errorf("Detail: %w", err)
-    }
-    return model.NewIndexedDocumentFromDB(dbDoc), nil
-}
-
-// GetOne - Use SQLBoiler's One() method (any filter)
-func (r *implRepository) GetOne(ctx context.Context, opt GetOneOptions) (*model.IndexedDocument, error) {
-    mods := r.buildGetOneQuery(opt)
-    dbDoc, err := sqlboiler.IndexedDocuments(mods...).One(ctx, r.db)
-    if err == sql.ErrNoRows {
-        return nil, nil
-    }
-    if err != nil {
-        return nil, fmt.Errorf("GetOne: %w", err)
-    }
-    return model.NewIndexedDocumentFromDB(dbDoc), nil
-}
-```
-
-### When to Use Which?
-
-- **`Exists`**: Khi chỉ cần biết record có tồn tại không (duplicate check)
-- **`Detail`**: Khi cần lấy record **bằng ID** (primary key)
-- **`GetOne`**: Khi cần lấy record **bằng filter khác** (analytics_id, content_hash)
+Performance: Detail (PK) và GetOne (index) đều nhanh; không cần thêm Exists.
 
 ---
 
-## 6. Interface Composition
+## 7. Interface Composition
 
-Don't create a massive `Repository` interface. Split it by entity.
+Tách theo entity; gộp Postgres (Document + DLQ) thành một interface, Qdrant riêng. Usecase có thể nhận **một** `PostgresRepository` và **một** `QdrantRepository`, hoặc một interface `Repository` embed cả hai (tùy wiring).
 
 ```go
 // repository/interface.go
 
-// The Main Interface (injected into UseCase)
-type Repository interface {
-    IndexedDocumentRepository
+// PostgresRepository — Document + DLQ (một New cho postgre)
+type PostgresRepository interface {
+    DocumentRepository
     DLQRepository
 }
 
-// Sub-Interface: IndexedDocument
-type IndexedDocumentRepository interface {
-    Create(ctx context.Context, opt CreateOptions) error
-    Detail(ctx context.Context, id string) (*model.IndexedDocument, error)
-    GetOne(ctx context.Context, opt GetOneOptions) (*model.IndexedDocument, error)
-    Get(ctx context.Context, opt GetOptions) ([]model.IndexedDocument, int, error)
-    List(ctx context.Context, opt ListOptions) ([]model.IndexedDocument, error)
-    Upsert(ctx context.Context, opt UpsertOptions) error
-    UpdateStatus(ctx context.Context, id string, status string, opt StatusMetrics) error
-    CountByProject(ctx context.Context, projectID string) (ProjectStats, error)
+type DocumentRepository interface {
+    GetDocuments(ctx context.Context, opt GetDocumentsOptions) ([]model.IndexedDocument, paginator.Paginator, error)
+    DetailDocument(ctx context.Context, id string) (model.IndexedDocument, error)
+    ListDocuments(ctx context.Context, opt ListDocumentsOptions) ([]model.IndexedDocument, error)
+    GetOneDocument(ctx context.Context, opt GetOneDocumentOptions) (model.IndexedDocument, error)
+    CreateDocument(ctx context.Context, opt CreateDocumentOptions) (model.IndexedDocument, error)
+    UpdateDocumentStatus(ctx context.Context, opt UpdateDocumentStatusOptions) (model.IndexedDocument, error)
+    UpsertDocument(ctx context.Context, opt UpsertDocumentOptions) (model.IndexedDocument, error)
+    CountDocumentsByProject(ctx context.Context, projectID string) (DocumentProjectStats, error)
 }
 
-// Sub-Interface: DLQ
 type DLQRepository interface {
-    CreateDLQ(ctx context.Context, opt CreateDLQOptions) error
-    GetOneDLQ(ctx context.Context, opt GetOneDLQOptions) (*model.IndexingDLQ, error)
-    ListDLQ(ctx context.Context, opt ListDLQOptions) ([]model.IndexingDLQ, error)
+    CreateDLQ(ctx context.Context, opt CreateDLQOptions) (model.IndexingDLQ, error)
+    GetOneDLQ(ctx context.Context, opt GetOneDLQOptions) (model.IndexingDLQ, error)
+    ListDLQs(ctx context.Context, opt ListDLQOptions) ([]model.IndexingDLQ, error)
+    MarkResolvedDLQ(ctx context.Context, id string) error
+}
+
+type QdrantRepository interface {
+    UpsertPoint(ctx context.Context, opt UpsertPointOptions) error
 }
 ```
+
+- **Factory**: `postgre.New(db, log)` → `PostgresRepository`; `qdrant.New(client, log)` → `QdrantRepository`. Collection name (Qdrant) là const trong `qdrant` package.
+- **errors.go**: Định nghĩa domain repo errors (ErrFailedToInsert, ErrFailedToGet, ...) dùng trong postgre/qdrant impl.
 
 ---
 
@@ -486,19 +387,7 @@ type DLQRepository interface {
 
 ### 8.1 Mapper Helper
 
-```go
-// indexed_document.go or indexed_document_mapper.go
-
-func (r *implRepository) toDomainList(dbDocs []*sqlboiler.IndexedDocument) []model.IndexedDocument {
-    result := make([]model.IndexedDocument, 0, len(dbDocs))
-    for _, db := range dbDocs {
-        if doc := model.NewIndexedDocumentFromDB(db); doc != nil {
-            result = append(result, *doc)
-        }
-    }
-    return result
-}
-```
+Dùng `internal/model.NewIndexedDocumentFromDB(dbDoc)` và `pkg/util.MapSlice(dbDocs, model.NewIndexedDocumentFromDB)` thay vì viết tay `toDomainList`. Return type là value (`model.IndexedDocument`), không pointer.
 
 ### 8.2 Transaction Support (Optional)
 
@@ -518,12 +407,11 @@ func (r *implRepository) WithTx(tx *sql.Tx) Repository {
 
 ## 9. Intern Checklist (Read before PR)
 
-- [ ] **Naming Check**: Did I use standard method names (`Create`, `GetOne`, `List`, etc.)?
-- [ ] **No Exists**: Did I avoid creating `Exists` methods? Use `GetOne` instead!
-- [ ] **Options Check**: Did I define all Options in `option.go`?
-- [ ] **Split Check**: Did I split my code into `entity.go` and `entity_query.go`?
-- [ ] **Context Check**: Am I passing `ctx` to the driver?
-- [ ] **Nil Check**: Do I return `nil` (not error) when record not found in `GetOne`/`Detail`?
-- [ ] **Mapping Check**: Did I handle `null` fields correctly? (e.g., `null.String` -> `*string`).
-- [ ] **Leak Check**: Am I returning `bson.M` or `sqlboiler.IndexedDocument` out of the interface? **FORBIDDEN**. Return `internal/model` types.
-- [ ] **Error Wrapping**: Did I wrap errors with method name for debugging?
+- [ ] **Naming**: Method names theo chuẩn (CreateDocument, DetailDocument, GetOneDocument, GetDocuments, ListDocuments, UpsertDocument, UpdateDocumentStatus, CountDocumentsByProject; CreateDLQ, GetOneDLQ, ListDLQs, MarkResolvedDLQ; UpsertPoint).
+- [ ] **No Exists**: Không tạo method Exists; dùng GetOne rồi kiểm tra entity rỗng.
+- [ ] **Options**: Tất cả Options trong `option.go` (CreateDocumentOptions, UpsertPointOptions, ...).
+- [ ] **Split**: Code tách `document.go` + `document_query.go`, `dlq.go` + `dlq_query.go`; qdrant `point.go`.
+- [ ] **Context**: Mọi call driver đều truyền `ctx`.
+- [ ] **Not found**: GetOne/Detail trả về value rỗng (model.IndexedDocument{}), không return error.
+- [ ] **Mapping**: Nullable dùng `null.v8` / `model.NewXxxFromDB`; không return sqlboiler/bson ra ngoài interface.
+- [ ] **Errors**: Dùng repo errors (ErrFailedToInsert, ...) hoặc wrap với tên method.

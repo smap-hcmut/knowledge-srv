@@ -4,6 +4,21 @@ import (
 	"time"
 )
 
+const (
+	MaxConcurrency    = 10
+	MinContentLength  = 10
+	MinQualityScore   = 0.3
+	EMBEDDING_ERROR   = "EMBEDDING_ERROR"
+	QDRANT_ERROR      = "QDRANT_ERROR"
+	DB_ERROR          = "DB_ERROR"
+	VALIDATION_ERROR  = "VALIDATION_ERROR"
+	DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
+	STATUS_INDEXED    = "INDEXED"
+	STATUS_SKIPPED    = "SKIPPED"
+	STATUS_FAILED     = "FAILED"
+	STATUS_PENDING    = "PENDING"
+)
+
 type IndexInput struct {
 	BatchID     string
 	ProjectID   string
@@ -69,11 +84,11 @@ type AnalyticsPost struct {
 	SourceID  string `json:"source_id"`
 
 	// UAP Core
-	Content          string         `json:"content"`
-	ContentCreatedAt time.Time      `json:"content_created_at"`
-	IngestedAt       time.Time      `json:"ingested_at"`
-	Platform         string         `json:"platform"`
-	UAPMetadata      UAPMetadata    `json:"uap_metadata"`
+	Content          string      `json:"content"`
+	ContentCreatedAt time.Time   `json:"content_created_at"`
+	IngestedAt       time.Time   `json:"ingested_at"`
+	Platform         string      `json:"platform"`
+	UAPMetadata      UAPMetadata `json:"uap_metadata"`
 
 	// Sentiment
 	OverallSentiment      string  `json:"overall_sentiment"`
@@ -154,4 +169,11 @@ type RiskFactor struct {
 	Factor      string `json:"factor"`
 	Severity    string `json:"severity"`
 	Description string `json:"description"`
+}
+
+// indexRecordResult - Result of processing single record
+type IndexRecordResult struct {
+	Status       string
+	ErrorType    string
+	ErrorMessage string
 }

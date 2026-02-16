@@ -1,15 +1,13 @@
 package consumer
 
 import (
+	"context"
+
 	"github.com/IBM/sarama"
 )
 
-// ============================================
-// Analytics Batch Completed Handler
-// ============================================
-
 type batchCompletedHandler struct {
-	consumer *Consumer
+	consumer *consumer
 }
 
 func (h *batchCompletedHandler) Setup(sarama.ConsumerGroupSession) error {
@@ -22,11 +20,9 @@ func (h *batchCompletedHandler) Cleanup(sarama.ConsumerGroupSession) error {
 
 func (h *batchCompletedHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		if err := h.consumer.processBatchCompleted(msg); err != nil {
-			h.consumer.l.Errorf(nil, "Failed to process batch completed message: %v", err)
-			// Continue processing other messages even if one fails
+		if err := h.consumer.handleBatchCompletedMessage(msg); err != nil {
+			h.consumer.l.Errorf(context.Background(), "indexing.delivery.kafka.consumer.ConsumeBatchCompleted: Failed to process batch completed message: %v", err)
 		}
-		// Mark message as processed
 		session.MarkMessage(msg, "")
 	}
 	return nil
