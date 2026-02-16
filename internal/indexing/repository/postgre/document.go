@@ -17,38 +17,7 @@ import (
 
 // CreateDocument - Insert single record (returns created entity)
 func (r *implPostgresRepository) CreateDocument(ctx context.Context, opt repo.CreateDocumentOptions) (model.IndexedDocument, error) {
-	dbDoc := &sqlboiler.IndexedDocument{
-		AnalyticsID:    opt.AnalyticsID,
-		ProjectID:      opt.ProjectID,
-		SourceID:       opt.SourceID,
-		QdrantPointID:  opt.QdrantPointID,
-		CollectionName: opt.CollectionName,
-		ContentHash:    opt.ContentHash,
-		Status:         opt.Status,
-		RetryCount:     null.IntFrom(opt.RetryCount),
-		CreatedAt:      null.TimeFrom(time.Now()),
-		UpdatedAt:      null.TimeFrom(time.Now()),
-	}
-
-	// Handle nullable fields
-	if opt.ErrorMessage != nil {
-		dbDoc.ErrorMessage = null.StringFrom(*opt.ErrorMessage)
-	}
-	if opt.BatchID != nil {
-		dbDoc.BatchID = null.StringFrom(*opt.BatchID)
-	}
-	if opt.EmbeddingTimeMs > 0 {
-		dbDoc.EmbeddingTimeMS = null.IntFrom(opt.EmbeddingTimeMs)
-	}
-	if opt.UpsertTimeMs > 0 {
-		dbDoc.UpsertTimeMS = null.IntFrom(opt.UpsertTimeMs)
-	}
-	if opt.TotalTimeMs > 0 {
-		dbDoc.TotalTimeMS = null.IntFrom(opt.TotalTimeMs)
-	}
-	if opt.IndexedAt != nil {
-		dbDoc.IndexedAt = null.TimeFrom(*opt.IndexedAt)
-	}
+	dbDoc := buildCreateDocument(opt)
 
 	if err := dbDoc.Insert(ctx, r.db, boil.Infer()); err != nil {
 		r.l.Errorf(ctx, "indexing.repository.postgre.CreateDocument: Failed to insert document: %v", err)
@@ -143,37 +112,7 @@ func (r *implPostgresRepository) ListDocuments(ctx context.Context, opt repo.Lis
 
 // UpsertDocument - Insert or update (returns entity)
 func (r *implPostgresRepository) UpsertDocument(ctx context.Context, opt repo.UpsertDocumentOptions) (model.IndexedDocument, error) {
-	dbDoc := &sqlboiler.IndexedDocument{
-		AnalyticsID:    opt.AnalyticsID,
-		ProjectID:      opt.ProjectID,
-		SourceID:       opt.SourceID,
-		QdrantPointID:  opt.QdrantPointID,
-		CollectionName: opt.CollectionName,
-		ContentHash:    opt.ContentHash,
-		Status:         opt.Status,
-		RetryCount:     null.IntFrom(opt.RetryCount),
-		UpdatedAt:      null.TimeFrom(time.Now()),
-	}
-
-	// Handle nullable fields
-	if opt.ErrorMessage != nil {
-		dbDoc.ErrorMessage = null.StringFrom(*opt.ErrorMessage)
-	}
-	if opt.BatchID != nil {
-		dbDoc.BatchID = null.StringFrom(*opt.BatchID)
-	}
-	if opt.EmbeddingTimeMs > 0 {
-		dbDoc.EmbeddingTimeMS = null.IntFrom(opt.EmbeddingTimeMs)
-	}
-	if opt.UpsertTimeMs > 0 {
-		dbDoc.UpsertTimeMS = null.IntFrom(opt.UpsertTimeMs)
-	}
-	if opt.TotalTimeMs > 0 {
-		dbDoc.TotalTimeMS = null.IntFrom(opt.TotalTimeMs)
-	}
-	if opt.IndexedAt != nil {
-		dbDoc.IndexedAt = null.TimeFrom(*opt.IndexedAt)
-	}
+	dbDoc := buildUpsertDocument(opt)
 
 	err := dbDoc.Upsert(ctx, r.db, true,
 		[]string{"analytics_id"}, // Conflict columns

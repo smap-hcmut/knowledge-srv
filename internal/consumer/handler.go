@@ -7,6 +7,7 @@ import (
 	indexingConsumer "knowledge-srv/internal/indexing/delivery/kafka/consumer"
 	indexingPostgre "knowledge-srv/internal/indexing/repository/postgre"
 	indexingQdrant "knowledge-srv/internal/indexing/repository/qdrant"
+	indexingRedis "knowledge-srv/internal/indexing/repository/redis"
 	indexingUsecase "knowledge-srv/internal/indexing/usecase"
 )
 
@@ -20,13 +21,14 @@ func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, 
 	// Initialize indexing domain (collection name là const trong qdrant package)
 	postgreRepo := indexingPostgre.New(srv.postgresDB, srv.l)
 	vectorRepo := indexingQdrant.New(srv.qdrantClient, srv.l)
+	cacheRepo := indexingRedis.New(srv.redisClient, srv.l)
 	indexingUC := indexingUsecase.New(
 		srv.l,
 		postgreRepo,
 		vectorRepo,
+		cacheRepo,
 		srv.minioClient,
 		srv.voyageClient,
-		srv.redisClient,
 	)
 	indexingCons, err := indexingConsumer.New(indexingConsumer.Config{
 		Logger:      srv.l,

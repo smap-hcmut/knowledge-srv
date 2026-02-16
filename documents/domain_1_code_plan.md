@@ -25,7 +25,7 @@ Domain Indexing là **write path** của hệ thống RAG Knowledge Service, ch�
 - Analytics data đã phân tích theo schema `analytics.post_analytics` (xem `documents/analytic_post_schema.md`)
 - Nhận qua 2 phương thức:
   - **Kafka**: topic `analytics.batch.completed` → message chứa MinIO file URL
-  - **HTTP**: `POST /internal/index/by-file` → body chứa MinIO file URL
+  - **HTTP**: `POST /internal/index` → body chứa MinIO file URL
 
 **Output:**
 
@@ -63,7 +63,7 @@ Domain Indexing là **write path** của hệ thống RAG Knowledge Service, ch�
 │                      ▼                                           │
 │           ┌──────────────────┐                                  │
 │           │   UseCase        │                                  │
-│           │  IndexFromFile() │                                  │
+│           │   Index()          │                                  │
 │           └────────┬─────────┘                                  │
 │                    │                                             │
 │         ┌──────────┼──────────┐                                 │
@@ -302,47 +302,47 @@ CREATE INDEX idx_indexing_dlq_error_type
 internal/indexing/
 ├── delivery/
 │   ├── http/
-│   │   ├── new.go                    # Factory: New(l, uc) Handler
-│   │   ├── handlers.go               # IndexByFile handler
-│   │   ├── process_request.go        # processIndexByFileRequest
-│   │   ├── presenters.go             # indexByFileReq, indexByFileResp
+│   │   ├── new.go                    # Factory: New(l, uc, discord) Handler
+│   │   ├── handlers.go               # Index, RetryFailed, Reconcile, GetStatistics handlers
+│   │   ├── process_request.go        # processIndexReq, processRetryFailedReq, processReconcileReq
+│   │   ├── presenters.go             # IndexReq/Resp, RetryFailedReq/Resp, ReconcileReq/Resp, StatisticsResp
 │   │   ├── routes.go                 # RegisterRoutes
-│   │   └── errors.go                 # mapError
+│   │   └── errors.go                 # mapError (errors.Is based)
 │   └── kafka/
+│       ├── type.go                   # BatchCompletedMessage, topic/group constants
 │       └── consumer/
-│           ├── new.go                # Factory: NewConsumerGroup
+│           ├── new.go                # Factory: New(cfg) Consumer
 │           ├── handler.go            # sarama.ConsumerGroupHandler impl
-│           ├── router.go             # Route messages by topic
-│           ├── worker.go             # processBatchCompleted
-│           └── constants.go          # Topic names
+│           ├── consumer.go           # ConsumeBatchCompleted
+│           ├── workers.go            # handleBatchCompletedMessage
+│           ├── presenters.go         # toIndexInput mapper
+│           └── error.go              # Consumer-specific errors
 ├── repository/
-│   ├── interface.go                  # Repository interface (composed)
-│   ├── options.go                    # Filter, ListOptions
-│   └── postgre/
+│   ├── interface.go                  # PostgresRepository (composed), QdrantRepository
+│   ├── option.go                     # Options structs (Create/Get/List/Upsert/Update)
+│   ├── errors.go                     # Repository errors
+│   ├── postgre/
+│   │   ├── new.go                    # Factory
+│   │   ├── document.go               # Document CRUD (uses build functions)
+│   │   ├── document_query.go         # Document query builders
+│   │   ├── document_build.go         # buildCreateDocument, buildUpsertDocument
+│   │   ├── dlq.go                    # DLQ CRUD
+│   │   └── dlq_query.go              # DLQ query builders
+│   └── qdrant/
 │       ├── new.go                    # Factory
-│       ├── indexed_document.go       # CRUD implementation
-│       ├── indexed_document_query.go # Query builders
-│       ├── indexed_document_build.go # toDomain, toDB mappers
-│       ├── dlq.go                    # DLQ CRUD
-│       ├── dlq_query.go              # DLQ query builders
-│       └── dlq_build.go              # DLQ mappers
+│       └── point.go                  # UpsertPoint
 ├── usecase/
-│   ├── new.go                        # Factory: impl struct + New
-│   ├── index.go                      # IndexFromFile main logic
-│   ├── index_record.go               # indexSingleRecord
-│   ├── batch.go                      # processBatch (parallel)
-│   ├── dedup.go                      # checkDuplicate logic
-│   ├── validation.go                 # validateAnalyticsPost
-│   ├── embedding.go                  # embedContent (with cache)
-│   ├── qdrant.go                     # prepareQdrantPoint, upsertToQdrant
-│   ├── reconcile.go                  # Reconcile (background job)
-│   ├── retry.go                      # RetryFailed logic
-│   ├── helpers.go                    # Private helpers
-│   └── types.go                      # Private structs (batchResult, etc.)
+│   ├── new.go                        # Factory: impl struct + New + Config
+│   ├── index.go                      # Index, indexSingleRecord, batch, validation, embedding, qdrant, cache, DLQ
+│   ├── retry_failed.go               # RetryFailed logic
+│   ├── reconcile.go                  # Reconcile (stale pending → failed)
+│   └── get_statistics.go             # GetStatistics
 ├── interface.go                      # UseCase interface
-├── types.go                          # Input/Output structs
+├── types.go                          # Input/Output structs, constants
 └── errors.go                         # Domain errors
 ```
+
+> **Note:** ID types sử dụng `string` thay vì `uuid.UUID`. UUID validation được thực hiện ở tầng Delivery (binding tag `uuid`), các tầng bên trong làm việc trên string.
 
 ---
 

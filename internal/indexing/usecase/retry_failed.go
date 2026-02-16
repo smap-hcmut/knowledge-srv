@@ -17,10 +17,11 @@ func (uc *implUseCase) RetryFailed(
 
 	// Step 1: Query failed records từ DB
 	docs, err := uc.postgreRepo.ListDocuments(ctx, repo.ListDocumentsOptions{
-		Status:   indexing.STATUS_FAILED,
-		MaxRetry: input.MaxRetryCount,
-		Limit:    input.Limit,
-		OrderBy:  "created_at ASC",
+		Status:     indexing.STATUS_FAILED,
+		MaxRetry:   input.MaxRetryCount,
+		ErrorTypes: input.ErrorTypes,
+		Limit:      input.Limit,
+		OrderBy:    "created_at ASC",
 	})
 	if err != nil {
 		return indexing.RetryFailedOutput{}, err
@@ -29,18 +30,32 @@ func (uc *implUseCase) RetryFailed(
 	// Step 2: Retry each record
 	var succeeded, failed int
 	for _, doc := range docs {
-		// Increment retry count
 		newRetryCount := doc.RetryCount + 1
 
-		// TODO: Implement actual retry logic
-		// For now, just mark as pending for re-processing
-		_, _ = uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
+		// Mark as PENDING for re-processing with incremented retry count
+		_, updateErr := uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
 			ID:     doc.ID,
 			Status: indexing.STATUS_PENDING,
 			Metrics: repo.DocumentStatusMetrics{
-				RetryCount: newRetryCount,
+				RetryCount:   newRetryCount,
+				ErrorMessage: "", // Clear previous error
 			},
 		})
+		if updateErr != nil {
+			uc.l.Warnf(ctx, "indexing.usecase.RetryFailed: Failed to update doc %s: %v", doc.ID, updateErr)
+			failed++
+			continue
+		}
+
+		// Resolve matching DLQ entry
+		dlqEntry, _ := uc.postgreRepo.GetOneDLQ(ctx, repo.GetOneDLQOptions{
+			AnalyticsID: doc.AnalyticsID,
+		})
+		if dlqEntry.ID != "" {
+			_ = uc.postgreRepo.MarkResolvedDLQ(ctx, dlqEntry.ID)
+		}
+
+		succeeded++
 	}
 
 	return indexing.RetryFailedOutput{

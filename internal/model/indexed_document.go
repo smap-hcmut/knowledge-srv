@@ -8,24 +8,6 @@ import (
 	"knowledge-srv/internal/sqlboiler"
 )
 
-// Status constants
-const (
-	StatusPending    = "PENDING"
-	StatusIndexed    = "INDEXED"
-	StatusFailed     = "FAILED"
-	StatusReIndexing = "RE_INDEXING"
-)
-
-// Error type constants
-const (
-	ErrorTypeValidation = "VALIDATION_ERROR"
-	ErrorTypeParse      = "PARSE_ERROR"
-	ErrorTypeEmbedding  = "EMBEDDING_ERROR"
-	ErrorTypeQdrant     = "QDRANT_ERROR"
-	ErrorTypeDB         = "DB_ERROR"
-	ErrorTypeDuplicate  = "DUPLICATE_CONTENT"
-)
-
 // IndexedDocument represents a document tracking record.
 type IndexedDocument struct {
 	ID          string `json:"id"`
