@@ -8,9 +8,11 @@ var TableNames = struct {
 	IndexedDocuments string
 	IndexingDLQ      string
 	Messages         string
+	Reports          string
 }{
 	Conversations:    "conversations",
 	IndexedDocuments: "indexed_documents",
 	IndexingDLQ:      "indexing_dlq",
 	Messages:         "messages",
+	Reports:          "reports",
 }
