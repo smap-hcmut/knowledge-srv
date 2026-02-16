@@ -9,6 +9,7 @@ import (
 	"knowledge-srv/config"
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/point"
+	"knowledge-srv/internal/search"
 	"knowledge-srv/pkg/discord"
 	"knowledge-srv/pkg/encrypter"
 	"knowledge-srv/pkg/gemini"
@@ -50,6 +51,7 @@ type HTTPServer struct {
 	// Core Domains (Shared)
 	pointUC     point.UseCase
 	embeddingUC embedding.UseCase
+	searchUC    search.UseCase
 }
 
 type Config struct {
