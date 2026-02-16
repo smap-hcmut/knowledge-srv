@@ -12,4 +12,5 @@ var (
 	ErrFileParseFailed      = errors.New("indexing: file parse failed")
 	ErrInvalidAnalyticsData = errors.New("indexing: invalid analytics data")
 	ErrQdrantUpsertFailed   = errors.New("indexing: qdrant upsert failed")
+	ErrCountDocument        = errors.New("indexing: count document failed")
 )

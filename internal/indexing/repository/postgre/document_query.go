@@ -8,7 +8,7 @@ import (
 )
 
 // buildGetOneQuery - Build query for GetOne
-func (r *implRepository) buildGetOneQuery(opt repo.GetOneDocumentOptions) []qm.QueryMod {
+func (r *implPostgresRepository) buildGetOneQuery(opt repo.GetOneDocumentOptions) []qm.QueryMod {
 	mods := []qm.QueryMod{}
 
 	// Apply ALL provided filters (AND condition)
@@ -24,7 +24,7 @@ func (r *implRepository) buildGetOneQuery(opt repo.GetOneDocumentOptions) []qm.Q
 }
 
 // buildGetCountQuery - Build count query for Get (without limit/offset)
-func (r *implRepository) buildGetCountQuery(opt repo.GetDocumentsOptions) []qm.QueryMod {
+func (r *implPostgresRepository) buildGetCountQuery(opt repo.GetDocumentsOptions) []qm.QueryMod {
 	mods := []qm.QueryMod{}
 
 	// Filters
@@ -51,7 +51,7 @@ func (r *implRepository) buildGetCountQuery(opt repo.GetDocumentsOptions) []qm.Q
 }
 
 // buildGetQuery - Build query for Get (with pagination)
-func (r *implRepository) buildGetQuery(opt repo.GetDocumentsOptions) []qm.QueryMod {
+func (r *implPostgresRepository) buildGetQuery(opt repo.GetDocumentsOptions) []qm.QueryMod {
 	// Start with count filters
 	mods := r.buildGetCountQuery(opt)
 
@@ -74,7 +74,7 @@ func (r *implRepository) buildGetQuery(opt repo.GetDocumentsOptions) []qm.QueryM
 }
 
 // buildListQuery - Build query for List (without pagination)
-func (r *implRepository) buildListQuery(opt repo.ListDocumentsOptions) []qm.QueryMod {
+func (r *implPostgresRepository) buildListQuery(opt repo.ListDocumentsOptions) []qm.QueryMod {
 	mods := []qm.QueryMod{}
 
 	// Filters

@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+const (
+	TopicBatchCompleted   = "analytics.batch.completed"
+	GroupIDBatchCompleted = "knowledge-indexing-batch"
+)
+
 // BatchCompletedMessage - Kafka message cho analytics.batch.completed
 type BatchCompletedMessage struct {
 	BatchID     string    `json:"batch_id"`

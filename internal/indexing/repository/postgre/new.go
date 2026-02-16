@@ -3,16 +3,17 @@ package postgre
 import (
 	"database/sql"
 	repo "knowledge-srv/internal/indexing/repository"
+	"knowledge-srv/pkg/log"
 )
 
-// implRepository implements repository.Repository interface
-type implRepository struct {
+type implPostgresRepository struct {
 	db *sql.DB
+	l  log.Logger
 }
 
-// New creates a new PostgreSQL repository for indexing domain
-func New(db *sql.DB) repo.Repository {
-	return &implRepository{
+func New(db *sql.DB, l log.Logger) repo.PostgresRepository {
+	return &implPostgresRepository{
 		db: db,
+		l:  l,
 	}
 }

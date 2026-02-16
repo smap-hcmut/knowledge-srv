@@ -5,27 +5,28 @@ import (
 	"fmt"
 
 	indexingConsumer "knowledge-srv/internal/indexing/delivery/kafka/consumer"
-	indexingRepo "knowledge-srv/internal/indexing/repository/postgre"
+	indexingPostgre "knowledge-srv/internal/indexing/repository/postgre"
+	indexingQdrant "knowledge-srv/internal/indexing/repository/qdrant"
 	indexingUsecase "knowledge-srv/internal/indexing/usecase"
 )
 
-// domainConsumers holds references to all domain consumers for cleanup
+// domainConsumers holds references to all domain consumers for cleanup (interface, like http.Handler)
 type domainConsumers struct {
-	indexingConsumer *indexingConsumer.Consumer
+	indexingConsumer indexingConsumer.Consumer
 }
 
 // setupDomains initializes all domain layers (repositories, usecases, consumers)
 func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, error) {
-	// Initialize indexing domain
-	indexingRepo := indexingRepo.New(srv.postgresDB)
+	// Initialize indexing domain (collection name là const trong qdrant package)
+	postgreRepo := indexingPostgre.New(srv.postgresDB, srv.l)
+	vectorRepo := indexingQdrant.New(srv.qdrantClient, srv.l)
 	indexingUC := indexingUsecase.New(
 		srv.l,
-		indexingRepo,
-		srv.qdrantClient,
+		postgreRepo,
+		vectorRepo,
 		srv.minioClient,
 		srv.voyageClient,
 		srv.redisClient,
-		"knowledge_indexing", // TODO: move to config
 	)
 	indexingCons, err := indexingConsumer.New(indexingConsumer.Config{
 		Logger:      srv.l,
@@ -46,8 +47,7 @@ func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, 
 // startConsumers starts all domain consumers in background goroutines
 func (srv *ConsumerServer) startConsumers(ctx context.Context, consumers *domainConsumers) error {
 	// Start indexing consumer
-	topic := "analytics.batch.completed" // TODO: move to config
-	if err := consumers.indexingConsumer.ConsumeBatchCompleted(ctx, topic); err != nil {
+	if err := consumers.indexingConsumer.ConsumeBatchCompleted(ctx); err != nil {
 		return fmt.Errorf("failed to start indexing consumer: %w", err)
 	}
 

@@ -3,7 +3,6 @@ package postgre
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/aarondl/null/v8"
@@ -16,7 +15,7 @@ import (
 )
 
 // CreateDLQ - Insert single DLQ record (returns created entity)
-func (r *implRepository) CreateDLQ(ctx context.Context, opt repo.CreateDLQOptions) (model.IndexingDLQ, error) {
+func (r *implPostgresRepository) CreateDLQ(ctx context.Context, opt repo.CreateDLQOptions) (model.IndexingDLQ, error) {
 	dbDlq := &sqlboiler.IndexingDLQ{
 		AnalyticsID:  opt.AnalyticsID,
 		ErrorMessage: opt.ErrorMessage,
@@ -33,7 +32,8 @@ func (r *implRepository) CreateDLQ(ctx context.Context, opt repo.CreateDLQOption
 	}
 
 	if err := dbDlq.Insert(ctx, r.db, boil.Infer()); err != nil {
-		return model.IndexingDLQ{}, fmt.Errorf("CreateDLQ: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.CreateDLQ: Failed to insert DLQ: %v", err)
+		return model.IndexingDLQ{}, repo.ErrFailedToInsert
 	}
 
 	if dlq := model.NewIndexingDLQFromDB(dbDlq); dlq != nil {
@@ -43,7 +43,7 @@ func (r *implRepository) CreateDLQ(ctx context.Context, opt repo.CreateDLQOption
 }
 
 // GetOneDLQ - Get single DLQ record by filters
-func (r *implRepository) GetOneDLQ(ctx context.Context, opt repo.GetOneDLQOptions) (model.IndexingDLQ, error) {
+func (r *implPostgresRepository) GetOneDLQ(ctx context.Context, opt repo.GetOneDLQOptions) (model.IndexingDLQ, error) {
 	mods := r.buildGetOneDLQQuery(opt)
 
 	dbDlq, err := sqlboiler.IndexingDLQS(mods...).One(ctx, r.db)
@@ -51,7 +51,8 @@ func (r *implRepository) GetOneDLQ(ctx context.Context, opt repo.GetOneDLQOption
 		return model.IndexingDLQ{}, nil // Not found
 	}
 	if err != nil {
-		return model.IndexingDLQ{}, fmt.Errorf("GetOneDLQ: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.GetOneDLQ: Failed to get DLQ: %v", err)
+		return model.IndexingDLQ{}, repo.ErrFailedToGet
 	}
 
 	if dlq := model.NewIndexingDLQFromDB(dbDlq); dlq != nil {
@@ -61,27 +62,34 @@ func (r *implRepository) GetOneDLQ(ctx context.Context, opt repo.GetOneDLQOption
 }
 
 // ListDLQs - List DLQ records (no pagination, for retry jobs)
-func (r *implRepository) ListDLQs(ctx context.Context, opt repo.ListDLQOptions) ([]model.IndexingDLQ, error) {
+func (r *implPostgresRepository) ListDLQs(ctx context.Context, opt repo.ListDLQOptions) ([]model.IndexingDLQ, error) {
 	mods := r.buildListDLQQuery(opt)
 
 	dbDlqs, err := sqlboiler.IndexingDLQS(mods...).All(ctx, r.db)
 	if err != nil {
-		return nil, fmt.Errorf("ListDLQs: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.ListDLQs: Failed to get DLQs: %v", err)
+		return nil, repo.ErrFailedToList
 	}
 
 	return util.MapSlice(dbDlqs, model.NewIndexingDLQFromDB), nil
 }
 
 // MarkResolvedDLQ - Mark DLQ record as resolved
-func (r *implRepository) MarkResolvedDLQ(ctx context.Context, id string) error {
+func (r *implPostgresRepository) MarkResolvedDLQ(ctx context.Context, id string) error {
 	dbDlq, err := sqlboiler.FindIndexingDLQ(ctx, r.db, id)
 	if err != nil {
-		return fmt.Errorf("MarkResolvedDLQ: %w", err)
+		r.l.Errorf(ctx, "indexing.repository.postgre.MarkResolvedDLQ: Failed to mark DLQ as resolved: %v", err)
+		return repo.ErrFailedToMarkResolved
 	}
 
 	dbDlq.Resolved = null.BoolFrom(true)
 	dbDlq.UpdatedAt = null.TimeFrom(time.Now())
 
 	_, err = dbDlq.Update(ctx, r.db, boil.Infer())
-	return err
+	if err != nil {
+		r.l.Errorf(ctx, "indexing.repository.postgre.MarkResolvedDLQ: Failed to update DLQ: %v", err)
+		return repo.ErrFailedToMarkResolved
+	}
+
+	return nil
 }

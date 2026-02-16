@@ -16,8 +16,8 @@ func (uc *implUseCase) RetryFailed(
 	startTime := time.Now()
 
 	// Step 1: Query failed records từ DB
-	docs, err := uc.repo.ListDocuments(ctx, repo.ListDocumentsOptions{
-		Status:   "FAILED",
+	docs, err := uc.postgreRepo.ListDocuments(ctx, repo.ListDocumentsOptions{
+		Status:   indexing.STATUS_FAILED,
 		MaxRetry: input.MaxRetryCount,
 		Limit:    input.Limit,
 		OrderBy:  "created_at ASC",
@@ -34,9 +34,9 @@ func (uc *implUseCase) RetryFailed(
 
 		// TODO: Implement actual retry logic
 		// For now, just mark as pending for re-processing
-		_, _ = uc.repo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
+		_, _ = uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
 			ID:     doc.ID,
-			Status: "PENDING",
+			Status: indexing.STATUS_PENDING,
 			Metrics: repo.DocumentStatusMetrics{
 				RetryCount: newRetryCount,
 			},

@@ -17,8 +17,8 @@ func (uc *implUseCase) Reconcile(
 
 	// Step 1: Find stale PENDING records
 	staleBefore := time.Now().Add(-input.StaleDuration)
-	docs, err := uc.repo.ListDocuments(ctx, repo.ListDocumentsOptions{
-		Status:      "PENDING",
+	docs, err := uc.postgreRepo.ListDocuments(ctx, repo.ListDocumentsOptions{
+		Status:      indexing.STATUS_PENDING,
 		StaleBefore: &staleBefore,
 		Limit:       input.Limit,
 		OrderBy:     "created_at ASC",
@@ -31,9 +31,9 @@ func (uc *implUseCase) Reconcile(
 	var fixed, requeued int
 	for _, doc := range docs {
 		// For now, mark as FAILED to trigger retry
-		_, _ = uc.repo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
+		_, _ = uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
 			ID:     doc.ID,
-			Status: "FAILED",
+			Status: indexing.STATUS_FAILED,
 			Metrics: repo.DocumentStatusMetrics{
 				ErrorMessage: "Reconciliation: PENDING timeout",
 			},

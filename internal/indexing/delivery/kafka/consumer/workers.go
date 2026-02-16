@@ -7,14 +7,13 @@ import (
 
 	"github.com/IBM/sarama"
 
-	"knowledge-srv/internal/indexing"
 	kafkaDelivery "knowledge-srv/internal/indexing/delivery/kafka"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/pkg/scope"
 )
 
-// processBatchCompleted processes analytics batch completed message
-func (c *Consumer) processBatchCompleted(msg *sarama.ConsumerMessage) error {
+// handleBatchCompletedMessage receives message, normalizes scope + input, delegates to usecase (no business logic here).
+func (c *consumer) handleBatchCompletedMessage(msg *sarama.ConsumerMessage) error {
 	ctx := context.Background()
 
 	c.l.Infof(ctx, "Processing batch completed message from partition %d, offset %d",
@@ -27,19 +26,14 @@ func (c *Consumer) processBatchCompleted(msg *sarama.ConsumerMessage) error {
 		return nil // Skip invalid messages
 	}
 
-	// 2. Validate message
+	// 2. Validate message (format only; business rules stay in usecase)
 	if message.BatchID == "" || message.FileURL == "" {
 		c.l.Warnf(ctx, "Invalid message: missing required fields (skipping)")
 		return nil
 	}
 
-	// 3. Convert to UseCase input
-	input := indexing.IndexInput{
-		BatchID:     message.BatchID,
-		ProjectID:   message.ProjectID,
-		FileURL:     message.FileURL,
-		RecordCount: message.RecordCount,
-	}
+	// 3. Map to usecase input (presenter)
+	input := toIndexInput(message)
 
 	// 4. Create scope (system scope for background processing) and set to context
 	sc := model.Scope{

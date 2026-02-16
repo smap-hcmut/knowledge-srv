@@ -6,25 +6,26 @@ import (
 	"github.com/gin-gonic/gin"
 
 	indexingHTTP "knowledge-srv/internal/indexing/delivery/http"
-	indexingRepo "knowledge-srv/internal/indexing/repository/postgre"
+	indexingQdrant "knowledge-srv/internal/indexing/repository/qdrant"
+	indexingPostgre "knowledge-srv/internal/indexing/repository/postgre"
 	indexingUsecase "knowledge-srv/internal/indexing/usecase"
 	"knowledge-srv/internal/middleware"
 )
 
 // setupIndexingDomain initializes indexing domain (repo -> usecase -> delivery)
 func (srv *HTTPServer) setupIndexingDomain(ctx context.Context, r *gin.RouterGroup, mw middleware.Middleware) error {
-	// Repository
-	repo := indexingRepo.New(srv.postgresDB)
+	// Repositories (collection name là const trong qdrant package)
+	postgreRepo := indexingPostgre.New(srv.postgresDB, srv.l)
+	vectorRepo := indexingQdrant.New(srv.qdrantClient, srv.l)
 
 	// UseCase
 	uc := indexingUsecase.New(
 		srv.l,
-		repo,
-		srv.qdrantClient,
+		postgreRepo,
+		vectorRepo,
 		srv.minioClient,
 		srv.voyageClient,
 		srv.redisClient,
-		"knowledge_indexing", // TODO: move to config
 	)
 
 	// HTTP Handler

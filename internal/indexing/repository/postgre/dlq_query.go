@@ -8,7 +8,7 @@ import (
 )
 
 // buildGetOneDLQQuery - Build query for GetOneDLQ
-func (r *implRepository) buildGetOneDLQQuery(opt repo.GetOneDLQOptions) []qm.QueryMod {
+func (r *implPostgresRepository) buildGetOneDLQQuery(opt repo.GetOneDLQOptions) []qm.QueryMod {
 	mods := []qm.QueryMod{}
 
 	// Apply ALL provided filters (AND condition)
@@ -18,12 +18,15 @@ func (r *implRepository) buildGetOneDLQQuery(opt repo.GetOneDLQOptions) []qm.Que
 	if opt.AnalyticsID != "" {
 		mods = append(mods, qm.Where("analytics_id = ?", opt.AnalyticsID))
 	}
+	if opt.ContentHash != "" {
+		mods = append(mods, qm.Where("content_hash = ?", opt.ContentHash))
+	}
 
 	return mods
 }
 
 // buildListDLQQuery - Build query for ListDLQ
-func (r *implRepository) buildListDLQQuery(opt repo.ListDLQOptions) []qm.QueryMod {
+func (r *implPostgresRepository) buildListDLQQuery(opt repo.ListDLQOptions) []qm.QueryMod {
 	mods := []qm.QueryMod{}
 
 	// Filters

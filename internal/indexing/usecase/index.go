@@ -17,7 +17,6 @@ import (
 	repo "knowledge-srv/internal/indexing/repository"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/pkg/minio"
-	"knowledge-srv/pkg/qdrant"
 )
 
 // Index - Index a batch of analytics posts from MinIO file
@@ -78,7 +77,7 @@ func (uc *implUseCase) processBatch(ctx context.Context, input indexing.IndexInp
 	)
 
 	g, gctx := errgroup.WithContext(ctx)
-	g.SetLimit(uc.maxConcurrency)
+	g.SetLimit(indexing.MaxConcurrency)
 
 	for i := range records {
 		record := records[i]
@@ -118,39 +117,39 @@ func (uc *implUseCase) processBatch(ctx context.Context, input indexing.IndexInp
 }
 
 // indexSingleRecord - Process single record: validate → dedup → embed → upsert
-func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexInput, record indexing.AnalyticsPost) indexRecordResult {
+func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexInput, record indexing.AnalyticsPost) indexing.IndexRecordResult {
 	startTime := time.Now()
 
 	// Step 1: Validate record
 	if err := uc.validateAnalyticsPost(record); err != nil {
-		return indexRecordResult{
+		return indexing.IndexRecordResult{
 			Status:       "skipped",
-			ErrorType:    "VALIDATION_ERROR",
+			ErrorType:    indexing.VALIDATION_ERROR,
 			ErrorMessage: err.Error(),
 		}
 	}
 
 	// Step 2: Pre-filter (spam, bot, quality)
 	if uc.shouldSkipRecord(record) {
-		return indexRecordResult{Status: "skipped"}
+		return indexing.IndexRecordResult{Status: "skipped"}
 	}
 
 	// Step 3: Check duplicate
 	contentHash := uc.generateContentHash(record.Content)
 
-	existingDoc, _ := uc.repo.GetOneDocument(ctx, repo.GetOneDocumentOptions{
+	existingDoc, _ := uc.postgreRepo.GetOneDocument(ctx, repo.GetOneDocumentOptions{
 		AnalyticsID: record.ID,
 	})
 	isReindex := existingDoc.ID != ""
 
 	if !isReindex {
-		contentDup, _ := uc.repo.GetOneDocument(ctx, repo.GetOneDocumentOptions{
+		contentDup, _ := uc.postgreRepo.GetOneDocument(ctx, repo.GetOneDocumentOptions{
 			ContentHash: contentHash,
 		})
 		if contentDup.ID != "" {
-			return indexRecordResult{
+			return indexing.IndexRecordResult{
 				Status:    "skipped",
-				ErrorType: "DUPLICATE_CONTENT",
+				ErrorType: indexing.DUPLICATE_CONTENT,
 			}
 		}
 	}
@@ -161,34 +160,32 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 	var err error
 
 	if isReindex {
-		trackingDoc, err = uc.repo.UpsertDocument(ctx, repo.UpsertDocumentOptions{
-			AnalyticsID:    record.ID,
-			ProjectID:      record.ProjectID,
-			SourceID:       record.SourceID,
-			QdrantPointID:  pointID,
-			CollectionName: uc.collectionName,
-			ContentHash:    contentHash,
-			Status:         "PENDING",
-			BatchID:        &ip.BatchID,
-			RetryCount:     0,
+		trackingDoc, err = uc.postgreRepo.UpsertDocument(ctx, repo.UpsertDocumentOptions{
+			AnalyticsID:   record.ID,
+			ProjectID:     record.ProjectID,
+			SourceID:      record.SourceID,
+			QdrantPointID: pointID,
+			ContentHash:   contentHash,
+			Status:        "PENDING",
+			BatchID:       &ip.BatchID,
+			RetryCount:    0,
 		})
 	} else {
-		trackingDoc, err = uc.repo.CreateDocument(ctx, repo.CreateDocumentOptions{
-			AnalyticsID:    record.ID,
-			ProjectID:      record.ProjectID,
-			SourceID:       record.SourceID,
-			QdrantPointID:  pointID,
-			CollectionName: uc.collectionName,
-			ContentHash:    contentHash,
-			Status:         "PENDING",
-			BatchID:        &ip.BatchID,
-			RetryCount:     0,
+		trackingDoc, err = uc.postgreRepo.CreateDocument(ctx, repo.CreateDocumentOptions{
+			AnalyticsID:   record.ID,
+			ProjectID:     record.ProjectID,
+			SourceID:      record.SourceID,
+			QdrantPointID: pointID,
+			ContentHash:   contentHash,
+			Status:        "PENDING",
+			BatchID:       &ip.BatchID,
+			RetryCount:    0,
 		})
 	}
 	if err != nil {
-		return indexRecordResult{
+		return indexing.IndexRecordResult{
 			Status:       "failed",
-			ErrorType:    "DB_ERROR",
+			ErrorType:    indexing.DB_ERROR,
 			ErrorMessage: err.Error(),
 		}
 	}
@@ -199,10 +196,10 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 	embeddingTime := int(time.Since(embeddingStart).Milliseconds())
 
 	if err != nil {
-		uc.updateFailedStatus(ctx, trackingDoc.ID, "EMBEDDING_ERROR", err.Error(), embeddingTime, 0)
-		return indexRecordResult{
+		uc.updateFailedStatus(ctx, trackingDoc.ID, indexing.EMBEDDING_ERROR, err.Error(), embeddingTime, 0)
+		return indexing.IndexRecordResult{
 			Status:       "failed",
-			ErrorType:    "EMBEDDING_ERROR",
+			ErrorType:    indexing.EMBEDDING_ERROR,
 			ErrorMessage: err.Error(),
 		}
 	}
@@ -216,10 +213,10 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 	upsertTime := int(time.Since(upsertStart).Milliseconds())
 
 	if err != nil {
-		uc.updateFailedStatus(ctx, trackingDoc.ID, "QDRANT_ERROR", err.Error(), embeddingTime, upsertTime)
-		return indexRecordResult{
+		uc.updateFailedStatus(ctx, trackingDoc.ID, indexing.QDRANT_ERROR, err.Error(), embeddingTime, upsertTime)
+		return indexing.IndexRecordResult{
 			Status:       "failed",
-			ErrorType:    "QDRANT_ERROR",
+			ErrorType:    indexing.QDRANT_ERROR,
 			ErrorMessage: err.Error(),
 		}
 	}
@@ -227,9 +224,9 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 	// Step 8: Update status = INDEXED
 	totalTime := int(time.Since(startTime).Milliseconds())
 	now := time.Now()
-	_, _ = uc.repo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
+	_, _ = uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
 		ID:     trackingDoc.ID,
-		Status: "INDEXED",
+		Status: indexing.STATUS_INDEXED,
 		Metrics: repo.DocumentStatusMetrics{
 			IndexedAt:       &now,
 			EmbeddingTimeMs: embeddingTime,
@@ -238,7 +235,7 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 		},
 	})
 
-	return indexRecordResult{Status: "indexed"}
+	return indexing.IndexRecordResult{Status: indexing.STATUS_INDEXED}
 }
 
 // parseJSONL - Parse JSONL file
@@ -299,7 +296,7 @@ func (uc *implUseCase) validateAnalyticsPost(record indexing.AnalyticsPost) erro
 	if record.SourceID == "" {
 		return fmt.Errorf("missing source_id")
 	}
-	if len(record.Content) < uc.minContentLength {
+	if len(record.Content) < indexing.MinContentLength {
 		return indexing.ErrContentTooShort
 	}
 	return nil
@@ -307,7 +304,7 @@ func (uc *implUseCase) validateAnalyticsPost(record indexing.AnalyticsPost) erro
 
 // shouldSkipRecord - Pre-filter: spam, bot, quality
 func (uc *implUseCase) shouldSkipRecord(record indexing.AnalyticsPost) bool {
-	return record.IsSpam || record.IsBot || record.ContentQualityScore < uc.minQualityScore
+	return record.IsSpam || record.IsBot || record.ContentQualityScore < indexing.MinQualityScore
 }
 
 // generateContentHash - Generate SHA-256 hash
@@ -322,12 +319,13 @@ func (uc *implUseCase) embedContent(ctx context.Context, content string) ([]floa
 
 	cachedVector, err := uc.getEmbeddingFromCache(ctx, cacheKey)
 	if err == nil && cachedVector != nil {
-		uc.l.Debugf(ctx, "Embedding cache hit")
+		uc.l.Debugf(ctx, "indexing.usecase.embedContent: Embedding cache hit")
 		return cachedVector, nil
 	}
 
 	vectors, err := uc.voyage.Embed(ctx, []string{content})
 	if err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.embedContent: Failed to embed content: %v", err)
 		return nil, fmt.Errorf("%w: %v", indexing.ErrEmbeddingFailed, err)
 	}
 
@@ -338,7 +336,7 @@ func (uc *implUseCase) embedContent(ctx context.Context, content string) ([]floa
 	vector := vectors[0]
 
 	if err := uc.saveEmbeddingToCache(ctx, cacheKey, vector, 7*24*time.Hour); err != nil {
-		uc.l.Warnf(ctx, "Failed to save embedding to cache: %v", err)
+		uc.l.Warnf(ctx, "indexing.usecase.embedContent: Failed to save embedding to cache: %v", err)
 	}
 
 	return vector, nil
@@ -354,11 +352,13 @@ func (uc *implUseCase) getEmbeddingCacheKey(content string) string {
 func (uc *implUseCase) getEmbeddingFromCache(ctx context.Context, key string) ([]float32, error) {
 	data, err := uc.redis.Get(ctx, key)
 	if err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.getEmbeddingFromCache: Failed to get embedding from cache: %v", err)
 		return nil, err
 	}
 
 	var vector []float32
 	if err := json.Unmarshal([]byte(data), &vector); err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.getEmbeddingFromCache: Failed to unmarshal embedding: %v", err)
 		return nil, err
 	}
 
@@ -369,9 +369,14 @@ func (uc *implUseCase) getEmbeddingFromCache(ctx context.Context, key string) ([
 func (uc *implUseCase) saveEmbeddingToCache(ctx context.Context, key string, vector []float32, ttl time.Duration) error {
 	data, err := json.Marshal(vector)
 	if err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.saveEmbeddingToCache: Failed to marshal embedding: %v", err)
 		return err
 	}
-	return uc.redis.Set(ctx, key, string(data), ttl)
+	if err := uc.redis.Set(ctx, key, string(data), ttl); err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.saveEmbeddingToCache: Failed to set embedding in cache: %v", err)
+		return err
+	}
+	return nil
 }
 
 // prepareQdrantPayload - Build Qdrant payload from analytics post
@@ -444,24 +449,20 @@ func (uc *implUseCase) prepareQdrantPayload(record indexing.AnalyticsPost) map[s
 	return payload
 }
 
-// upsertToQdrant - Upsert point to Qdrant
+// upsertToQdrant - Upsert point via vector repo (collection name nằm ở tầng repo)
 func (uc *implUseCase) upsertToQdrant(
 	ctx context.Context,
 	pointID string,
 	vector []float32,
 	payload map[string]interface{},
 ) error {
-	point := qdrant.Point{
-		ID:      pointID,
+	if err := uc.vectorRepo.UpsertPoint(ctx, repo.UpsertPointOptions{
+		PointID: pointID,
 		Vector:  vector,
 		Payload: payload,
-	}
-
-	err := uc.qdrant.UpsertPoints(ctx, uc.collectionName, []qdrant.Point{point})
-	if err != nil {
+	}); err != nil {
 		return fmt.Errorf("%w: %v", indexing.ErrQdrantUpsertFailed, err)
 	}
-
 	return nil
 }
 
@@ -480,7 +481,7 @@ func (uc *implUseCase) updateFailedStatus(
 	errorType, errorMessage string,
 	embeddingTime, upsertTime int,
 ) {
-	_, _ = uc.repo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
+	_, _ = uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
 		ID:     docID,
 		Status: "FAILED",
 		Metrics: repo.DocumentStatusMetrics{
@@ -496,11 +497,4 @@ func (uc *implUseCase) updateFailedStatus(
 func (uc *implUseCase) invalidateSearchCache(ctx context.Context, projectID string) error {
 	uc.l.Debugf(ctx, "Cache invalidation skipped (DeleteByPattern not implemented)")
 	return nil
-}
-
-// indexRecordResult - Result of processing single record
-type indexRecordResult struct {
-	Status       string
-	ErrorType    string
-	ErrorMessage string
 }
