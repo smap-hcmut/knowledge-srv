@@ -15,7 +15,6 @@ type implUseCase struct {
 	l        log.Logger
 }
 
-// New - Factory function
 func New(
 	repo repository.PostgresRepository,
 	searchUC search.UseCase,

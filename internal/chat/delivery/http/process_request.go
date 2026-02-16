@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// processChatRequest - Bind + validate POST /api/v1/chat
 func (h *handler) processChatRequest(c *gin.Context) (chatReq, model.Scope, error) {
 	var req chatReq
 
@@ -21,7 +20,6 @@ func (h *handler) processChatRequest(c *gin.Context) (chatReq, model.Scope, erro
 	return req, sc, nil
 }
 
-// processGetConversationRequest - Extract conversation_id from path
 func (h *handler) processGetConversationRequest(c *gin.Context) (getConversationReq, model.Scope, error) {
 	req := getConversationReq{
 		ConversationID: c.Param("conversation_id"),
@@ -31,7 +29,6 @@ func (h *handler) processGetConversationRequest(c *gin.Context) (getConversation
 	return req, sc, nil
 }
 
-// processListConversationsRequest - Extract campaign_id from path + pagination from query
 func (h *handler) processListConversationsRequest(c *gin.Context) (listConversationsReq, model.Scope, error) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
@@ -46,7 +43,6 @@ func (h *handler) processListConversationsRequest(c *gin.Context) (listConversat
 	return req, sc, nil
 }
 
-// processGetSuggestionsRequest - Extract campaign_id from path
 func (h *handler) processGetSuggestionsRequest(c *gin.Context) (getSuggestionsReq, model.Scope, error) {
 	req := getSuggestionsReq{
 		CampaignID: c.Param("campaign_id"),

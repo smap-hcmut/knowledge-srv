@@ -4,9 +4,13 @@
 package sqlboiler
 
 var TableNames = struct {
+	Conversations    string
 	IndexedDocuments string
 	IndexingDLQ      string
+	Messages         string
 }{
+	Conversations:    "conversations",
 	IndexedDocuments: "indexed_documents",
 	IndexingDLQ:      "indexing_dlq",
+	Messages:         "messages",
 }

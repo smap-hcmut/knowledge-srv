@@ -9,7 +9,6 @@ import (
 	"knowledge-srv/internal/model"
 )
 
-// GetConversation - Lấy conversation + messages
 func (uc *implUseCase) GetConversation(ctx context.Context, sc model.Scope, input chat.GetConversationInput) (chat.ConversationOutput, error) {
 	conv, err := uc.repo.GetConversationByID(ctx, input.ConversationID)
 	if err != nil {
@@ -21,13 +20,12 @@ func (uc *implUseCase) GetConversation(ctx context.Context, sc model.Scope, inpu
 		OrderASC:       true,
 	})
 	if err != nil {
-		uc.l.Warnf(ctx, "chat.usecase.GetConversation: ListMessages failed: %v", err)
+		uc.l.Warnf(ctx, "chat.usecase.GetConversation.ListMessages: %v", err)
 	}
 
 	return uc.toConversationOutput(conv, msgs), nil
 }
 
-// ListConversations - Liệt kê conversations theo campaign + user
 func (uc *implUseCase) ListConversations(ctx context.Context, sc model.Scope, input chat.ListConversationsInput) ([]chat.ConversationOutput, error) {
 	limit := input.Limit
 	if limit <= 0 {
@@ -46,12 +44,11 @@ func (uc *implUseCase) ListConversations(ctx context.Context, sc model.Scope, in
 
 	results := make([]chat.ConversationOutput, len(convos))
 	for i, c := range convos {
-		results[i] = uc.toConversationOutput(c, nil) // no messages for list view
+		results[i] = uc.toConversationOutput(c, nil)
 	}
 	return results, nil
 }
 
-// toConversationOutput - Convert model.Conversation + messages to chat.ConversationOutput
 func (uc *implUseCase) toConversationOutput(conv model.Conversation, msgs []model.Message) chat.ConversationOutput {
 	output := chat.ConversationOutput{
 		ID:            conv.ID,
@@ -69,7 +66,6 @@ func (uc *implUseCase) toConversationOutput(conv model.Conversation, msgs []mode
 	return output
 }
 
-// toMessageOutput - Convert model.Message to chat.MessageOutput
 func (uc *implUseCase) toMessageOutput(m model.Message) chat.MessageOutput {
 	output := chat.MessageOutput{
 		ID:        m.ID,
@@ -78,7 +74,6 @@ func (uc *implUseCase) toMessageOutput(m model.Message) chat.MessageOutput {
 		CreatedAt: m.CreatedAt,
 	}
 
-	// Parse JSONB fields
 	if len(m.Citations) > 0 && string(m.Citations) != "null" {
 		var citations []chat.Citation
 		if err := json.Unmarshal(m.Citations, &citations); err == nil {
