@@ -659,7 +659,8 @@ CREATE TABLE analytics.post_analytics (
     keywords TEXT[],
 
     -- Entities
-    entities JSONB,
+    -- Entities
+    -- (Removed: Not currently in schema)
 
     -- Risk
     risk_level VARCHAR(20),
@@ -690,7 +691,7 @@ CREATE TABLE analytics.post_analytics (
     updated_at TIMESTAMPTZ DEFAULT NOW(),
 
     -- Processing
-    processing_metadata JSONB
+    -- (Removed: processing_metadata not currently in schema)
 );
 
 -- Indexes
@@ -710,7 +711,7 @@ CREATE INDEX idx_post_analytics_metadata ON analytics.post_analytics USING GIN (
 
 ## 5. TÓM TẮT
 
-### Key Takeaways:
+### Key Takeaways
 
 1. **Schema này là OUTPUT của Analytics Pipeline** - chứa KẾT QUẢ phân tích, không phải raw data
 
@@ -722,13 +723,13 @@ CREATE INDEX idx_post_analytics_metadata ON analytics.post_analytics USING GIN (
 
 5. **Ready for Qdrant** - structure phù hợp để index vào vector DB
 
-### Data Flow Summary:
+### Data Flow Summary
 
 ```
 Raw Data → UAP → Analytics Pipeline → analytics.post_analytics → Qdrant → RAG
 ```
 
-### Next Steps:
+### Next Steps
 
 1. Implement Analytics Pipeline để tạo ra data theo schema này
 2. Setup Qdrant indexing từ analytics.post_analytics

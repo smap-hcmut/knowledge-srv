@@ -2,14 +2,10 @@
   "id": "analytics_550e8400-e29b-41d4-a716-446655440000",
   "project_id": "proj_vinfast_vf8_monitor",
   "source_id": "src_tiktok_crawl_vinfast_vf8",
-
-  "_comment_uap_core_fields": "=== UAP Core Fields - Dữ liệu gốc ===",
   "content": "Mình vừa lái thử VF8 được 2 tuần. Thiết kế xe rất đẹp và sang trọng, nội thất da thật cao cấp. Tuy nhiên pin sụt nhanh hơn mình nghĩ, đi 100km hết gần 25% pin. Giá 1.2 tỷ thì hơi cao so với các dòng xe điện khác. Dịch vụ bảo hành của VinFast thì ok, nhân viên nhiệt tình.",
   "content_created_at": "2026-02-10T14:30:00Z",
   "ingested_at": "2026-02-15T10:45:23Z",
   "platform": "tiktok",
-
-  "_comment_metadata": "=== Metadata - Thông tin bổ sung từ nguồn ===",
   "uap_metadata": {
     "author": "nguyen_van_a_2024",
     "author_display_name": "Nguyễn Văn A",
@@ -22,20 +18,12 @@
     },
     "video_url": "https://tiktok.com/@nguyen_van_a_2024/video/7234567890",
     "hashtags": ["#VinFast", "#VF8", "#XeDien", "#Review"],
-    "location": "Hà Nội, Việt Nam",
-    "device": "iPhone 14 Pro",
-    "original_time_value": "2 tuần trước",
-    "time_type": "relative",
-    "source_timezone": "Asia/Ho_Chi_Minh"
+    "location": "Hà Nội, Việt Nam"
   },
-
-  "_comment_sentiment_analysis": "=== Sentiment Analysis - Phân tích cảm xúc tổng thể ===",
   "overall_sentiment": "MIXED",
   "overall_sentiment_score": 0.15,
   "sentiment_confidence": 0.87,
   "sentiment_explanation": "Người dùng có cảm xúc trái chiều: tích cực về thiết kế và dịch vụ, tiêu cực về pin và giá",
-
-  "_comment_aspect_based_sentiment": "=== ABSA - Phân tích cảm xúc theo khía cạnh ===",
   "aspects": [
     {
       "aspect": "DESIGN",
@@ -116,8 +104,6 @@
       "explanation": "Người dùng hài lòng với chất lượng dịch vụ và thái độ nhân viên"
     }
   ],
-
-  "_comment_keywords": "=== Keywords - Từ khóa quan trọng ===",
   "keywords": [
     "VF8",
     "thiết kế",
@@ -132,17 +118,6 @@
     "bảo hành",
     "nhiệt tình"
   ],
-
-  "_comment_entities": "=== Named Entities - Thực thể được nhắc đến ===",
-  "entities": {
-    "brands": ["VinFast"],
-    "products": ["VF8"],
-    "competitors": [],
-    "locations": ["Hà Nội"],
-    "persons": []
-  },
-
-  "_comment_risk_assessment": "=== Risk Assessment - Đánh giá rủi ro ===",
   "risk_level": "MEDIUM",
   "risk_score": 0.58,
   "risk_factors": [
@@ -159,38 +134,15 @@
   ],
   "requires_attention": true,
   "alert_triggered": false,
-
-  "_comment_engagement_metrics": "=== Engagement Metrics - Chỉ số tương tác ===",
   "engagement_score": 0.73,
   "virality_score": 0.65,
   "influence_score": 0.58,
   "reach_estimate": 45000,
-
-  "_comment_quality_metrics": "=== Quality Metrics - Chỉ số chất lượng ===",
   "content_quality_score": 0.82,
   "is_spam": false,
   "is_bot": false,
   "language": "vi",
   "language_confidence": 0.98,
   "toxicity_score": 0.05,
-  "is_toxic": false,
-
-  "_comment_timestamps": "=== Timestamps - Thời gian xử lý ===",
-  "analyzed_at": "2026-02-15T10:46:15Z",
-  "indexed_at": "2026-02-15T10:46:45Z",
-  "created_at": "2026-02-15T10:46:15Z",
-  "updated_at": "2026-02-15T10:46:15Z",
-
-  "_comment_processing_metadata": "=== Processing Metadata - Metadata xử lý ===",
-  "processing_metadata": {
-    "analytics_version": "2.0.0",
-    "models_used": {
-      "sentiment": "phobert-base-v2",
-      "aspect": "phobert-aspect-v1",
-      "keyword": "underthesea-v1.3"
-    },
-    "processing_time_ms": 1250,
-    "retry_count": 0,
-    "error_count": 0
-  }
+  "is_toxic": false
 }
