@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smap-knowledge-api
+  name: knowledge-api
   namespace: smap
   labels:
-    app: smap-knowledge-api
+    app: knowledge-api
     version: v1
 spec:
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
-      app: smap-knowledge-api
+      app: knowledge-api
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -20,15 +20,15 @@ spec:
   template:
     metadata:
       labels:
-        app: smap-knowledge-api
+        app: knowledge-api
         version: v1
     spec:
       imagePullSecrets:
-        - name: harbor-secret
+        - name: harbor-registry
       containers:
-        - name: smap-knowledge-api
-          image: registry.tantai.dev/smap/smap-knowledge:251209-033141
-          imagePullPolicy: Always
+        - name: knowledge-api
+          image: registry.tantai.dev/smap/knowledge-api:260310-005827
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               name: http
@@ -42,12 +42,12 @@ spec:
               cpu: "1000m"
           envFrom:
             - configMapRef:
-                name: smap-knowledge-config
+                name: knowledge-config
             - secretRef:
-                name: smap-knowledge-secrets
+                name: knowledge-secrets
           env:
             - name: CONTAINER_NAME
-              value: "smap-knowledge-api"
+              value: "knowledge-api"
             - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
@@ -60,6 +60,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            # Test: load JWT_SECRET from secret
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: knowledge-secrets
+                  key: JWT_SECRET
           livenessProbe:
             httpGet:
               path: /health
@@ -96,13 +102,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: smap-knowledge-api
+  name: knowledge-api
   namespace: smap
   labels:
-    app: smap-knowledge-api
+    app: knowledge-api
 spec:
   selector:
-    app: smap-knowledge-api
+    app: knowledge-api
   ports:
     - port: 80
       targetPort: 8080
