@@ -10,6 +10,7 @@ sqlboiler.toml
 
 # Kubernetes secrets
 k8s/secret.yaml
+manifests/secret.yaml
 
 docs
 

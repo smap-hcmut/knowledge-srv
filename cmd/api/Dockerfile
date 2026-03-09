@@ -2,10 +2,9 @@
 
 # =============================================================================
 # STAGE 1: BUILDER
-# Tip: --platform=$BUILDPLATFORM ensures Docker always uses the Go image that matches your machine's chip (e.g. Apple Silicon M4)
-# so the compiler runs at full speed with no need for slow emulation (QEMU).
+# Simpler builder image for local builds (no Buildx-specific platform flags)
 # =============================================================================
-FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
@@ -17,11 +16,9 @@ ARG TARGETARCH
 # Install git and tzdata (will be copied to runtime image)
 RUN apk add --no-cache git tzdata
 
-# 2. Cache & Download Dependencies + Install Swag
-# Using cache mount prevents downloading dependencies on every build
+# 2. Download dependencies + Install Swag (no BuildKit mounts for simplicity)
 COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod \
-    go mod download && \
+RUN go mod download && \
     go install github.com/swaggo/swag/cmd/swag@v1.8.12
 
 # 3. Copy Source Code
@@ -30,13 +27,8 @@ COPY . .
 # 4. Generate Swagger Documentation
 RUN swag init -g cmd/api/main.go
 
-# 5. Build Binary (Explicitly specify GOOS and GOARCH from Docker ARGs)
-# CGO_ENABLED=0: Required to run with Distroless Static (no C libraries needed)
-# -ldflags="-s -w": Remove debug info to reduce binary size (~30-40% smaller)
-# --mount=type=cache: Reuses build cache between builds → Much faster!
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg/mod \
-    CGO_ENABLED=0 \
+# 5. Build Binary (no BuildKit mounts)
+RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
