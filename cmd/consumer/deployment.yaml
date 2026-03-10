@@ -27,14 +27,14 @@ spec:
         - name: harbor-registry
       containers:
         - name: knowledge-consumer
-          image: registry.tantai.dev/smap/knowledge-consumer:260310-005848
+          image: registry.tantai.dev/smap/knowledge-consumer:260310-221739
           imagePullPolicy: IfNotPresent
           resources:
             requests:
               memory: "256Mi"
-              cpu: "250m"
+              cpu: "200m"
             limits:
-              memory: "2Gi"
+              memory: "1Gi"
               cpu: "1000m"
           envFrom:
             - configMapRef:
