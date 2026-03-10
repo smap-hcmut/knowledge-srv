@@ -3,63 +3,40 @@ kind: ConfigMap
 metadata:
   name: knowledge-config
   namespace: smap
-  labels:
-    app.kubernetes.io/name: knowledge
-    app.kubernetes.io/part-of: smap
 data:
-  # Environment
-  ENVIRONMENT_NAME: "production"
-
-  # HTTP Server Configuration
-  APP_PORT: "8080"
   API_MODE: "release"
-
-  # Logger Configuration
-  LOGGER_LEVEL: "info"
-  LOGGER_MODE: "production"
-  LOGGER_ENCODING: "json"
-  LOGGER_COLOR_ENABLED: "false"
-
-  # Kafka Configuration - K8s Kafka namespace (Strimzi)
-  KAFKA_BROKERS: "kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
-  KAFKA_TOPIC: "knowledge.events"
-  KAFKA_GROUP_ID: "knowledge-consumer-group"
-
-  # Redis Configuration (non-sensitive) - K8s Infrastructure
-  REDIS_HOST: "redis-client.infrastructure.svc.cluster.local"
-  REDIS_PORT: "6379"
-  REDIS_DB: "0"
-
-  # PostgreSQL Configuration (non-sensitive) - External VM
-  POSTGRES_HOST: "172.16.19.10"
-  POSTGRES_PORT: "5432"
-  POSTGRES_DB: "smap"
-  POSTGRES_SSLMODE: "disable"
-  POSTGRES_SCHEMA: "knowledge"
-
-  # Qdrant Configuration (non-sensitive) - External VM (gRPC)
-  QDRANT_HOST: "172.16.19.20"
-  QDRANT_PORT: "6334"
-  QDRANT_USE_TLS: "false"
-  QDRANT_TIMEOUT: "30"
-
-  # MinIO Configuration (non-sensitive) - External VM
-  MINIO_ENDPOINT: "172.16.21.10:9000"
-  MINIO_USE_SSL: "false"
-  MINIO_REGION: "us-east-1"
-  MINIO_BUCKET: "smap-knowledge"
-
-  # Gemini Configuration (non-sensitive)
-  GEMINI_MODEL: "gemini-1.5-pro"
-
-  # Project Service Configuration (in-cluster service name)
-  PROJECT_URL: "http://project-api"
-  PROJECT_TIMEOUT: "10"
-
-  # Cookie Configuration
+  APP_PORT: "8080"
   COOKIE_DOMAIN: ".tantai.dev"
-  COOKIE_SECURE: "true"
-  COOKIE_SAMESITE: "Lax"
   COOKIE_MAX_AGE: "28800"
   COOKIE_MAX_AGE_REMEMBER: "604800"
   COOKIE_NAME: "smap_auth_token"
+  COOKIE_SAMESITE: "Lax"
+  COOKIE_SECURE: "true"
+  ENVIRONMENT_NAME: "production"
+  GEMINI_MODEL: "gemini-1.5-pro"
+  HTTP_SERVER_MODE: "release"
+  KAFKA_BROKERS: "kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+  KAFKA_GROUP_ID: "knowledge-consumer-group"
+  KAFKA_TOPIC: "knowledge.events"
+  LOGGER_COLOR_ENABLED: "false"
+  LOGGER_ENCODING: "json"
+  LOGGER_LEVEL: "info"
+  LOGGER_MODE: "production"
+  MINIO_BUCKET: "smap-knowledge"
+  MINIO_ENDPOINT: "172.16.21.10:9000"
+  MINIO_REGION: "us-east-1"
+  MINIO_USE_SSL: "false"
+  POSTGRES_DB: "smap"
+  POSTGRES_HOST: "172.16.19.10"
+  POSTGRES_PORT: "5432"
+  POSTGRES_SCHEMA: "knowledge"
+  POSTGRES_SSLMODE: "disable"
+  PROJECT_TIMEOUT: "10"
+  PROJECT_URL: "http://project-api"
+  QDRANT_HOST: "172.16.19.20"
+  QDRANT_PORT: "6334"
+  QDRANT_TIMEOUT: "30"
+  QDRANT_USE_TLS: "false"
+  REDIS_DB: "0"
+  REDIS_HOST: "redis-client.infrastructure.svc.cluster.local"
+  REDIS_PORT: "6379"
