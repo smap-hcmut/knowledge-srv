@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knowledge-config
+  namespace: smap
+  labels:
+    app.kubernetes.io/name: knowledge
+    app.kubernetes.io/part-of: smap
+data:
+  ENVIRONMENT_NAME: "production"
+  APP_PORT: "8080"
+  API_MODE: "release"
+
+  # Logger Configuration
+  LOGGER_LEVEL: "info"
+  LOGGER_MODE: "production"
+  LOGGER_ENCODING: "json"
+  LOGGER_COLOR_ENABLED: "false"
+
+  # Kafka Configuration (in-cluster)
+  KAFKA_BROKERS: "kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+  KAFKA_TOPIC: "knowledge.events"
+  KAFKA_GROUP_ID: "knowledge-consumer-group"
+
+  # Redis Configuration (in-cluster)
+  REDIS_HOST: "redis-client.infrastructure.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+
+  # PostgreSQL Configuration (external VM)
+  POSTGRES_HOST: "CHANGE_ME"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "smap"
+  POSTGRES_SSLMODE: "disable"
+  POSTGRES_SCHEMA: "knowledge"
+
+  # Qdrant Configuration (external VM)
+  QDRANT_HOST: "CHANGE_ME"
+  QDRANT_PORT: "6334"
+  QDRANT_USE_TLS: "false"
+  QDRANT_TIMEOUT: "30"
+
+  # MinIO Configuration (external VM)
+  MINIO_ENDPOINT: "CHANGE_ME:9000"
+  MINIO_USE_SSL: "false"
+  MINIO_REGION: "us-east-1"
+  MINIO_BUCKET: "smap-knowledge"
+
+  # Gemini Configuration
+  GEMINI_MODEL: "gemini-1.5-pro"
+
+  # Project Service Configuration (in-cluster)
+  PROJECT_URL: "http://project-api"
+  PROJECT_TIMEOUT: "10"
+
+  # Cookie Configuration
+  COOKIE_DOMAIN: ".example.com"
+  COOKIE_SECURE: "true"
+  COOKIE_SAMESITE: "Lax"
+  COOKIE_MAX_AGE: "28800"
+  COOKIE_MAX_AGE_REMEMBER: "604800"
+  COOKIE_NAME: "smap_auth_token"
