@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	pkghttp "knowledge-srv/pkg/http"
+	pkghttp "github.com/smap-hcmut/shared-libs/go/http"
 )
 
 // IVoyage defines the interface for Voyage AI embeddings.
@@ -21,7 +21,7 @@ func NewVoyage(cfg VoyageConfig) (IVoyage, error) {
 	}
 	return &voyageImpl{
 		apiKey: cfg.APIKey,
-		httpClient: pkghttp.NewClient(pkghttp.ClientConfig{
+		httpClient: pkghttp.NewClient(pkghttp.Config{
 			Timeout:   30 * time.Second,
 			Retries:   3,
 			RetryWait: 1 * time.Second,

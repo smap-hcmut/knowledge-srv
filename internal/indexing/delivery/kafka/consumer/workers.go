@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"knowledge-srv/internal/indexing/delivery/kafka"
 
 	"github.com/IBM/sarama"
-
-	kafkaDelivery "knowledge-srv/internal/indexing/delivery/kafka"
-	"knowledge-srv/internal/model"
-	"knowledge-srv/pkg/scope"
+	"github.com/smap-hcmut/shared-libs/go/scope"
 )
 
 // handleBatchCompletedMessage receives message, normalizes scope + input, delegates to usecase (no business logic here).
@@ -20,7 +18,7 @@ func (c *consumer) handleBatchCompletedMessage(msg *sarama.ConsumerMessage) erro
 		msg.Partition, msg.Offset)
 
 	// 1. Unmarshal message
-	var message kafkaDelivery.BatchCompletedMessage
+	var message kafka.BatchCompletedMessage
 	if err := json.Unmarshal(msg.Value, &message); err != nil {
 		c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Invalid message format (skipping): %v", err)
 		return nil // Skip invalid messages
@@ -36,7 +34,7 @@ func (c *consumer) handleBatchCompletedMessage(msg *sarama.ConsumerMessage) erro
 	input := toIndexInput(message)
 
 	// 4. Create scope (system scope for background processing) and set to context
-	sc := model.Scope{
+	sc := scope.Scope{
 		UserID: "system",
 		Role:   "system",
 	}

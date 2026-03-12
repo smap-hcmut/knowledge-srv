@@ -2,9 +2,9 @@ package http
 
 import (
 	"knowledge-srv/internal/model"
-	"knowledge-srv/pkg/scope"
 
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/scope"
 )
 
 func (h *handler) processGenerateReportRequest(c *gin.Context) (generateReportReq, model.Scope, error) {
@@ -16,8 +16,8 @@ func (h *handler) processGenerateReportRequest(c *gin.Context) (generateReportRe
 		return req, model.Scope{}, err
 	}
 
-	sc := scope.GetScopeFromContext(c.Request.Context())
-	return req, sc, nil
+	sc, _ := scope.GetScopeFromContext(c.Request.Context())
+	return req, model.ToScope(sc), nil
 }
 
 func (h *handler) processGetReportRequest(c *gin.Context) (getReportReq, model.Scope, error) {
@@ -25,8 +25,8 @@ func (h *handler) processGetReportRequest(c *gin.Context) (getReportReq, model.S
 		ReportID: c.Param("report_id"),
 	}
 
-	sc := scope.GetScopeFromContext(c.Request.Context())
-	return req, sc, nil
+	sc, _ := scope.GetScopeFromContext(c.Request.Context())
+	return req, model.ToScope(sc), nil
 }
 
 func (h *handler) processDownloadReportRequest(c *gin.Context) (downloadReportReq, model.Scope, error) {
@@ -34,6 +34,6 @@ func (h *handler) processDownloadReportRequest(c *gin.Context) (downloadReportRe
 		ReportID: c.Param("report_id"),
 	}
 
-	sc := scope.GetScopeFromContext(c.Request.Context())
-	return req, sc, nil
+	sc, _ := scope.GetScopeFromContext(c.Request.Context())
+	return req, model.ToScope(sc), nil
 }

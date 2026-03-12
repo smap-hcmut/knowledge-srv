@@ -12,14 +12,14 @@ models: ## Generate models
 
 swagger:
 	@echo "Generating swagger"
-	@swag init -g cmd/api/main.go
+	@swag init -g cmd/api/main.go --parseVendor
 	@echo "Fixing swagger docs (removing deprecated LeftDelim/RightDelim)..."
 	@sed -i '' '/LeftDelim:/d' docs/docs.go
 	@sed -i '' '/RightDelim:/d' docs/docs.go
 
 run-api:
 	@echo "Generating swagger"
-	@swag init -g cmd/api/main.go
+	@swag init -g cmd/api/main.go --parseVendor
 	@sed -i '' '/LeftDelim:/d' docs/docs.go
 	@sed -i '' '/RightDelim:/d' docs/docs.go
 	@echo "Running the application"

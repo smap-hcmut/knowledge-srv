@@ -1,9 +1,8 @@
 package httpserver
 
 import (
-	"knowledge-srv/pkg/response"
-
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/response"
 )
 
 // Health response constants (single source for version and service identity).

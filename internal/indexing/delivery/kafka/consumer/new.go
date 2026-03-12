@@ -3,11 +3,11 @@ package consumer
 import (
 	"context"
 	"fmt"
-
 	"knowledge-srv/config"
 	"knowledge-srv/internal/indexing"
-	pkgKafka "knowledge-srv/pkg/kafka"
-	"knowledge-srv/pkg/log"
+
+	"github.com/smap-hcmut/shared-libs/go/kafka"
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 // Consumer is the delivery interface for Kafka. Same idea as http.Handler: caller depends on interface, not concrete type.
@@ -24,11 +24,10 @@ type Config struct {
 
 // consumer implements Consumer (thin layer: receive msg → normalize → delegate to usecase).
 type consumer struct {
-	l           log.Logger
-	kafkaConfig config.KafkaConfig
-	uc          indexing.UseCase
-
-	batchCompletedGroup pkgKafka.IConsumer
+	l                   log.Logger
+	kafkaConfig         config.KafkaConfig
+	uc                  indexing.UseCase
+	batchCompletedGroup kafka.IConsumer
 }
 
 func New(cfg Config) (Consumer, error) {
@@ -59,12 +58,12 @@ func (c *consumer) Close() error {
 	return nil
 }
 
-func (c *consumer) createConsumerGroup(groupID string) (pkgKafka.IConsumer, error) {
-	consumerConfig := pkgKafka.ConsumerConfig{
+func (c *consumer) createConsumerGroup(groupID string) (kafka.IConsumer, error) {
+	consumerConfig := kafka.ConsumerConfig{
 		Brokers: c.kafkaConfig.Brokers,
 		GroupID: groupID,
 	}
-	group, err := pkgKafka.NewConsumer(consumerConfig)
+	group, err := kafka.NewConsumer(consumerConfig)
 	if err != nil {
 		c.l.Errorf(context.Background(), "indexing.delivery.kafka.consumer.createConsumerGroup: failed to create consumer group %s: %v", groupID, err)
 		return nil, ErrCreateConsumerGroupFailed

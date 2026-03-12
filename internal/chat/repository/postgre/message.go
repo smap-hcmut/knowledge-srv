@@ -2,13 +2,12 @@ package postgre
 
 import (
 	"context"
-
-	"github.com/aarondl/sqlboiler/v4/boil"
-
 	"knowledge-srv/internal/chat/repository"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/sqlboiler"
-	"knowledge-srv/pkg/util"
+
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/smap-hcmut/shared-libs/go/util"
 )
 
 // CreateMessage - Insert message record (returns created entity)

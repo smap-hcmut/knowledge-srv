@@ -7,18 +7,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
-	"sync"
-	"time"
-
-	"golang.org/x/sync/errgroup"
-
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/indexing"
 	repo "knowledge-srv/internal/indexing/repository"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/point"
-	"knowledge-srv/pkg/minio"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/smap-hcmut/shared-libs/go/minio"
+	"golang.org/x/sync/errgroup"
 )
 
 // Index - Index a batch of analytics posts from MinIO file

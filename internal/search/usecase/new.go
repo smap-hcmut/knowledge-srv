@@ -5,8 +5,9 @@ import (
 	"knowledge-srv/internal/point"
 	"knowledge-srv/internal/search"
 	"knowledge-srv/internal/search/repository"
-	"knowledge-srv/pkg/log"
 	"knowledge-srv/pkg/projectsrv"
+
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 // implUseCase - Implementation của UseCase interface

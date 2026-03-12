@@ -3,25 +3,24 @@ package httpserver
 import (
 	"database/sql"
 	"errors"
-
-	"github.com/gin-gonic/gin"
-
 	"knowledge-srv/config"
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/point"
 	"knowledge-srv/internal/search"
-	"knowledge-srv/pkg/discord"
-	"knowledge-srv/pkg/encrypter"
-	"knowledge-srv/pkg/gemini"
-	pkgJWT "knowledge-srv/pkg/jwt"
-	"knowledge-srv/pkg/kafka"
-	"knowledge-srv/pkg/log"
-	"knowledge-srv/pkg/minio"
 	pkgQdrant "knowledge-srv/pkg/qdrant"
-	pkgRedis "knowledge-srv/pkg/redis"
 	"knowledge-srv/pkg/voyage"
-	"go.uber.org/zap"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/auth"
+	"github.com/smap-hcmut/shared-libs/go/discord"
+	"github.com/smap-hcmut/shared-libs/go/encrypter"
+	"github.com/smap-hcmut/shared-libs/go/gemini"
+	"github.com/smap-hcmut/shared-libs/go/kafka"
+	"github.com/smap-hcmut/shared-libs/go/log"
+	"github.com/smap-hcmut/shared-libs/go/minio"
+	"github.com/smap-hcmut/shared-libs/go/redis"
+	"go.uber.org/zap"
 )
 
 type HTTPServer struct {
@@ -42,8 +41,8 @@ type HTTPServer struct {
 
 	// Authentication & Security Configuration
 	config       *config.Config
-	jwtManager   pkgJWT.IManager
-	redisClient  pkgRedis.IRedis
+	jwtManager   auth.Manager
+	redisClient  redis.IRedis
 	cookieConfig config.CookieConfig
 	encrypter    encrypter.Encrypter
 
@@ -83,8 +82,8 @@ type Config struct {
 
 	// Authentication & Security Configuration
 	Config       *config.Config
-	JWTManager   pkgJWT.IManager
-	RedisClient  pkgRedis.IRedis
+	JWTManager   auth.Manager
+	RedisClient  redis.IRedis
 	CookieConfig config.CookieConfig
 	Encrypter    encrypter.Encrypter
 
@@ -194,10 +193,6 @@ func (srv HTTPServer) validate() error {
 	if srv.minioClient == nil {
 		return errors.New("minioClient is required")
 	}
-	if srv.kafkaProducer == nil {
-		return errors.New("kafkaProducer is required")
-	}
-
 	// Authentication & Security
 	if srv.config == nil {
 		return errors.New("config is required")

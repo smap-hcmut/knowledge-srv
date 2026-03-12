@@ -1,10 +1,10 @@
 package postgre
 
 import (
-	"github.com/aarondl/sqlboiler/v4/queries/qm"
-
 	repo "knowledge-srv/internal/indexing/repository"
-	"knowledge-srv/pkg/util"
+
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
+	"github.com/smap-hcmut/shared-libs/go/util"
 )
 
 // buildGetOneQuery - Build query for GetOne

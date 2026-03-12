@@ -4,8 +4,9 @@ import (
 	"knowledge-srv/internal/chat"
 	"knowledge-srv/internal/chat/repository"
 	"knowledge-srv/internal/search"
-	"knowledge-srv/pkg/gemini"
-	"knowledge-srv/pkg/log"
+
+	"github.com/smap-hcmut/shared-libs/go/gemini"
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 type implUseCase struct {

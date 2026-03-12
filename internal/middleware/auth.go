@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"knowledge-srv/pkg/response"
-	"knowledge-srv/pkg/scope"
-
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/auth"
+	"github.com/smap-hcmut/shared-libs/go/response"
+	"github.com/smap-hcmut/shared-libs/go/scope"
 )
 
 func (m Middleware) Auth() gin.HandlerFunc {
@@ -43,8 +43,15 @@ func (m Middleware) Auth() gin.HandlerFunc {
 
 		// Set payload and scope in context for downstream handlers
 		ctx := c.Request.Context()
-		ctx = scope.SetPayloadToContext(ctx, payload)
-		sc := scope.NewScope(payload)
+		ctx = auth.SetPayloadToContext(ctx, payload)
+		authScope := auth.NewScope(payload)
+		// Convert auth.Scope to scope.Scope
+		sc := scope.Scope{
+			UserID:   authScope.UserID,
+			Username: authScope.Username,
+			Role:     authScope.Role,
+			JTI:      payload.Id, // Use JWT ID from payload
+		}
 		ctx = scope.SetScopeToContext(ctx, sc)
 		c.Request = c.Request.WithContext(ctx)
 

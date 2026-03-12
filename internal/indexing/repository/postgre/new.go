@@ -3,7 +3,8 @@ package postgre
 import (
 	"database/sql"
 	repo "knowledge-srv/internal/indexing/repository"
-	"knowledge-srv/pkg/log"
+
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 type implPostgresRepository struct {

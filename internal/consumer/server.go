@@ -3,16 +3,16 @@ package consumer
 import (
 	"context"
 	"database/sql"
-
 	"knowledge-srv/config"
-	"knowledge-srv/pkg/discord"
-	"knowledge-srv/pkg/gemini"
-	pkgKafka "knowledge-srv/pkg/kafka"
-	"knowledge-srv/pkg/log"
-	"knowledge-srv/pkg/minio"
 	"knowledge-srv/pkg/qdrant"
-	"knowledge-srv/pkg/redis"
 	"knowledge-srv/pkg/voyage"
+
+	"github.com/smap-hcmut/shared-libs/go/discord"
+	"github.com/smap-hcmut/shared-libs/go/gemini"
+	"github.com/smap-hcmut/shared-libs/go/kafka"
+	"github.com/smap-hcmut/shared-libs/go/log"
+	"github.com/smap-hcmut/shared-libs/go/minio"
+	"github.com/smap-hcmut/shared-libs/go/redis"
 )
 
 // ConsumerServer is the Kafka consumer orchestrator
@@ -26,7 +26,7 @@ type ConsumerServer struct {
 	qdrantClient  qdrant.IQdrant
 	postgresDB    *sql.DB
 	minioClient   minio.MinIO
-	kafkaProducer pkgKafka.IProducer
+	kafkaProducer kafka.IProducer
 
 	// AI/ML clients
 	voyageClient voyage.IVoyage
@@ -47,7 +47,7 @@ type Config struct {
 	QdrantClient  qdrant.IQdrant
 	PostgresDB    *sql.DB
 	MinIOClient   minio.MinIO
-	KafkaProducer pkgKafka.IProducer
+	KafkaProducer kafka.IProducer
 
 	// AI/ML clients
 	VoyageClient voyage.IVoyage

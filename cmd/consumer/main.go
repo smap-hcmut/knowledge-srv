@@ -10,13 +10,14 @@ import (
 	"knowledge-srv/config/qdrant"
 	"knowledge-srv/config/redis"
 	"knowledge-srv/internal/consumer"
-	"knowledge-srv/pkg/discord"
-	"knowledge-srv/pkg/gemini"
-	"knowledge-srv/pkg/log"
 	"knowledge-srv/pkg/voyage"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/smap-hcmut/shared-libs/go/discord"
+	"github.com/smap-hcmut/shared-libs/go/gemini"
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 func main() {

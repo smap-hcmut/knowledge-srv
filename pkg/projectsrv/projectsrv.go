@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	pkghttp "knowledge-srv/pkg/http"
+	pkghttp "github.com/smap-hcmut/shared-libs/go/http"
 )
 
-func defaultHTTPClient() pkghttp.IClient {
-	return pkghttp.NewClient(pkghttp.ClientConfig{
+func defaultHTTPClient() pkghttp.Client {
+	return pkghttp.NewClient(pkghttp.Config{
 		Timeout:   DefaultTimeout,
 		Retries:   DefaultRetries,
 		RetryWait: DefaultRetryWait,

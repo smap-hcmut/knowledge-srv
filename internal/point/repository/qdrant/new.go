@@ -2,8 +2,9 @@ package qdrant
 
 import (
 	"knowledge-srv/internal/point/repository"
-	"knowledge-srv/pkg/log"
 	pkgQdrant "knowledge-srv/pkg/qdrant"
+
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 type implRepository struct {

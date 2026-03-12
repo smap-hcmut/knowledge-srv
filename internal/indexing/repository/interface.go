@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
-
 	"knowledge-srv/internal/model"
-	"knowledge-srv/pkg/paginator"
+
+	"github.com/smap-hcmut/shared-libs/go/paginator"
 )
 
 //go:generate mockery --name PostgresRepository

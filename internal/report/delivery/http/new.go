@@ -3,10 +3,10 @@ package http
 import (
 	"knowledge-srv/internal/middleware"
 	"knowledge-srv/internal/report"
-	"knowledge-srv/pkg/discord"
-	"knowledge-srv/pkg/log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/discord"
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 type Handler interface {

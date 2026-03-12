@@ -3,15 +3,14 @@ package postgre
 import (
 	"context"
 	"database/sql"
+	repo "knowledge-srv/internal/indexing/repository"
+	"knowledge-srv/internal/model"
+	"knowledge-srv/internal/sqlboiler"
 	"time"
 
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
-
-	repo "knowledge-srv/internal/indexing/repository"
-	"knowledge-srv/internal/model"
-	"knowledge-srv/internal/sqlboiler"
-	"knowledge-srv/pkg/util"
+	"github.com/smap-hcmut/shared-libs/go/util"
 )
 
 // CreateDLQ - Insert single DLQ record (returns created entity)
