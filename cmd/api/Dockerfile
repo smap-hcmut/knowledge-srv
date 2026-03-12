@@ -24,8 +24,8 @@ RUN go mod download && \
 # 3. Copy Source Code
 COPY . .
 
-# 4. Generate Swagger Documentation
-RUN swag init -g cmd/api/main.go
+# 4. Generate Swagger Documentation (skip for now due to parsing issues)
+# RUN swag init -g cmd/api/main.go --parseVendor
 
 # 5. Build Binary (no BuildKit mounts)
 RUN CGO_ENABLED=0 \
