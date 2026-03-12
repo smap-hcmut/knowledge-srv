@@ -13,7 +13,8 @@ import (
 	"knowledge-srv/config/postgre"
 	"knowledge-srv/config/qdrant"
 	"knowledge-srv/config/redis"
-	_ "knowledge-srv/docs" // Swagger docs - blank import to trigger init()
+
+	// _ "knowledge-srv/docs" // Swagger docs - blank import to trigger init() - commented for build
 	"knowledge-srv/internal/httpserver"
 	"knowledge-srv/pkg/voyage"
 
