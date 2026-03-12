@@ -1,12 +1,11 @@
 package http
 
 import (
+	"knowledge-srv/internal/model"
 	"strconv"
 
-	"knowledge-srv/internal/model"
-	"knowledge-srv/pkg/scope"
-
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/scope"
 )
 
 func (h *handler) processChatRequest(c *gin.Context) (chatReq, model.Scope, error) {
@@ -16,8 +15,8 @@ func (h *handler) processChatRequest(c *gin.Context) (chatReq, model.Scope, erro
 		return req, model.Scope{}, err
 	}
 
-	sc := scope.GetScopeFromContext(c.Request.Context())
-	return req, sc, nil
+	sc, _ := scope.GetScopeFromContext(c.Request.Context())
+	return req, model.ToScope(sc), nil
 }
 
 func (h *handler) processGetConversationRequest(c *gin.Context) (getConversationReq, model.Scope, error) {
@@ -25,8 +24,8 @@ func (h *handler) processGetConversationRequest(c *gin.Context) (getConversation
 		ConversationID: c.Param("conversation_id"),
 	}
 
-	sc := scope.GetScopeFromContext(c.Request.Context())
-	return req, sc, nil
+	sc, _ := scope.GetScopeFromContext(c.Request.Context())
+	return req, model.ToScope(sc), nil
 }
 
 func (h *handler) processListConversationsRequest(c *gin.Context) (listConversationsReq, model.Scope, error) {
@@ -39,8 +38,8 @@ func (h *handler) processListConversationsRequest(c *gin.Context) (listConversat
 		Offset:     offset,
 	}
 
-	sc := scope.GetScopeFromContext(c.Request.Context())
-	return req, sc, nil
+	sc, _ := scope.GetScopeFromContext(c.Request.Context())
+	return req, model.ToScope(sc), nil
 }
 
 func (h *handler) processGetSuggestionsRequest(c *gin.Context) (getSuggestionsReq, model.Scope, error) {
@@ -48,6 +47,6 @@ func (h *handler) processGetSuggestionsRequest(c *gin.Context) (getSuggestionsRe
 		CampaignID: c.Param("campaign_id"),
 	}
 
-	sc := scope.GetScopeFromContext(c.Request.Context())
-	return req, sc, nil
+	sc, _ := scope.GetScopeFromContext(c.Request.Context())
+	return req, model.ToScope(sc), nil
 }

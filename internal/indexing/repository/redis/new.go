@@ -2,8 +2,9 @@ package redis
 
 import (
 	repo "knowledge-srv/internal/indexing/repository"
-	"knowledge-srv/pkg/log"
-	"knowledge-srv/pkg/redis"
+
+	"github.com/smap-hcmut/shared-libs/go/log"
+	"github.com/smap-hcmut/shared-libs/go/redis"
 )
 
 type implCacheRepository struct {

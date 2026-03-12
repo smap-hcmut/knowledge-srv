@@ -2,21 +2,22 @@ package middleware
 
 import (
 	"knowledge-srv/config"
-	"knowledge-srv/pkg/encrypter"
-	"knowledge-srv/pkg/log"
-	"knowledge-srv/pkg/scope"
+
+	"github.com/smap-hcmut/shared-libs/go/auth"
+	"github.com/smap-hcmut/shared-libs/go/encrypter"
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 type Middleware struct {
 	l            log.Logger
-	jwtManager   scope.Manager
+	jwtManager   auth.Manager
 	cookieConfig config.CookieConfig
 	internalKey  string
 	config       *config.Config
 	encrypter    encrypter.Encrypter
 }
 
-func New(l log.Logger, jwtManager scope.Manager, cookieConfig config.CookieConfig, internalKey string, cfg *config.Config, enc encrypter.Encrypter) Middleware {
+func New(l log.Logger, jwtManager auth.Manager, cookieConfig config.CookieConfig, internalKey string, cfg *config.Config, enc encrypter.Encrypter) Middleware {
 	return Middleware{
 		l:            l,
 		jwtManager:   jwtManager,

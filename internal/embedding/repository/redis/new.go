@@ -2,16 +2,17 @@ package redis
 
 import (
 	"knowledge-srv/internal/embedding/repository"
-	"knowledge-srv/pkg/log"
-	pkgRedis "knowledge-srv/pkg/redis"
+
+	"github.com/smap-hcmut/shared-libs/go/log"
+	"github.com/smap-hcmut/shared-libs/go/redis"
 )
 
 type implRepository struct {
-	redis pkgRedis.IRedis
+	redis redis.IRedis
 	l     log.Logger
 }
 
-func New(redis pkgRedis.IRedis, l log.Logger) repository.Repository {
+func New(redis redis.IRedis, l log.Logger) repository.Repository {
 	return &implRepository{
 		redis: redis,
 		l:     l,

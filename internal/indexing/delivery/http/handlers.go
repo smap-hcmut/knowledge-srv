@@ -2,8 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-
-	"knowledge-srv/pkg/response"
+	"github.com/smap-hcmut/shared-libs/go/response"
 )
 
 // Index - Handler cho POST /internal/index

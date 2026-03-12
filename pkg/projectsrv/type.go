@@ -1,11 +1,11 @@
 package projectsrv
 
-import pkghttp "knowledge-srv/pkg/http"
+import pkghttp "github.com/smap-hcmut/shared-libs/go/http"
 
 // ProjectConfig holds configuration for the Project Service client.
 type ProjectConfig struct {
 	BaseURL    string
-	HTTPClient pkghttp.IClient
+	HTTPClient pkghttp.Client
 }
 
 // Campaign represents a campaign in the Project Service.
@@ -18,5 +18,5 @@ type Campaign struct {
 // projectImpl implements IProject.
 type projectImpl struct {
 	baseURL    string
-	httpClient pkghttp.IClient
+	httpClient pkghttp.Client
 }

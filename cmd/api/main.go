@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"knowledge-srv/config"
 	"knowledge-srv/config/kafka"
 	"knowledge-srv/config/minio"
@@ -11,15 +15,13 @@ import (
 	"knowledge-srv/config/redis"
 	_ "knowledge-srv/docs" // Swagger docs - blank import to trigger init()
 	"knowledge-srv/internal/httpserver"
-	"knowledge-srv/pkg/discord"
-	"knowledge-srv/pkg/encrypter"
-	"knowledge-srv/pkg/gemini"
-	"knowledge-srv/pkg/jwt"
-	"knowledge-srv/pkg/log"
 	"knowledge-srv/pkg/voyage"
-	"os"
-	"os/signal"
-	"syscall"
+
+	"github.com/smap-hcmut/shared-libs/go/auth"
+	"github.com/smap-hcmut/shared-libs/go/discord"
+	"github.com/smap-hcmut/shared-libs/go/encrypter"
+	"github.com/smap-hcmut/shared-libs/go/gemini"
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 // @title       SMAP Knowledge Service API
@@ -46,7 +48,7 @@ func main() {
 	}
 
 	// Initialize logger
-	logger := log.Init(log.ZapConfig{
+	logger := log.NewZapLogger(log.ZapConfig{
 		Level:        cfg.Logger.Level,
 		Mode:         cfg.Logger.Mode,
 		Encoding:     cfg.Logger.Encoding,
@@ -133,11 +135,7 @@ func main() {
 	}
 
 	// JWT Manager (verify tokens from cookie/header)
-	jwtManager, err := jwt.New(jwt.Config{SecretKey: cfg.JWT.SecretKey})
-	if err != nil {
-		logger.Error(ctx, "Failed to initialize JWT manager: ", err)
-		return
-	}
+	jwtManager := auth.NewManager(cfg.JWT.SecretKey)
 	logger.Infof(ctx, "JWT Manager initialized")
 
 	// HTTP server

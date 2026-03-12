@@ -6,7 +6,8 @@ import (
 	"sync"
 
 	"knowledge-srv/config"
-	"knowledge-srv/pkg/minio"
+
+	"github.com/smap-hcmut/shared-libs/go/minio"
 )
 
 var (
@@ -32,7 +33,16 @@ func Connect(ctx context.Context, cfg *config.MinIOConfig) (minio.MinIO, error) 
 
 	var err error
 	once.Do(func() {
-		client, e := minio.NewMinIO(cfg)
+		client, e := minio.NewMinIO(&minio.Config{
+			Endpoint:             cfg.Endpoint,
+			AccessKey:            cfg.AccessKey,
+			SecretKey:            cfg.SecretKey,
+			Region:               cfg.Region,
+			Bucket:               cfg.Bucket,
+			UseSSL:               cfg.UseSSL,
+			AsyncUploadWorkers:   cfg.AsyncUploadWorkers,
+			AsyncUploadQueueSize: cfg.AsyncUploadQueueSize,
+		})
 		if e != nil {
 			err = fmt.Errorf("failed to create MinIO client: %w", e)
 			initErr = err

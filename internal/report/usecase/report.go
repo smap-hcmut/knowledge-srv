@@ -5,14 +5,13 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"time"
-
-	"github.com/google/uuid"
-
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/report"
 	"knowledge-srv/internal/report/repository"
-	"knowledge-srv/pkg/minio"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/smap-hcmut/shared-libs/go/minio"
 )
 
 // Generate creates a new report or returns existing one if already processing/completed.

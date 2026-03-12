@@ -1,9 +1,8 @@
 package middleware
 
 import (
-	"knowledge-srv/pkg/response"
-
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/response"
 )
 
 // ServiceAuth validates X-Service-Key header for internal service-to-service authentication

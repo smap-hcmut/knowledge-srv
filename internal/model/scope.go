@@ -27,3 +27,36 @@ func (s Scope) IsAnalyst() bool {
 func (s Scope) IsViewer() bool {
 	return s.Role == RoleViewer
 }
+
+func ToScope(sc interface{}) Scope {
+	if s, ok := sc.(interface {
+		GetUserID() string
+		GetUsername() string
+		GetRole() string
+		GetJTI() string
+	}); ok {
+		return Scope{
+			UserID:   s.GetUserID(),
+			Username: s.GetUsername(),
+			Role:     s.GetRole(),
+			JTI:      s.GetJTI(),
+		}
+	}
+
+	// Fallback for direct struct conversion
+	if s, ok := sc.(struct {
+		UserID   string
+		Username string
+		Role     string
+		JTI      string
+	}); ok {
+		return Scope{
+			UserID:   s.UserID,
+			Username: s.Username,
+			Role:     s.Role,
+			JTI:      s.JTI,
+		}
+	}
+
+	return Scope{}
+}

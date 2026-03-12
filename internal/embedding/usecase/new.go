@@ -3,8 +3,9 @@ package usecase
 import (
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/embedding/repository"
-	"knowledge-srv/pkg/log"
 	"knowledge-srv/pkg/voyage"
+
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 type implUseCase struct {

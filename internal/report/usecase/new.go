@@ -4,9 +4,10 @@ import (
 	"knowledge-srv/internal/report"
 	"knowledge-srv/internal/report/repository"
 	"knowledge-srv/internal/search"
-	"knowledge-srv/pkg/gemini"
-	"knowledge-srv/pkg/log"
-	"knowledge-srv/pkg/minio"
+
+	"github.com/smap-hcmut/shared-libs/go/gemini"
+	"github.com/smap-hcmut/shared-libs/go/log"
+	"github.com/smap-hcmut/shared-libs/go/minio"
 )
 
 const (

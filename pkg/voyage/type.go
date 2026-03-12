@@ -1,6 +1,6 @@
 package voyage
 
-import pkghttp "knowledge-srv/pkg/http"
+import pkghttp "github.com/smap-hcmut/shared-libs/go/http"
 
 // VoyageConfig holds the configuration for the Voyage client.
 type VoyageConfig struct {
@@ -10,7 +10,7 @@ type VoyageConfig struct {
 // voyageImpl implements IVoyage using the Voyage AI API.
 type voyageImpl struct {
 	apiKey     string
-	httpClient pkghttp.IClient
+	httpClient pkghttp.Client
 }
 
 // Request defines the request body for Embedding API

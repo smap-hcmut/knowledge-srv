@@ -1,9 +1,8 @@
 package http
 
 import (
-	"knowledge-srv/pkg/response"
-
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/response"
 )
 
 // @Summary Chat with knowledge service

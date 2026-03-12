@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strings"
-	"time"
-
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/report"
 	"knowledge-srv/internal/report/repository"
 	"knowledge-srv/internal/search"
-	"knowledge-srv/pkg/minio"
+	"strings"
+	"time"
+
+	"github.com/smap-hcmut/shared-libs/go/minio"
 )
 
 // generateInBackground runs the full Map-Reduce report generation pipeline.

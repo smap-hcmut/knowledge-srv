@@ -1,11 +1,11 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"knowledge-srv/internal/indexing"
-	"knowledge-srv/pkg/discord"
-	"knowledge-srv/pkg/log"
+
+	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/discord"
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 type Handler interface {

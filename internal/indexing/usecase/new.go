@@ -5,8 +5,9 @@ import (
 	"knowledge-srv/internal/indexing"
 	repo "knowledge-srv/internal/indexing/repository"
 	"knowledge-srv/internal/point"
-	"knowledge-srv/pkg/log"
-	"knowledge-srv/pkg/minio"
+
+	"github.com/smap-hcmut/shared-libs/go/log"
+	"github.com/smap-hcmut/shared-libs/go/minio"
 )
 
 // implUseCase implements the indexing.UseCase interface

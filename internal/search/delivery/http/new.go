@@ -1,13 +1,12 @@
 package http
 
 import (
-	"knowledge-srv/internal/search"
-	"knowledge-srv/pkg/discord"
-	"knowledge-srv/pkg/log"
-
 	"knowledge-srv/internal/middleware"
+	"knowledge-srv/internal/search"
 
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/discord"
+	"github.com/smap-hcmut/shared-libs/go/log"
 )
 
 // Handler - Interface cho search HTTP handler
