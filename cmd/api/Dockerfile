@@ -16,22 +16,23 @@ ARG TARGETARCH
 # Install git and tzdata (will be copied to runtime image)
 RUN apk add --no-cache git tzdata
 
-# 2. Download dependencies + Install Swag (no BuildKit mounts for simplicity)
+# 2. Copy dependencies (vendor mode)
 COPY go.mod go.sum ./
-RUN go mod download && \
-    go install github.com/swaggo/swag/cmd/swag@v1.8.12
+COPY vendor/ vendor/
 
 # 3. Copy Source Code
 COPY . .
 
-# 4. Generate Swagger Documentation (skip for now due to parsing issues)
-# RUN swag init -g cmd/api/main.go --parseVendor
+# 4. Install Swag and Generate Swagger Documentation
+RUN go install github.com/swaggo/swag/cmd/swag@v1.8.12
+RUN swag init -g cmd/api/main.go --parseVendor
 
-# 5. Build Binary (no BuildKit mounts)
+# 5. Build Binary (vendor mode)
 RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
+    -mod=vendor \
     -ldflags="-s -w" \
     -o api ./cmd/api
 
