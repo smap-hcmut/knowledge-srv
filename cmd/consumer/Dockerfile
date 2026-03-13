@@ -17,7 +17,7 @@ RUN apk add --no-cache git tzdata
 
 # Download dependencies (no BuildKit mounts for simplicity)
 COPY go.mod go.sum ./
-RUN go mod download
+COPY vendor/ vendor/
 
 # Copy Source Code
 COPY . .
@@ -27,6 +27,7 @@ RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
+    -mod=vendor \
     -ldflags="-s -w" \
     -o consumer ./cmd/consumer
 

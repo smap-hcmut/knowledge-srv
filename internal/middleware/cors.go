@@ -32,6 +32,7 @@ var productionOrigins = []string{
 	"https://identity-srv.tantai.dev",
 	"http://smap.tantai.dev",         // For testing/non-HTTPS
 	"http://identity-srv.tantai.dev", // For testing/non-HTTPS
+	"http://localhost:3005",          // For UI Test Console (new port)
 }
 
 func isPrivateOrigin(origin string) bool {
