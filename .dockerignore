@@ -29,7 +29,7 @@ api
 *.out
 
 # Vendor (sẽ được download lại trong Docker)
-vendor/
+# vendor/
 
 # Temporary files
 tmp/
