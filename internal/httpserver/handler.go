@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"knowledge-srv/internal/middleware"
+	sharedmw "github.com/smap-hcmut/shared-libs/go/middleware"
 	"knowledge-srv/internal/model"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -11,7 +12,7 @@ import (
 )
 
 func (srv HTTPServer) mapHandlers() error {
-	mw := middleware.New(srv.l, srv.jwtManager, srv.cookieConfig, srv.config.InternalConfig.InternalKey, srv.config, srv.encrypter)
+	mw := middleware.New(srv.l, srv.jwtManager, srv.cookieConfig, srv.config.InternalConfig.InternalKey, srv.encrypter)
 
 	srv.registerMiddlewares(mw)
 	srv.registerSystemRoutes()
@@ -24,11 +25,11 @@ func (srv HTTPServer) mapHandlers() error {
 }
 
 func (srv HTTPServer) registerMiddlewares(mw middleware.Middleware) {
-	srv.gin.Use(middleware.Tracing())
-	srv.gin.Use(middleware.Recovery(srv.l, srv.discord))
+	srv.gin.Use(sharedmw.Tracing())
+	srv.gin.Use(sharedmw.Recovery(srv.l, srv.discord))
 
-	corsConfig := middleware.DefaultCORSConfig(srv.environment)
-	srv.gin.Use(middleware.CORS(corsConfig))
+	corsConfig := sharedmw.DefaultCORSConfig(srv.environment)
+	srv.gin.Use(sharedmw.CORS(corsConfig))
 
 	// Log CORS mode for visibility
 	ctx := context.Background()
@@ -39,7 +40,7 @@ func (srv HTTPServer) registerMiddlewares(mw middleware.Middleware) {
 	}
 
 	// Add locale middleware to extract and set locale from request header
-	srv.gin.Use(mw.Locale())
+	srv.gin.Use(sharedmw.Locale())
 }
 
 func (srv HTTPServer) registerSystemRoutes() {

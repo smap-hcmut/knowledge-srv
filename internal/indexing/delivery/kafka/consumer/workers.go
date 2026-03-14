@@ -7,7 +7,7 @@ import (
 	"knowledge-srv/internal/indexing/delivery/kafka"
 
 	"github.com/IBM/sarama"
-	"github.com/smap-hcmut/shared-libs/go/scope"
+	"github.com/smap-hcmut/shared-libs/go/auth"
 )
 
 // handleBatchCompletedMessage receives message, normalizes scope + input, delegates to usecase (no business logic here).
@@ -34,11 +34,11 @@ func (c *consumer) handleBatchCompletedMessage(msg *sarama.ConsumerMessage) erro
 	input := toIndexInput(message)
 
 	// 4. Create scope (system scope for background processing) and set to context
-	sc := scope.Scope{
+	sc := auth.Scope{
 		UserID: "system",
 		Role:   "system",
 	}
-	ctx = scope.SetScopeToContext(ctx, sc)
+	ctx = auth.SetScopeToContext(ctx, sc)
 
 	// 5. Call UseCase (scope already in context)
 	output, err := c.uc.Index(ctx, input)

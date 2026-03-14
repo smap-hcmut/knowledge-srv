@@ -4,7 +4,7 @@ import (
 	"knowledge-srv/internal/model"
 
 	"github.com/gin-gonic/gin"
-	"github.com/smap-hcmut/shared-libs/go/scope"
+	"github.com/smap-hcmut/shared-libs/go/auth"
 )
 
 func (h *handler) processSearchRequest(c *gin.Context) (searchReq, model.Scope, error) {
@@ -14,6 +14,6 @@ func (h *handler) processSearchRequest(c *gin.Context) (searchReq, model.Scope, 
 		return req, model.Scope{}, err
 	}
 
-	sc, _ := scope.GetScopeFromContext(c.Request.Context())
+	sc := auth.GetScopeFromContext(c.Request.Context())
 	return req, model.ToScope(sc), nil
 }

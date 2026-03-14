@@ -108,14 +108,13 @@ type ProjectConfig struct {
 	Timeout int // in seconds
 }
 
-// CookieConfig configures the auth cookie (name, domain, secure, max-age). Used to read/set token in cookie.
+// CookieConfig is the configuration for HttpOnly cookie authentication
+// Note: Secure and SameSite are now dynamically determined by auth.Middleware
+// based on the request Origin header. Bearer token acceptance is controlled by ENVIRONMENT_NAME.
 type CookieConfig struct {
-	Domain         string
-	Secure         bool
-	SameSite       string
-	MaxAge         int
-	MaxAgeRemember int
-	Name           string
+	Name   string // Cookie name (e.g., "smap_auth_token")
+	MaxAge int    // Cookie max age in seconds (e.g., 28800 for 8 hours)
+	Domain string // Production domain for cookies (e.g., ".tantai.dev")
 }
 
 // JWTConfig is for verifying tokens only
@@ -259,12 +258,9 @@ func Load() (*Config, error) {
 	cfg.JWT.SecretKey = viper.GetString("jwt.secret_key")
 
 	// Cookie
-	cfg.Cookie.Domain = viper.GetString("cookie.domain")
-	cfg.Cookie.Secure = viper.GetBool("cookie.secure")
-	cfg.Cookie.SameSite = viper.GetString("cookie.samesite")
-	cfg.Cookie.MaxAge = viper.GetInt("cookie.max_age")
-	cfg.Cookie.MaxAgeRemember = viper.GetInt("cookie.max_age_remember")
 	cfg.Cookie.Name = viper.GetString("cookie.name")
+	cfg.Cookie.MaxAge = viper.GetInt("cookie.max_age")
+	cfg.Cookie.Domain = viper.GetString("cookie.domain")
 
 	// Encrypter
 	cfg.Encrypter.Key = viper.GetString("encrypter.key")
@@ -344,15 +340,9 @@ func setDefaults() {
 	viper.SetDefault("oauth2.scopes", []string{"openid", "email", "profile"})
 
 	// Cookie
-	viper.SetDefault("cookie.domain", ".smap.com")
-	viper.SetDefault("cookie.secure", true)
-	viper.SetDefault("cookie.samesite", "Lax")
-	viper.SetDefault("cookie.max_age", 28800)           // 8 hours
-	viper.SetDefault("cookie.max_age_remember", 604800) // 7 days
 	viper.SetDefault("cookie.name", "smap_auth_token")
-
-	// Access Control
-	viper.SetDefault("access_control.default_role", "VIEWER")
+	viper.SetDefault("cookie.max_age", 28800)    // 8 hours
+	viper.SetDefault("cookie.domain", ".tantai.dev")
 	viper.SetDefault("access_control.allowed_redirect_urls", []string{"/dashboard", "/", "http://localhost:3000", "http://localhost:5173"})
 
 	// Session
