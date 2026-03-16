@@ -4,17 +4,13 @@ metadata:
   name: knowledge-config
   namespace: smap
 data:
-  API_MODE: "release"
-  APP_PORT: "8080"
   COOKIE_DOMAIN: ".tantai.dev"
   COOKIE_MAX_AGE: "28800"
-  COOKIE_MAX_AGE_REMEMBER: "604800"
   COOKIE_NAME: "smap_auth_token"
-  COOKIE_SAMESITE: "Lax"
-  COOKIE_SECURE: "true"
   ENVIRONMENT_NAME: "production"
   GEMINI_MODEL: "gemini-1.5-pro"
   HTTP_SERVER_MODE: "release"
+  HTTP_SERVER_PORT: "8080"
   KAFKA_BROKERS: "kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
   KAFKA_GROUP_ID: "knowledge-consumer-group"
   KAFKA_TOPIC: "knowledge.events"

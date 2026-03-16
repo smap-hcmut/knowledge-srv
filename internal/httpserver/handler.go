@@ -15,6 +15,7 @@ func (srv HTTPServer) mapHandlers() error {
 		CookieName:       srv.cookieConfig.Name,
 		ProductionDomain: srv.cookieConfig.Domain,
 		InternalKey:      srv.config.InternalConfig.InternalKey,
+		IsProduction:     srv.environment == string(model.EnvironmentProduction),
 	})
 
 	srv.registerMiddlewares()

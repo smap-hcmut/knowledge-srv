@@ -13,7 +13,7 @@ require (
 	github.com/lib/pq v1.11.2
 	github.com/qdrant/go-client v1.16.2
 	github.com/redis/go-redis/v9 v9.17.3
-	github.com/smap-hcmut/shared-libs/go v1.0.5
+	github.com/smap-hcmut/shared-libs/go v1.0.6
 	github.com/spf13/viper v1.21.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
