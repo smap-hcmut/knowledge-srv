@@ -8,7 +8,7 @@ import (
 
 func (h *handler) RegisterRoutes(r *gin.RouterGroup, mw middleware.Middleware) {
 	internal := r.Group("/internal")
-	internal.Use(mw.ServiceAuth())
+	internal.Use(mw.InternalAuth())
 	{
 		internal.POST("/index", h.Index)
 		internal.POST("/index/retry", h.RetryFailed)

@@ -1,18 +1,13 @@
 package middleware
 
 import (
-	"os"
 	"knowledge-srv/config"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/smap-hcmut/shared-libs/go/auth"
 	"github.com/smap-hcmut/shared-libs/go/log"
 )
-
-// Encrypter interface for password/key encryption
-type Encrypter interface {
-	Decrypt(encrypted string) (string, error)
-}
 
 // Middleware wraps shared-libs auth.Middleware and holds service-specific dependencies
 type Middleware struct {
@@ -20,11 +15,10 @@ type Middleware struct {
 	l              log.Logger
 	cookieConfig   config.CookieConfig
 	internalKey    string
-	encrypter      Encrypter
 }
 
 // New creates a new middleware instance
-func New(logger log.Logger, jwtManager auth.Manager, cookieConfig config.CookieConfig, internalKey string, encrypter Encrypter) Middleware {
+func New(logger log.Logger, jwtManager auth.Manager, cookieConfig config.CookieConfig, internalKey string) Middleware {
 	// Create shared-libs auth middleware
 	authMiddleware := auth.NewMiddleware(auth.MiddlewareConfig{
 		Manager:                 jwtManager,
@@ -38,7 +32,6 @@ func New(logger log.Logger, jwtManager auth.Manager, cookieConfig config.CookieC
 		l:              logger,
 		cookieConfig:   cookieConfig,
 		internalKey:    internalKey,
-		encrypter:      encrypter,
 	}
 }
 
