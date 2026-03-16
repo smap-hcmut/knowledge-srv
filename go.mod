@@ -2,8 +2,6 @@ module knowledge-srv
 
 go 1.25.6
 
-replace github.com/smap-hcmut/shared-libs/go => ../shared-libs/go
-
 require (
 	github.com/IBM/sarama v1.47.0
 	github.com/aarondl/null/v8 v8.1.3
