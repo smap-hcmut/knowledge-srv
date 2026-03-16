@@ -3,8 +3,8 @@ package httpserver
 import (
 	"context"
 
-	"knowledge-srv/internal/middleware"
 	sharedmw "github.com/smap-hcmut/shared-libs/go/middleware"
+	"knowledge-srv/internal/middleware"
 	"knowledge-srv/internal/model"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -12,7 +12,7 @@ import (
 )
 
 func (srv HTTPServer) mapHandlers() error {
-	mw := middleware.New(srv.l, srv.jwtManager, srv.cookieConfig, srv.config.InternalConfig.InternalKey, srv.encrypter)
+	mw := middleware.New(srv.l, srv.jwtManager, srv.cookieConfig, srv.config.InternalConfig.InternalKey)
 
 	srv.registerMiddlewares(mw)
 	srv.registerSystemRoutes()
