@@ -27,7 +27,7 @@ spec:
         - name: harbor-registry
       containers:
         - name: knowledge-consumer
-          image: registry.tantai.dev/smap/knowledge-consumer:260315-010622
+          image: registry.tantai.dev/smap/knowledge-consumer:260316-234519
           imagePullPolicy: IfNotPresent
           resources:
             requests:
