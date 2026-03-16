@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	pkghttp "github.com/smap-hcmut/shared-libs/go/http"
+	pkghttp "github.com/smap-hcmut/shared-libs/go/httpclient"
 )
 
 func defaultHTTPClient() pkghttp.Client {

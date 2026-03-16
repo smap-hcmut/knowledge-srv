@@ -3,17 +3,18 @@ package http
 import (
 	"errors"
 	"knowledge-srv/internal/indexing"
+	"net/http"
 
 	pkgErrors "github.com/smap-hcmut/shared-libs/go/errors"
 )
 
 var (
-	errFileNotFound       = pkgErrors.NewHTTPError(30001, "File not found in MinIO")
-	errFileDownloadFailed = pkgErrors.NewHTTPError(30002, "Failed to download file from MinIO")
-	errFileParseFailed    = pkgErrors.NewHTTPError(30003, "Failed to parse JSONL file")
-	errEmbeddingFailed    = pkgErrors.NewHTTPError(30004, "Failed to generate embedding")
-	errQdrantFailed       = pkgErrors.NewHTTPError(30005, "Failed to upsert to Qdrant")
-	ErrMissingProjectID   = pkgErrors.NewHTTPError(30006, "Missing project_id parameter")
+	errFileNotFound       = &pkgErrors.HTTPError{Code: 1, Message: "File not found in MinIO", StatusCode: http.StatusNotFound}
+	errFileDownloadFailed = &pkgErrors.HTTPError{Code: 2, Message: "Failed to download file from MinIO", StatusCode: http.StatusInternalServerError}
+	errFileParseFailed    = &pkgErrors.HTTPError{Code: 3, Message: "Failed to parse JSONL file", StatusCode: http.StatusUnprocessableEntity}
+	errEmbeddingFailed    = &pkgErrors.HTTPError{Code: 4, Message: "Failed to generate embedding", StatusCode: http.StatusInternalServerError}
+	errQdrantFailed       = &pkgErrors.HTTPError{Code: 5, Message: "Failed to upsert to Qdrant", StatusCode: http.StatusInternalServerError}
+	ErrMissingProjectID   = &pkgErrors.HTTPError{Code: 6, Message: "Missing project_id parameter", StatusCode: http.StatusBadRequest}
 )
 
 var NotFound = []error{

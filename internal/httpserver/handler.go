@@ -2,19 +2,22 @@ package httpserver
 
 import (
 	"context"
-
-	sharedmw "github.com/smap-hcmut/shared-libs/go/middleware"
-	"knowledge-srv/internal/middleware"
 	"knowledge-srv/internal/model"
 
+	"github.com/smap-hcmut/shared-libs/go/middleware"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func (srv HTTPServer) mapHandlers() error {
-	mw := middleware.New(srv.l, srv.jwtManager, srv.cookieConfig, srv.config.InternalConfig.InternalKey)
+	mw := middleware.New(middleware.Config{
+		JWTManager:       srv.jwtManager,
+		CookieName:       srv.cookieConfig.Name,
+		ProductionDomain: srv.cookieConfig.Domain,
+		InternalKey:      srv.config.InternalConfig.InternalKey,
+	})
 
-	srv.registerMiddlewares(mw)
+	srv.registerMiddlewares()
 	srv.registerSystemRoutes()
 
 	if err := srv.registerDomainRoutes(mw); err != nil {
@@ -24,12 +27,12 @@ func (srv HTTPServer) mapHandlers() error {
 	return nil
 }
 
-func (srv HTTPServer) registerMiddlewares(mw middleware.Middleware) {
-	srv.gin.Use(sharedmw.Tracing())
-	srv.gin.Use(sharedmw.Recovery(srv.l, srv.discord))
+func (srv HTTPServer) registerMiddlewares() {
+	srv.gin.Use(middleware.Tracing())
+	srv.gin.Use(middleware.Recovery(srv.l, srv.discord))
 
-	corsConfig := sharedmw.DefaultCORSConfig(srv.environment)
-	srv.gin.Use(sharedmw.CORS(corsConfig))
+	corsConfig := middleware.DefaultCORSConfig(srv.environment)
+	srv.gin.Use(middleware.CORS(corsConfig))
 
 	// Log CORS mode for visibility
 	ctx := context.Background()
@@ -40,7 +43,7 @@ func (srv HTTPServer) registerMiddlewares(mw middleware.Middleware) {
 	}
 
 	// Add locale middleware to extract and set locale from request header
-	srv.gin.Use(sharedmw.Locale())
+	srv.gin.Use(middleware.Locale())
 }
 
 func (srv HTTPServer) registerSystemRoutes() {
@@ -57,11 +60,11 @@ func (srv HTTPServer) registerSystemRoutes() {
 }
 
 // registerDomainRoutes initializes and registers all domain routes
-func (srv HTTPServer) registerDomainRoutes(mw middleware.Middleware) error {
+func (srv HTTPServer) registerDomainRoutes(mw *middleware.Middleware) error {
 	ctx := context.Background()
 
-	// Base route group
-	api := srv.gin.Group("/knowledge")
+	// Base route group (api/v1/knowledge)
+	api := srv.gin.Group(model.APIV1Prefix + "/knowledge")
 
 	// Setup core domains first
 	if err := srv.setupCoreDomains(ctx); err != nil {

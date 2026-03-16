@@ -1,6 +1,6 @@
 package projectsrv
 
-import pkghttp "github.com/smap-hcmut/shared-libs/go/http"
+import pkghttp "github.com/smap-hcmut/shared-libs/go/httpclient"
 
 // ProjectConfig holds configuration for the Project Service client.
 type ProjectConfig struct {

@@ -9,7 +9,6 @@ import (
 	"knowledge-srv/internal/search"
 	pkgQdrant "knowledge-srv/pkg/qdrant"
 	"knowledge-srv/pkg/voyage"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/smap-hcmut/shared-libs/go/auth"
@@ -18,6 +17,7 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/gemini"
 	"github.com/smap-hcmut/shared-libs/go/kafka"
 	"github.com/smap-hcmut/shared-libs/go/log"
+	"github.com/smap-hcmut/shared-libs/go/middleware"
 	"github.com/smap-hcmut/shared-libs/go/minio"
 	"github.com/smap-hcmut/shared-libs/go/redis"
 )
@@ -126,35 +126,10 @@ func New(logger log.Logger, cfg Config) (*HTTPServer, error) {
 	}
 
 	// Add middlewares
-	srv.gin.Use(srv.zapLoggerMiddleware())
+	srv.gin.Use(middleware.Logger(srv.l, srv.environment))
 	srv.gin.Use(gin.Recovery())
 
 	return srv, nil
-}
-
-func (srv *HTTPServer) zapLoggerMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		path := c.Request.URL.Path
-		query := c.Request.URL.RawQuery
-
-		c.Next()
-
-		latency := time.Since(start)
-		status := c.Writer.Status()
-
-		if path == "/health" || path == "/ready" || path == "/live" {
-			return
-		}
-
-		if srv.environment == "production" {
-			srv.l.Infof(c.Request.Context(),
-				"HTTP Request - Method: %s, Path: %s, Status: %d, IP: %s, Latency: %v, UserAgent: %s, Query: %s",
-				c.Request.Method, path, status, c.ClientIP(), latency, c.Request.UserAgent(), query)
-		} else {
-			srv.l.Infof(c.Request.Context(), "%s %s %d %s %s", c.Request.Method, path, status, latency, c.ClientIP())
-		}
-	}
 }
 
 // validate validates that all required dependencies are provided.

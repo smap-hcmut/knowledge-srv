@@ -1,12 +1,11 @@
 package http
 
 import (
-	"knowledge-srv/internal/middleware"
-
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/middleware"
 )
 
-func (h *handler) RegisterRoutes(r *gin.RouterGroup, mw middleware.Middleware) {
+func (h *handler) RegisterRoutes(r *gin.RouterGroup, mw *middleware.Middleware) {
 	internal := r.Group("/internal")
 	internal.Use(mw.InternalAuth())
 	{

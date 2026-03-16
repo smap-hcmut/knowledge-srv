@@ -2,16 +2,15 @@ package httpserver
 
 import (
 	"context"
-
-	"github.com/gin-gonic/gin"
-
-	"knowledge-srv/internal/middleware"
 	reportHTTP "knowledge-srv/internal/report/delivery/http"
 	reportPostgre "knowledge-srv/internal/report/repository/postgre"
 	reportUsecase "knowledge-srv/internal/report/usecase"
+
+	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/middleware"
 )
 
-func (srv *HTTPServer) setupReportDomain(ctx context.Context, r *gin.RouterGroup, mw middleware.Middleware) error {
+func (srv *HTTPServer) setupReportDomain(ctx context.Context, r *gin.RouterGroup, mw *middleware.Middleware) error {
 	repo := reportPostgre.New(srv.postgresDB, srv.l)
 
 	uc := reportUsecase.New(repo, srv.searchUC, srv.geminiClient, srv.minioClient, srv.l, reportUsecase.Config{})

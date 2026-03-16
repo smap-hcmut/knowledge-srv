@@ -2,17 +2,16 @@ package httpserver
 
 import (
 	"context"
-
-	"github.com/gin-gonic/gin"
-
 	indexingHTTP "knowledge-srv/internal/indexing/delivery/http"
 	indexingPostgre "knowledge-srv/internal/indexing/repository/postgre"
 	indexingRedis "knowledge-srv/internal/indexing/repository/redis"
 	indexingUsecase "knowledge-srv/internal/indexing/usecase"
-	"knowledge-srv/internal/middleware"
+
+	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/middleware"
 )
 
-func (srv *HTTPServer) setupIndexingDomain(ctx context.Context, r *gin.RouterGroup, mw middleware.Middleware) error {
+func (srv *HTTPServer) setupIndexingDomain(ctx context.Context, r *gin.RouterGroup, mw *middleware.Middleware) error {
 	postgreRepo := indexingPostgre.New(srv.postgresDB, srv.l)
 	cacheRepo := indexingRedis.New(srv.redisClient, srv.l)
 
@@ -20,7 +19,7 @@ func (srv *HTTPServer) setupIndexingDomain(ctx context.Context, r *gin.RouterGro
 
 	handler := indexingHTTP.New(srv.l, uc, srv.discord)
 	handler.(interface {
-		RegisterRoutes(r *gin.RouterGroup, mw middleware.Middleware)
+		RegisterRoutes(r *gin.RouterGroup, mw *middleware.Middleware)
 	}).RegisterRoutes(r, mw)
 
 	srv.l.Infof(ctx, "Indexing domain registered")

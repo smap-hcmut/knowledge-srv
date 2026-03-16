@@ -2,16 +2,15 @@ package httpserver
 
 import (
 	"context"
-
-	"github.com/gin-gonic/gin"
-
 	chatHTTP "knowledge-srv/internal/chat/delivery/http"
 	chatPostgre "knowledge-srv/internal/chat/repository/postgre"
 	chatUsecase "knowledge-srv/internal/chat/usecase"
-	"knowledge-srv/internal/middleware"
+
+	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/middleware"
 )
 
-func (srv *HTTPServer) setupChatDomain(ctx context.Context, r *gin.RouterGroup, mw middleware.Middleware) error {
+func (srv *HTTPServer) setupChatDomain(ctx context.Context, r *gin.RouterGroup, mw *middleware.Middleware) error {
 	repo := chatPostgre.New(srv.postgresDB, srv.l)
 
 	uc := chatUsecase.New(repo, srv.searchUC, srv.geminiClient, srv.l)

@@ -2,17 +2,16 @@ package httpserver
 
 import (
 	"context"
-
-	"github.com/gin-gonic/gin"
-
-	"knowledge-srv/internal/middleware"
 	searchHTTP "knowledge-srv/internal/search/delivery/http"
 	searchRedis "knowledge-srv/internal/search/repository/redis"
 	searchUsecase "knowledge-srv/internal/search/usecase"
 	"knowledge-srv/pkg/projectsrv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/middleware"
 )
 
-func (srv *HTTPServer) setupSearchDomain(ctx context.Context, r *gin.RouterGroup, mw middleware.Middleware) error {
+func (srv *HTTPServer) setupSearchDomain(ctx context.Context, r *gin.RouterGroup, mw *middleware.Middleware) error {
 	cacheRepo := searchRedis.New(srv.redisClient, srv.l)
 
 	projectSrv := projectsrv.New(projectsrv.ProjectConfig{

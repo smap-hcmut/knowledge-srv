@@ -1,6 +1,6 @@
 package voyage
 
-import pkghttp "github.com/smap-hcmut/shared-libs/go/http"
+import pkghttp "github.com/smap-hcmut/shared-libs/go/httpclient"
 
 // VoyageConfig holds the configuration for the Voyage client.
 type VoyageConfig struct {

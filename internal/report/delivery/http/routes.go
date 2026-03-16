@@ -1,17 +1,15 @@
 package http
 
 import (
-	"knowledge-srv/internal/middleware"
-
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/middleware"
 )
 
-func (h *handler) RegisterRoutes(r *gin.RouterGroup, mw middleware.Middleware) {
-	api := r.Group("/api/v1")
-	api.Use(mw.Auth())
+func (h *handler) RegisterRoutes(r *gin.RouterGroup, mw *middleware.Middleware) {
+	r.Use(mw.Auth())
 	{
-		api.POST("/reports/generate", h.GenerateReport)
-		api.GET("/reports/:report_id", h.GetReport)
-		api.GET("/reports/:report_id/download", h.DownloadReport)
+		r.POST("/reports/generate", h.GenerateReport)
+		r.GET("/reports/:report_id", h.GetReport)
+		r.GET("/reports/:report_id/download", h.DownloadReport)
 	}
 }
