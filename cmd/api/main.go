@@ -14,7 +14,7 @@ import (
 	"knowledge-srv/config/qdrant"
 	"knowledge-srv/config/redis"
 
-	// _ "knowledge-srv/docs" // Swagger docs - blank import to trigger init() - commented for build
+	_ "knowledge-srv/docs"
 	"knowledge-srv/internal/httpserver"
 	"knowledge-srv/pkg/voyage"
 
