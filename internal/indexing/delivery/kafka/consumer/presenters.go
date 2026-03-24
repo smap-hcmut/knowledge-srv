@@ -10,6 +10,7 @@ func toIndexInput(m kafkaDelivery.BatchCompletedMessage) indexing.IndexInput {
 	return indexing.IndexInput{
 		BatchID:     m.BatchID,
 		ProjectID:   m.ProjectID,
+		CampaignID:  m.CampaignID,
 		FileURL:     m.FileURL,
 		RecordCount: m.RecordCount,
 	}

@@ -22,6 +22,7 @@ const (
 type IndexInput struct {
 	BatchID     string
 	ProjectID   string
+	CampaignID  string // Optional: for notebook sync. Fallback: resolve via project-srv.
 	FileURL     string
 	RecordCount int
 }

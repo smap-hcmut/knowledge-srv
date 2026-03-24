@@ -16,6 +16,7 @@ import (
 
 	_ "knowledge-srv/docs"
 	"knowledge-srv/internal/httpserver"
+	"knowledge-srv/pkg/maestro"
 	"knowledge-srv/pkg/voyage"
 
 	"github.com/smap-hcmut/shared-libs/go/auth"
@@ -127,6 +128,23 @@ func main() {
 		logger.Infof(ctx, "Kafka producer client initialized")
 	}
 
+	// Maestro - NotebookLM automation (optional - only needed when notebook.enabled=true)
+	var maestroClient maestro.IMaestro
+	if cfg.Maestro.APIKey != "" {
+		maestroClient, err = maestro.NewMaestro(maestro.MaestroConfig{
+			BaseURL: cfg.Maestro.BaseURL,
+			APIKey:  cfg.Maestro.APIKey,
+		})
+		if err != nil {
+			logger.Warnf(ctx, "Maestro client not configured (optional): %v", err)
+			maestroClient = nil
+		} else {
+			logger.Info(ctx, "Maestro client initialized")
+		}
+	} else {
+		logger.Info(ctx, "Maestro client skipped (no API key configured)")
+	}
+
 	// Discord - Monitoring & Notification
 	discordClient, err := discord.New(logger, cfg.Discord.WebhookURL)
 	if err != nil {
@@ -155,7 +173,8 @@ func main() {
 		CookieConfig: cfg.Cookie,
 		Encrypter:    encrypterInstance,
 
-		Discord: discordClient,
+		Discord:       discordClient,
+		MaestroClient: maestroClient,
 
 		QdrantClient:  qdrantClient,
 		VoyageClient:  voyageClient,

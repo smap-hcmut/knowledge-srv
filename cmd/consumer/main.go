@@ -10,6 +10,7 @@ import (
 	"knowledge-srv/config/qdrant"
 	"knowledge-srv/config/redis"
 	"knowledge-srv/internal/consumer"
+	"knowledge-srv/pkg/maestro"
 	"knowledge-srv/pkg/voyage"
 	"os"
 	"os/signal"
@@ -106,6 +107,23 @@ func main() {
 	}
 	logger.Info(ctx, "Gemini client initialized")
 
+	// Maestro - NotebookLM automation (optional)
+	var maestroClient maestro.IMaestro
+	if cfg.Maestro.APIKey != "" {
+		maestroClient, err = maestro.NewMaestro(maestro.MaestroConfig{
+			BaseURL: cfg.Maestro.BaseURL,
+			APIKey:  cfg.Maestro.APIKey,
+		})
+		if err != nil {
+			logger.Warnf(ctx, "Maestro client not configured (optional): %v", err)
+			maestroClient = nil
+		} else {
+			logger.Info(ctx, "Maestro client initialized")
+		}
+	} else {
+		logger.Info(ctx, "Maestro client skipped (no API key configured)")
+	}
+
 	// Discord (optional)
 	var discordClient discord.IDiscord
 	if cfg.Discord.WebhookURL != "" {
@@ -129,6 +147,8 @@ func main() {
 		GeminiClient:  geminiClient,
 		Discord:       discordClient,
 		KafkaProducer: kafkaProducer,
+		MaestroClient: maestroClient,
+		AppConfig:     cfg,
 	})
 	if err != nil {
 		logger.Errorf(ctx, "Failed to create consumer server: %v", err)

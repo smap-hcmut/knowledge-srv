@@ -13,8 +13,13 @@ import (
 )
 
 // Chat - Main RAG pipeline
+
 func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.ChatInput) (chat.ChatOutput, error) {
 	startTime := time.Now()
+
+	// Classify query intent
+	intent := ClassifyIntent(input.Message)
+	notebookEnabled := uc.cfg.NotebookEnabled
 
 	if err := uc.validateChatInput(input); err != nil {
 		uc.l.Errorf(ctx, "chat.usecase.Chat: validateChatInput failed: %v", err)
@@ -61,7 +66,27 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		history = msgs
 	}
 
-	// Step 2: Search relevant documents (via search.UseCase)
+	// Step 2: Route query based on intent
+	route := RouteQuery(input.Message, notebookEnabled)
+
+	if route.UseNotebook {
+		// Async notebook flow
+		jobID, err := uc.notebookUC.SubmitChatJob(ctx, sc, input.ConversationID, input.CampaignID, input.Message)
+		if err != nil {
+			uc.l.Errorf(ctx, "Failed to submit async notebook chat: %v", err)
+			return chat.ChatOutput{}, fmt.Errorf("notebook chat submission failed: %w", err)
+		}
+
+		return chat.ChatOutput{
+			ConversationID: input.ConversationID,
+			ChatJobID:      jobID,
+			IsAsync:        true,
+			QueryIntent:    string(intent),
+			Backend:        "NotebookLM",
+		}, nil
+	}
+
+	// Step 3: Search relevant documents (via search.UseCase)
 	searchInput := search.SearchInput{
 		CampaignID: input.CampaignID,
 		Query:      input.Message,
@@ -151,6 +176,9 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		Citations:      citations,
 		Suggestions:    suggestions,
 		SearchMetadata: searchMeta,
+		QueryIntent:    string(intent),
+		Backend:        "Qdrant",
+		IsAsync:        false,
 	}, nil
 }
 
@@ -166,3 +194,21 @@ func (uc *implUseCase) validateChatInput(input chat.ChatInput) error {
 	}
 	return nil
 }
+
+func (uc *implUseCase) GetChatJobStatus(ctx context.Context, sc model.Scope, jobID string) (chat.JobStatusOutput, error) {
+	if uc.notebookUC == nil {
+		return chat.JobStatusOutput{}, fmt.Errorf("notebook integration is currently disabled")
+	}
+
+	job, err := uc.notebookUC.GetChatJobStatus(ctx, sc, jobID)
+	if err != nil {
+		return chat.JobStatusOutput{}, fmt.Errorf("failed to retrieve chat job status: %w", err)
+	}
+
+	return chat.JobStatusOutput{
+		State:   job.Status,
+		Answer:  job.NotebookAnswer,
+		Backend: "NotebookLM",
+	}, nil
+}
+
