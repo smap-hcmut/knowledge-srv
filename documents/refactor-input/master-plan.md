@@ -601,33 +601,135 @@ InsightMessage
 
 **knowledge-srv processing:**
 
-1. Check `should_index == true`
-2. Build prose text từ structured data:
+1. **Gate check:** If `should_index == false` → skip entirely (no indexing, no NotebookLM export)
 
+2. **Prose generation** — Build coherent narrative text from structured data
+
+   **Pseudo-code:**
+
+   ```golang
+   prose := ""
+
+   // Section 1: Report Header
+   prose += fmt.Sprintf("Campaign Report: %s\n", domainOverlay)
+   prose += fmt.Sprintf("Platform: %s | Mentions: %d\n", platform, totalMentions)
+   prose += fmt.Sprintf("Analysis Window: %s to %s\n", windowStart, windowEnd)
+   prose += "\n"
+
+   // Section 2: Top Entities/Brands (max 5)
+   prose += "Top Brands:\n"
+   for i := 0; i < min(5, len(topEntities)); i++ {
+     entity := topEntities[i]
+     prose += fmt.Sprintf("- %s: %d mentions (%.1f%% share)\n",
+       entity.Name, entity.MentionCount, entity.MentionShare*100)
+   }
+   prose += "\n"
+
+   // Section 3: Top Topics (max 5)
+   prose += "Key Discussion Topics:\n"
+   for i := 0; i < min(5, len(topTopics)); i++ {
+     topic := topTopics[i]
+     prose += fmt.Sprintf("- %s: %d mentions", topic.Label, topic.MentionCount)
+     if topic.QualityScore > 0 {
+       prose += fmt.Sprintf(" (quality: %.2f)", topic.QualityScore)
+     }
+     if len(topic.RepresentativeTexts) > 0 {
+       prose += fmt.Sprintf("\n  Example: \"%s\"", topic.RepresentativeTexts[0])
+     }
+     prose += "\n"
+   }
+   prose += "\n"
+
+   // Section 4: Top Issues (max 5)
+   prose += "Critical Issues:\n"
+   for i := 0; i < min(5, len(topIssues)); i++ {
+     issue := topIssues[i]
+     prose += fmt.Sprintf("- %s: %d mentions (pressure: %.2f)\n",
+       issue.Category, issue.MentionCount, issue.IssuePressureProxy)
+   }
+   ```
+
+   **Example output (for reference):**
+
+   ```text
+   Campaign Report: domain-facial-cleanser-vn
+   Platform: tiktok | Mentions: 2000
+   Analysis Window: 2026-02-01T10:17:00Z to 2026-02-10T21:24:00Z
+
+   Top Brands:
+   - Cetaphil: 234 mentions (11.7% share)
+   - CeraVe: 233 mentions (11.7% share)
+   - Hada Labo: 218 mentions (10.9% share)
+
+   Key Discussion Topics:
+   - Cleanser Brand Comparison: 364 mentions (quality: 0.98)
+     Example: "Dùng thử 5 loại sữa rửa mặt..."
+   - Recommendation by Skin Type: 375 mentions
+     Example: "Da dầu nên dùng gì?"
+
+   Critical Issues:
+   - fake_authenticity_concern: 200 mentions (pressure: 149.48)
+   ```
+
+3. **Embedding** — Send generated prose to embedding model
+   - Input: complete prose text (all sections concatenated)
+   - Output: vector → upsert to Qdrant
+
+4. **Metadata** — Store structured data separately (see Qdrant point structure below)
+
+**Qdrant Point Structure cho Layer 1:**
+
+```json
+{
+  "collection": "macro_insights",
+  "point_id": "digest:{run_id}",
+  "vector": [embed(generated_prose)],
+  "payload": {
+    // Envelope scoping
+    "project_id": "proj_cleanser_01",
+    "campaign_id": "camp_q1_2026",
+    "run_id": "run-20260323T165146Z",
+
+    // Document type identifier (hardcoded by knowledge-srv)
+    "rag_document_type": "report_digest",
+
+    // Window & domain context
+    "analysis_window_start": "2026-02-01T10:17:00Z",
+    "analysis_window_end": "2026-02-10T21:24:00Z",
+    "domain_overlay": "domain-facial-cleanser-vn",
+    "platform": "tiktok",
+    "total_mentions": 2000,
+
+    // Full structured data (for filtering & display)
+    "top_entities": [...],     // array of 5-10 entities
+    "top_topics": [...],       // array of 5-10 topics
+    "top_issues": [...]        // array of 5-10 issues
+  }
+}
 ```
-Report Digest for {domain_overlay} ({platform}, {total_mentions} mentions).
-Window: {analysis_window_start} to {analysis_window_end}.
-Top brands: {top_entities[0].entity_name} ({mention_share}%), {top_entities[1].entity_name} ({mention_share}%), ...
-Top topics: {top_topics[0].topic_label} ({mention_share}%), ...
-Top issues: {top_issues[0].issue_category} (pressure: {issue_pressure_proxy}), ...
-```
 
-1. Embed prose text → upsert vào `macro_insights`
+**Details:**
 
-**Qdrant Point cho Layer 1:**
+- **Collection:** `macro_insights` (shared with Layer 2 insights)
+- **Point ID format:** `digest:{run_id}` (e.g., `digest:run-20260323T165146Z`)
+  - Unique per run per project (run_id is globally unique)
+  - Enables upsert strategy: new run with same run_id replaces old digest
 
-- **Collection:** `macro_insights`
-- **Point ID:** `digest:{run_id}`
-- **Embed text:** Prose text tự build (xem trên)
-- **Metadata payload:**
-  - `project_id`, `campaign_id`, `run_id`
-  - `rag_document_type` = `"report_digest"` (knowledge-srv tự gán, không từ payload)
-  - `domain_overlay`, `platform`, `total_mentions`
-  - `analysis_window_start`, `analysis_window_end`
-  - `top_entities` (full structured array — cho filter/facet)
-  - `top_topics` (full structured array)
-  - `top_issues` (full structured array)
-- **Upsert strategy:** Mỗi run mới → upsert thay thế digest cũ cùng `project_id`
+- **Vector:** Generated prose text embedded
+  - Input to embedding model: complete multi-section prose (header + brands + topics + issues)
+  - Output: single vector for Qdrant
+
+- **Payload fields:**
+  - **Identifiers:** project_id, campaign_id, run_id (for scoping & filtering)
+  - **Document type:** rag_document_type = "report_digest" (hardcoded by knowledge-srv to distinguish from insight_card)
+  - **Context:** analysis_window_start/end, domain_overlay, platform, total_mentions
+  - **Structured data:** top_entities[], top_topics[], top_issues[] stored as-is for drill-down queries
+
+- **Upsert strategy:**
+  - Check if point with ID `digest:{run_id}` already exists
+  - If yes: replace (overwrite entire payload + vector)
+  - If no: create new
+  - Effect: latest digest per run always available; old digests from same run replaced
 
 ---
 
