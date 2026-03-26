@@ -3,23 +3,24 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"knowledge-srv/internal/chat"
 	"knowledge-srv/internal/chat/repository"
 	"knowledge-srv/internal/model"
+	"knowledge-srv/internal/notebook"
+	nbrepo "knowledge-srv/internal/notebook/repository"
 	"knowledge-srv/internal/search"
 )
 
-// Chat - Main RAG pipeline
-
+// Chat is the main RAG / NotebookLM routing entrypoint.
 func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.ChatInput) (chat.ChatOutput, error) {
 	startTime := time.Now()
 
-	// Classify query intent
 	intent := ClassifyIntent(input.Message)
-	notebookEnabled := uc.cfg.NotebookEnabled
 
 	if err := uc.validateChatInput(input); err != nil {
 		uc.l.Errorf(ctx, "chat.usecase.Chat: validateChatInput failed: %v", err)
@@ -54,11 +55,10 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		}
 		conversation = conv
 
-		// Load history (max N recent messages)
 		msgs, err := uc.repo.ListMessages(ctx, repository.ListMessagesOptions{
 			ConversationID: conversation.ID,
-			Limit:          chat.MaxHistoryMessages,
-			OrderASC:       true,
+			Limit:            chat.MaxHistoryMessages,
+			OrderASC:         true,
 		})
 		if err != nil {
 			uc.l.Warnf(ctx, "chat.usecase.Chat: ListMessages failed: %v", err)
@@ -66,19 +66,44 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		history = msgs
 	}
 
-	// Step 2: Route query based on intent
-	route := RouteQuery(input.Message, notebookEnabled)
+	notebookEnabled := uc.cfg.NotebookEnabled && uc.notebookUC != nil
+	notebookAvailable := false
+	if notebookEnabled {
+		ok, err := uc.notebookUC.HasSyncedForCampaign(ctx, input.CampaignID)
+		if err != nil {
+			uc.l.Warnf(ctx, "chat.usecase.Chat: HasSyncedForCampaign: %v", err)
+		} else {
+			notebookAvailable = ok
+		}
+	}
+
+	route := RouteQuery(input.Message, notebookEnabled, notebookAvailable)
 
 	if route.UseNotebook {
-		// Async notebook flow
-		jobID, err := uc.notebookUC.SubmitChatJob(ctx, sc, input.ConversationID, input.CampaignID, input.Message)
+		filtersJSON, _ := json.Marshal(input.Filters)
+		_, err := uc.repo.CreateMessage(ctx, repository.CreateMessageOptions{
+			ConversationID: conversation.ID,
+			Role:           "user",
+			Content:        input.Message,
+			FiltersUsed:    filtersJSON,
+		})
 		if err != nil {
-			uc.l.Errorf(ctx, "Failed to submit async notebook chat: %v", err)
+			uc.l.Warnf(ctx, "chat.usecase.Chat: CreateMessage (user, async) failed: %v", err)
+		}
+
+		jobID, err := uc.notebookUC.SubmitChatJob(ctx, sc, conversation.ID, input.CampaignID, input.Message)
+		if err != nil {
+			uc.l.Errorf(ctx, "chat.usecase.Chat: SubmitChatJob failed: %v", err)
 			return chat.ChatOutput{}, fmt.Errorf("notebook chat submission failed: %w", err)
 		}
 
+		_ = uc.repo.UpdateConversationLastMessage(ctx, repository.UpdateLastMessageOptions{
+			ConversationID: conversation.ID,
+			MessageCount:     conversation.MessageCount + 1,
+		})
+
 		return chat.ChatOutput{
-			ConversationID: input.ConversationID,
+			ConversationID: conversation.ID,
 			ChatJobID:      jobID,
 			IsAsync:        true,
 			QueryIntent:    string(intent),
@@ -86,7 +111,6 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		}, nil
 	}
 
-	// Step 3: Search relevant documents (via search.UseCase)
 	searchInput := search.SearchInput{
 		CampaignID: input.CampaignID,
 		Query:      input.Message,
@@ -112,35 +136,28 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		return chat.ChatOutput{}, fmt.Errorf("%w: %v", chat.ErrSearchFailed, err)
 	}
 
-	// Step 3: Build LLM prompt (with token window management)
 	prompt := uc.buildPrompt(input.Message, searchOutput.Results, history)
 
-	// Step 4: Call LLM
 	answer, err := uc.gemini.Generate(ctx, prompt)
 	if err != nil {
 		uc.l.Errorf(ctx, "chat.usecase.Chat: LLM failed: %v", err)
 		return chat.ChatOutput{}, fmt.Errorf("%w: %v", chat.ErrLLMFailed, err)
 	}
 
-	// Step 5: Extract citations from search results
 	citations := uc.extractCitations(searchOutput.Results)
-
-	// Step 6: Generate follow-up suggestions
 	suggestions := uc.generateSuggestions(input.Message, searchOutput)
 
-	// Step 7: Save user message
 	filtersJSON, _ := json.Marshal(input.Filters)
 	_, err = uc.repo.CreateMessage(ctx, repository.CreateMessageOptions{
 		ConversationID: conversation.ID,
-		Role:           "user",
-		Content:        input.Message,
-		FiltersUsed:    filtersJSON,
+		Role:             "user",
+		Content:          input.Message,
+		FiltersUsed:      filtersJSON,
 	})
 	if err != nil {
 		uc.l.Warnf(ctx, "chat.usecase.Chat: CreateMessage failed: %v", err)
 	}
 
-	// Step 8: Save assistant message
 	searchMeta := chat.SearchMeta{
 		TotalDocsSearched: searchOutput.TotalFound,
 		DocsUsed:          len(citations),
@@ -153,21 +170,20 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 
 	_, err = uc.repo.CreateMessage(ctx, repository.CreateMessageOptions{
 		ConversationID: conversation.ID,
-		Role:           "assistant",
-		Content:        answer,
-		Citations:      citationsJSON,
-		SearchMetadata: searchMetaJSON,
-		Suggestions:    suggestionsJSON,
+		Role:             "assistant",
+		Content:          answer,
+		Citations:        citationsJSON,
+		SearchMetadata:   searchMetaJSON,
+		Suggestions:      suggestionsJSON,
 	})
 	if err != nil {
 		uc.l.Warnf(ctx, "chat.usecase.Chat: CreateMessage failed: %v", err)
 	}
 
-	// Step 9: Update conversation metadata
 	newCount := conversation.MessageCount + 2
 	_ = uc.repo.UpdateConversationLastMessage(ctx, repository.UpdateLastMessageOptions{
 		ConversationID: conversation.ID,
-		MessageCount:   newCount,
+		MessageCount:     newCount,
 	})
 
 	return chat.ChatOutput{
@@ -197,18 +213,71 @@ func (uc *implUseCase) validateChatInput(input chat.ChatInput) error {
 
 func (uc *implUseCase) GetChatJobStatus(ctx context.Context, sc model.Scope, jobID string) (chat.JobStatusOutput, error) {
 	if uc.notebookUC == nil {
-		return chat.JobStatusOutput{}, fmt.Errorf("notebook integration is currently disabled")
+		return chat.JobStatusOutput{}, fmt.Errorf("notebook integration is disabled")
 	}
 
 	job, err := uc.notebookUC.GetChatJobStatus(ctx, sc, jobID)
 	if err != nil {
+		if errors.Is(err, nbrepo.ErrChatJobNotFound) {
+			return chat.JobStatusOutput{}, chat.ErrChatJobNotFound
+		}
 		return chat.JobStatusOutput{}, fmt.Errorf("failed to retrieve chat job status: %w", err)
 	}
 
-	return chat.JobStatusOutput{
-		State:   job.Status,
-		Answer:  job.NotebookAnswer,
-		Backend: "NotebookLM",
-	}, nil
+	timeout := uc.cfg.ChatTimeoutSec
+	if timeout <= 0 {
+		timeout = 45
+	}
+
+	if uc.cfg.NotebookFallbackEnabled && strings.EqualFold(job.Status, "PROCESSING") {
+		if created, perr := time.Parse(time.RFC3339, job.CreatedAt); perr == nil {
+			if time.Since(created) > time.Duration(timeout)*time.Second {
+				answer, ferr := uc.runQdrantFallbackAnswer(ctx, sc, job.CampaignID, job.UserMessage)
+				if ferr == nil && answer != "" {
+					_ = uc.notebookUC.ApplyChatFallback(ctx, jobID, answer)
+					job, _ = uc.notebookUC.GetChatJobStatus(ctx, sc, jobID)
+				}
+			}
+		}
+	}
+
+	return mapNotebookJobToStatus(job), nil
 }
 
+func (uc *implUseCase) runQdrantFallbackAnswer(ctx context.Context, sc model.Scope, campaignID, message string) (string, error) {
+	searchInput := search.SearchInput{
+		CampaignID: campaignID,
+		Query:      message,
+		Limit:      chat.MaxSearchDocs,
+		MinScore:   0.65,
+	}
+	searchOutput, err := uc.searchUC.Search(ctx, sc, searchInput)
+	if err != nil {
+		return "", err
+	}
+	prompt := uc.buildPrompt(message, searchOutput.Results, nil)
+	return uc.gemini.Generate(ctx, prompt)
+}
+
+func mapNotebookJobToStatus(job notebook.ChatJob) chat.JobStatusOutput {
+	backend := "NotebookLM"
+	if job.FallbackUsed {
+		backend = "Qdrant"
+	}
+
+	st := strings.ToUpper(strings.TrimSpace(job.Status))
+	switch st {
+	case "COMPLETED":
+		return chat.JobStatusOutput{State: chat.JobCompleted, Answer: job.NotebookAnswer, Backend: backend}
+	case "FAILED":
+		return chat.JobStatusOutput{State: chat.JobFailed, Backend: backend}
+	case "EXPIRED":
+		return chat.JobStatusOutput{State: chat.JobExpired, Backend: backend}
+	case "PENDING":
+		return chat.JobStatusOutput{State: chat.JobPending, Backend: backend}
+	case "PROCESSING":
+		return chat.JobStatusOutput{State: chat.JobProcessing, Backend: backend}
+	default:
+		return chat.JobStatusOutput{State: chat.JobProcessing, Backend: backend}
+	}
+}

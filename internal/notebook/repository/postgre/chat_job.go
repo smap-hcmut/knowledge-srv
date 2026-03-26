@@ -65,7 +65,7 @@ func (r *chatJobRepo) GetJobByID(ctx context.Context, jobID string) (notebook.Ch
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return notebook.ChatJob{}, errors.New("chat job not found")
+			return notebook.ChatJob{}, repository.ErrChatJobNotFound
 		}
 		return notebook.ChatJob{}, fmt.Errorf("failed to get chat job: %w", err)
 	}

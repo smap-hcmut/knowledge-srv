@@ -15,7 +15,9 @@ func (srv *HTTPServer) setupChatDomain(ctx context.Context, r *gin.RouterGroup, 
 
 	// Inject actual notebook.UseCase once it is fully implemented and wired.
 	chatCfg := chatUsecase.Config{
-		NotebookEnabled: srv.config.Notebook.Enabled,
+		NotebookEnabled:         srv.config.Notebook.Enabled,
+		NotebookFallbackEnabled: srv.config.Router.NotebookFallbackEnabled,
+		ChatTimeoutSec:          srv.config.Notebook.ChatTimeoutSec,
 	}
 
 	uc := chatUsecase.New(repo, srv.searchUC, srv.notebookUC, srv.geminiClient, chatCfg, srv.l)

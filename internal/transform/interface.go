@@ -1,8 +1,13 @@
 package transform
 
+import (
+	"context"
+
+	"knowledge-srv/internal/notebook"
+)
+
 //go:generate mockery --name UseCase
 type UseCase interface {
-	// BuildParts transforms a batch of analytics posts into markdown parts
-	// grouped by ISO week and split by MaxPostsPerPart.
-	BuildParts(input TransformInput) ([]MarkdownPart, error)
+	// BuildParts loads Layer 1–3 content from Qdrant and assembles markdown parts for NotebookLM.
+	BuildParts(ctx context.Context, input TransformInput) ([]notebook.MarkdownPart, error)
 }

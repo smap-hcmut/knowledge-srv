@@ -1,7 +1,13 @@
 package http
 
 import (
+	"net/http"
+
+	"knowledge-srv/internal/chat"
+	"knowledge-srv/internal/model"
+
 	"github.com/gin-gonic/gin"
+	"github.com/smap-hcmut/shared-libs/go/auth"
 	"github.com/smap-hcmut/shared-libs/go/response"
 )
 
@@ -32,7 +38,65 @@ func (h *handler) Chat(c *gin.Context) {
 		return
 	}
 
+	if o.IsAsync {
+		c.JSON(http.StatusAccepted, gin.H{
+			"status":           "ACCEPTED",
+			"conversation_id":  o.ConversationID,
+			"chat_job_id":      o.ChatJobID,
+			"query_intent":     o.QueryIntent,
+			"backend":          o.Backend,
+			"poll_jobs_path":   "GET /api/v1/knowledge/chat/jobs/:job_id",
+		})
+		return
+	}
+
 	response.OK(c, h.newChatResp(o))
+}
+
+// GetChatJob returns status of an async NotebookLM chat job (or Qdrant fallback result).
+func (h *handler) GetChatJob(c *gin.Context) {
+	ctx := c.Request.Context()
+	jobID := c.Param("job_id")
+	if jobID == "" {
+		response.Error(c, errJobIDRequired, h.discord)
+		return
+	}
+
+	sc := model.ToScope(auth.GetScopeFromContext(c.Request.Context()))
+	st, err := h.uc.GetChatJobStatus(ctx, sc, jobID)
+	if err != nil {
+		h.l.Errorf(ctx, "chat.delivery.http.GetChatJob: %v", err)
+		response.Error(c, h.mapError(err), h.discord)
+		return
+	}
+
+	switch st.State {
+	case chat.JobPending, chat.JobProcessing:
+		c.JSON(http.StatusAccepted, gin.H{
+			"status":  st.State,
+			"backend": st.Backend,
+			"message": "Job is still processing",
+		})
+	case chat.JobCompleted:
+		c.JSON(http.StatusOK, gin.H{
+			"status":  st.State,
+			"answer":  st.Answer,
+			"backend": st.Backend,
+		})
+	case chat.JobFailed:
+		c.JSON(http.StatusOK, gin.H{
+			"status":  st.State,
+			"backend": st.Backend,
+			"message": "Notebook job failed",
+		})
+	case chat.JobExpired:
+		c.JSON(http.StatusGone, gin.H{
+			"status":  st.State,
+			"message": "Job has expired",
+		})
+	default:
+		c.JSON(http.StatusOK, gin.H{"status": st.State, "backend": st.Backend})
+	}
 }
 
 // @Summary Get conversation detail

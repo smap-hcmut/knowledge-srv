@@ -7,6 +7,8 @@ import (
 	"knowledge-srv/internal/point"
 	"knowledge-srv/internal/point/repository"
 	pkgQdrant "knowledge-srv/pkg/qdrant"
+
+	pb "github.com/qdrant/go-client/qdrant"
 )
 
 func (r *implRepository) Search(ctx context.Context, opt repository.SearchOptions) ([]point.SearchOutput, error) {
@@ -52,5 +54,43 @@ func (r *implRepository) Delete(ctx context.Context, opt repository.DeleteOption
 }
 
 func (r *implRepository) Scroll(ctx context.Context, opt repository.ScrollOptions) ([]model.Point, error) {
-	return nil, fmt.Errorf("not implemented")
+	if opt.CollectionName == "" {
+		return nil, fmt.Errorf("collection name is required")
+	}
+	maxTotal := opt.Limit
+	if maxTotal == 0 {
+		maxTotal = 1000
+	}
+	const batch = 100
+	var all []model.Point
+	var pbOffset *pb.PointId
+	for uint64(len(all)) < maxTotal {
+		n := batch
+		if rem := int(maxTotal - uint64(len(all))); rem < n {
+			n = rem
+		}
+		if n <= 0 {
+			break
+		}
+		points, next, err := r.client.ScrollPoints(ctx, opt.CollectionName, opt.Filter, uint32(n), opt.WithPayload, pbOffset)
+		if err != nil {
+			r.l.Errorf(ctx, "point.repository.qdrant.Scroll: %v", err)
+			return nil, err
+		}
+		for _, p := range points {
+			all = append(all, model.Point{
+				ID:      p.ID,
+				Vector:  p.Vector,
+				Payload: p.Payload,
+			})
+		}
+		if next == nil || len(points) == 0 {
+			break
+		}
+		pbOffset = next
+	}
+	if uint64(len(all)) > maxTotal {
+		all = all[:maxTotal]
+	}
+	return all, nil
 }

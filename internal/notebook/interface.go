@@ -31,4 +31,10 @@ type UseCase interface {
 
 	// GetChatJobStatus retrieves the status and result of a chat job.
 	GetChatJobStatus(ctx context.Context, sc model.Scope, jobID string) (ChatJob, error)
+
+	// HasSyncedForCampaign is true when at least one NotebookLM source finished syncing for this campaign.
+	HasSyncedForCampaign(ctx context.Context, campaignID string) (bool, error)
+
+	// ApplyChatFallback completes a chat job with a Qdrant/Gemini answer when NotebookLM times out or is unavailable.
+	ApplyChatFallback(ctx context.Context, jobID, answer string) error
 }

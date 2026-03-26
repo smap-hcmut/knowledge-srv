@@ -6,25 +6,27 @@ import (
 	"knowledge-srv/internal/notebook"
 )
 
-// CampaignRepo defines the interface for campaign repository operations.
+// CampaignRepo maps campaigns to NotebookLM notebooks (one row per campaign + period).
 type CampaignRepo interface {
-	// Placeholder for campaign repository methods
+	GetByCampaignAndPeriod(ctx context.Context, campaignID, periodLabel string) (notebook.NotebookInfo, error)
+	Create(ctx context.Context, campaignID, periodLabel, notebookID string) error
 }
 
-// SourceRepo defines the interface for source repository operations.
+// SourceRepo tracks markdown source uploads for deduplication and webhook correlation.
 type SourceRepo interface {
-	// Placeholder for source repository methods
+	GetByContentHash(ctx context.Context, campaignID, contentHash string) (notebook.SourceRecord, error)
+	CreateUploading(ctx context.Context, in notebook.SourceUpsertInput) error
+	ListFailedRetryable(ctx context.Context, maxRetries int) ([]notebook.SourceRecord, error)
+	UpdateStatusByMaestroJobID(ctx context.Context, maestroJobID, status string, errMsg *string) error
+	HasSyncedForCampaign(ctx context.Context, campaignID string) (bool, error)
 }
 
-// SessionRepo defines the interface for session repository operations.
-type SessionRepo interface {
-	// Placeholder for session repository methods
-}
+// SessionRepo reserved for persisting Maestro browser sessions (optional).
+type SessionRepo interface{}
 
-// ChatJobRepo defines the interface for chat job repository operations.
+// ChatJobRepo persists async notebook chat jobs.
 type ChatJobRepo interface {
 	CreateJob(ctx context.Context, job notebook.ChatJob) (notebook.ChatJob, error)
 	GetJobByID(ctx context.Context, jobID string) (notebook.ChatJob, error)
 	UpdateJobStatus(ctx context.Context, jobID, status string, maestroJobID, answer *string, fallbackUsed bool) error
 }
-

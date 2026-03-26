@@ -6,22 +6,48 @@ Core service for SMAP platform handling RAG (Retrieval-Augmented Generation), Ve
 
 ## Architecture
 
-```
-                    ┌──────────────────────────────────────┐
-                    │          DELIVERY (HTTP/Kafka)       │
-                    └────┬──────────┬────────┬──────────┬──┘
-                         │          │        │          │
-                    ┌────▼────┐ ┌───▼───┐ ┌──▼───┐ ┌────▼──────┐
-                    │  chat   │ │search │ │report│ │ indexing  │
-                    │ (RAG)   │ │       │ │      │ │           │
-                    └────┬────┘ └───▲───┘ └──┬───┘ └───────────┘
-                         │          │        │
-                         └──────────┘────────┘
-                          (chat & report use search UseCase)
+### System Overview
 
-    Shared:  internal/model  (Scope, Entity models)
-    Pkg:     pkg/qdrant, pkg/gemini, pkg/voyage, pkg/minio, pkg/kafka...
+```mermaid
+flowchart TD
+    subgraph analysis-srv
+        K1[analytics.batch.completed]
+        K2[analytics.insights.published]
+        K3[analytics.report.digest]
+    end
+
+    subgraph knowledge-srv consumers
+        C1[Layer 3 Consumer<br/>handleBatchCompleted]
+        C2[Layer 2 Consumer<br/>handleInsightsPublished]
+        C3[Layer 1 Consumer<br/>handleReportDigest]
+    end
+
+    subgraph Qdrant
+        Q1["proj_{project_id}<br/>InsightMessage points"]
+        Q2["macro_insights<br/>insight_card points"]
+        Q3["macro_insights<br/>report_digest point"]
+    end
+
+    subgraph NotebookLM sync
+        T1[transformUC.BuildParts]
+        N1[notebookUC.EnsureNotebook]
+        N2[notebookUC.SyncPart]
+        M1[maestro.UploadSources]
+        WH[POST /internal/notebook/callback]
+    end
+
+    K1 -->|direct payload| C1 --> Q1
+    K2 -->|direct payload| C2 --> Q2
+    K3 -->|direct payload| C3 --> Q3
+
+    C3 -->|async goroutine<br/>if notebook.enabled| T1
+    T1 -->|scroll| Q1
+    T1 -->|scroll| Q2
+    T1 -->|scroll| Q3
+    T1 --> N1 --> N2 --> M1 --> WH
 ```
+
+**Shared layers:** `internal/model` (Scope, entities), infra clients in `pkg/` (Qdrant, Gemini, Voyage, MinIO, Kafka, Maestro).
 
 **4 Core Domains:**
 
@@ -29,6 +55,46 @@ Core service for SMAP platform handling RAG (Retrieval-Augmented Generation), Ve
 - **Search**: Advanced vector search with filters (Sentiment, Aspect, Date) and Caching layers.
 - **Chat**: RAG Q&A system with context-aware responses and dynamic follow-up suggestions.
 - **Report**: Asynchronous report generation using Map-Reduce pattern (Aggregate -> Generate -> Compile).
+
+### Data Ingestion + NotebookLM Sync
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant K3 as analytics.report.digest
+    participant C3 as ReportDigest Consumer
+    participant Q3 as Qdrant macro_insights
+    participant T1 as transformUC
+    participant N2 as notebookUC
+    participant M1 as Maestro
+    K3->>C3: digest payload (run_id, campaign_id, project_id)
+    C3->>Q3: IndexDigest (blocking upsert)
+    alt notebook.enabled && campaign_id != ""
+        C3-->>T1: BuildParts (bg goroutine)
+        T1->>Q3: Scroll report_digest + insight_card
+        T1->>Q1: Scroll proj_{project_id} (HIGH or impact_score > 60)
+        T1-->>N2: SyncPart(parts)
+        N2-->>M1: UploadSources (async job)
+        M1-->>N2: Webhook callback (upload_sources)
+    end
+```
+
+### Chat Flow (Qdrant vs NotebookLM)
+
+```mermaid
+flowchart TD
+    A[POST /api/v1/knowledge/chat] --> B{ClassifyIntent}
+    B -->|STRUCTURED or default| Q[Qdrant search + Gemini]
+    B -->|NARRATIVE| C{notebook.enabled && notebookAvailable}
+    C -->|no| Q
+    C -->|yes| J[SubmitChatJob -> 202 + chat_job_id]
+    J --> P[Client polls GET /api/v1/knowledge/chat/jobs/:job_id]
+    P -->|processing| P
+    P -->|completed| R[Return NotebookLM answer]
+    P -->|timeout| F[Fallback Qdrant answer if enabled]
+```
+
+**Notebook availability**: `notebookAvailable = HasSyncedForCampaign` (at least one `notebook_sources.status = SYNCED`).
 
 ---
 
@@ -280,4 +346,4 @@ Part of SMAP graduation project.
 
 ---
 
-**Last Updated**: 17/02/2026
+**Last Updated**: 26/03/2026

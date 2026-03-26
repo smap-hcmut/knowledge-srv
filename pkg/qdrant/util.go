@@ -2,9 +2,21 @@ package qdrant
 
 import (
 	"fmt"
+	"strconv"
 
 	pb "github.com/qdrant/go-client/qdrant"
 )
+
+// PointIDString returns a stable string form for Qdrant point IDs (UUID or numeric hash id).
+func PointIDString(id *pb.PointId) string {
+	if id == nil {
+		return ""
+	}
+	if u := id.GetUuid(); u != "" {
+		return u
+	}
+	return strconv.FormatUint(id.GetNum(), 10)
+}
 
 // valueToInterface converts a qdrant Value to a Go interface{} (for payload extraction).
 func valueToInterface(v *pb.Value) interface{} {
