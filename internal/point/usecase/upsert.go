@@ -8,6 +8,7 @@ import (
 
 func (uc *implUseCase) Upsert(ctx context.Context, input point.UpsertInput) error {
 	return uc.repo.Upsert(ctx, repository.UpsertOptions{
-		Points: input.Points,
+		CollectionName: input.CollectionName,
+		Points:         input.Points,
 	})
 }

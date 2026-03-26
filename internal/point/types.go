@@ -9,6 +9,7 @@ import (
 type Filter = qdrant.Filter
 
 type SearchInput struct {
+	CollectionName string
 	Vector         []float32
 	Filter         *Filter
 	Limit          uint64
@@ -23,29 +24,34 @@ type SearchOutput struct {
 }
 
 type UpsertInput struct {
-	Points []model.Point
+	CollectionName string
+	Points         []model.Point
 }
 
 type CountInput struct {
-	Filter *Filter
+	CollectionName string
+	Filter         *Filter
 }
 
 type DeleteInput struct {
-	Filter *Filter
-	Points []string
+	CollectionName string
+	Filter         *Filter
+	Points         []string
 }
 
 type ScrollInput struct {
-	Filter      *Filter
-	Limit       uint64
-	WithPayload bool
-	Offset      *string
+	CollectionName string
+	Filter         *Filter
+	Limit          uint64
+	WithPayload    bool
+	Offset         *string
 }
 
 type FacetInput struct {
-	Key    string
-	Filter *Filter
-	Limit  uint64
+	CollectionName string
+	Key            string
+	Filter         *Filter
+	Limit          uint64
 }
 
 type FacetOutput struct {

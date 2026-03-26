@@ -2,19 +2,15 @@ package qdrant
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
+	"regexp"
 	"time"
 
 	pb "github.com/qdrant/go-client/qdrant"
 )
 
-// Close closes the Qdrant connection.
-func (c *qdrantImpl) Close() error {
-	if c.conn != nil {
-		return c.conn.Close()
-	}
-	return nil
-}
+// ... (rest of the code remains the same)
 
 // Ping checks if Qdrant is reachable.
 func (c *qdrantImpl) Ping(ctx context.Context) error {
@@ -145,8 +141,16 @@ func (c *qdrantImpl) UpsertPoint(ctx context.Context, collectionName string, poi
 	if err != nil {
 		return WrapError(err, "failed to convert payload")
 	}
+	// Determine if ID is UUID or string
+	var pointId *pb.PointId
+	if isValidUUID(point.ID) {
+		pointId = &pb.PointId{PointIdOptions: &pb.PointId_Uuid{Uuid: point.ID}}
+	} else {
+		pointId = &pb.PointId{PointIdOptions: &pb.PointId_Num{Num: generateHashNumber(point.ID)}}
+	}
+
 	qdrantPoint := &pb.PointStruct{
-		Id:      &pb.PointId{PointIdOptions: &pb.PointId_Uuid{Uuid: point.ID}},
+		Id:      pointId,
 		Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: point.Vector}}},
 		Payload: payloadMap,
 	}
@@ -180,8 +184,16 @@ func (c *qdrantImpl) UpsertPoints(ctx context.Context, collectionName string, po
 		if err != nil {
 			return WrapError(err, "failed to convert payload")
 		}
+		// Determine if ID is UUID or string
+		var pointId *pb.PointId
+		if isValidUUID(point.ID) {
+			pointId = &pb.PointId{PointIdOptions: &pb.PointId_Uuid{Uuid: point.ID}}
+		} else {
+			pointId = &pb.PointId{PointIdOptions: &pb.PointId_Num{Num: generateHashNumber(point.ID)}}
+		}
+
 		qdrantPoints = append(qdrantPoints, &pb.PointStruct{
-			Id:      &pb.PointId{PointIdOptions: &pb.PointId_Uuid{Uuid: point.ID}},
+			Id:      pointId,
 			Vectors: &pb.Vectors{VectorsOptions: &pb.Vectors_Vector{Vector: &pb.Vector{Data: point.Vector}}},
 			Payload: payloadMap,
 		})
@@ -368,4 +380,26 @@ func (c *qdrantImpl) searchResultsFromHits(hits []*pb.ScoredPoint) []SearchResul
 		results = append(results, SearchResult{ID: id, Score: hit.Score, Payload: payload})
 	}
 	return results
+}
+
+// isValidUUID checks if the string is a valid UUID
+func isValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
+}
+
+// generateHashNumber generates a numeric hash from string ID
+func generateHashNumber(id string) uint64 {
+	hash := md5.Sum([]byte(id))
+	// Use first 8 bytes to create a uint64
+	return uint64(hash[0])<<56 | uint64(hash[1])<<48 | uint64(hash[2])<<40 | uint64(hash[3])<<32 |
+		uint64(hash[4])<<24 | uint64(hash[5])<<16 | uint64(hash[6])<<8 | uint64(hash[7])
+}
+
+// Close closes the gRPC connection
+func (c *qdrantImpl) Close() error {
+	if c.conn != nil {
+		return c.conn.Close()
+	}
+	return nil
 }

@@ -7,6 +7,7 @@ import (
 )
 
 type SearchOptions struct {
+	CollectionName string
 	Vector         []float32
 	Filter         *qdrant.Filter
 	Limit          uint64
@@ -15,27 +16,32 @@ type SearchOptions struct {
 }
 
 type UpsertOptions struct {
-	Points []model.Point
+	CollectionName string
+	Points         []model.Point
 }
 
 type CountOptions struct {
-	Filter *qdrant.Filter
+	CollectionName string
+	Filter         *qdrant.Filter
 }
 
 type DeleteOptions struct {
-	Filter *qdrant.Filter
-	Points []string
+	CollectionName string
+	Filter         *qdrant.Filter
+	Points         []string
 }
 
 type ScrollOptions struct {
-	Filter      *qdrant.Filter
-	Limit       uint64
-	WithPayload bool
-	Offset      *string
+	CollectionName string
+	Filter         *qdrant.Filter
+	Limit          uint64
+	WithPayload    bool
+	Offset         *string
 }
 
 type FacetOptions struct {
-	Key    string
-	Filter *qdrant.Filter
-	Limit  uint64
+	CollectionName string
+	Key            string
+	Filter         *qdrant.Filter
+	Limit          uint64
 }

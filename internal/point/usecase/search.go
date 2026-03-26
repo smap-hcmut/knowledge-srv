@@ -8,6 +8,7 @@ import (
 
 func (uc *implUseCase) Search(ctx context.Context, input point.SearchInput) ([]point.SearchOutput, error) {
 	return uc.repo.Search(ctx, repository.SearchOptions{
+		CollectionName: input.CollectionName,
 		Vector:         input.Vector,
 		Filter:         input.Filter,
 		Limit:          input.Limit,
