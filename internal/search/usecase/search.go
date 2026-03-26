@@ -71,6 +71,7 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	// Step 5: Search Qdrant (Via Point Domain)
 	// Note: ScoreThreshold is implicit or handled by post-filtering
 	pointResults, err := uc.pointUC.Search(ctx, point.SearchInput{
+		CollectionName: point.CollectionAnalyticsLegacy,
 		Vector:         vector,
 		Filter:         filter,
 		Limit:          uint64(limit),

@@ -10,7 +10,7 @@ import (
 
 func (r *implRepository) Facet(ctx context.Context, input repository.FacetOptions) ([]point.FacetOutput, error) {
 
-	pkgResults, err := r.client.Facet(ctx, collectionName, input.Key, input.Limit, input.Filter)
+	pkgResults, err := r.client.Facet(ctx, input.CollectionName, input.Key, input.Limit, input.Filter)
 	if err != nil {
 		r.l.Errorf(ctx, "point.repository.qdrant.Facet: Failed to facet points: %v", err)
 		return nil, err

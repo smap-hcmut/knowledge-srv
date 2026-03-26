@@ -22,6 +22,7 @@ const (
 type IndexInput struct {
 	BatchID     string
 	ProjectID   string
+	CampaignID  string // Optional: for notebook sync. Fallback: resolve via project-srv.
 	FileURL     string
 	RecordCount int
 }
@@ -176,4 +177,149 @@ type IndexRecordResult struct {
 	Status       string
 	ErrorType    string
 	ErrorMessage string
+}
+
+type IndexInsightInput struct {
+	ProjectID           string
+	CampaignID          string
+	RunID               string
+	InsightType         string
+	Title               string
+	Summary             string
+	Confidence          float64
+	AnalysisWindowStart string
+	AnalysisWindowEnd   string
+	SupportingMetrics   map[string]interface{}
+	EvidenceReferences  []string
+}
+
+type IndexInsightOutput struct {
+	PointID  string
+	Duration time.Duration
+}
+
+type IndexDigestInput struct {
+	ProjectID           string
+	CampaignID          string
+	RunID               string
+	AnalysisWindowStart string
+	AnalysisWindowEnd   string
+	DomainOverlay       string
+	Platform            string
+	TotalMentions       int
+	TopEntities         []TopEntityInput
+	TopTopics           []TopTopicInput
+	TopIssues           []TopIssueInput
+}
+
+type TopEntityInput struct {
+	CanonicalEntityID string
+	EntityName        string
+	EntityType        string
+	MentionCount      int
+	MentionShare      float64
+}
+
+type TopTopicInput struct {
+	TopicKey            string
+	TopicLabel          string
+	MentionCount        int
+	MentionShare        float64
+	BuzzScoreProxy      *float64
+	QualityScore        *float64
+	RepresentativeTexts []string
+}
+
+type TopIssueInput struct {
+	IssueCategory      string
+	MentionCount       int
+	IssuePressureProxy float64
+	SeverityMix        *SeverityMixInput
+}
+
+type SeverityMixInput struct {
+	Low    float64
+	Medium float64
+	High   float64
+}
+
+type IndexDigestOutput struct {
+	PointID  string
+	Duration time.Duration
+}
+
+// IndexBatchInput - Input for direct payload indexing flow (Layer 3).
+type IndexBatchInput struct {
+	ProjectID  string
+	CampaignID string
+	Documents  []InsightMessageInput
+}
+
+// InsightMessageInput - Domain-level representation of one insight document.
+type InsightMessageInput struct {
+	Identity InsightIdentityInput
+	Content  InsightContentInput
+	NLP      InsightNLPInput
+	Business InsightBusinessInput
+	RAG      bool
+}
+
+type InsightIdentityInput struct {
+	UapID        string
+	UapType      string
+	UapMediaType string
+	Platform     string
+	PublishedAt  string
+}
+
+type InsightContentInput struct {
+	CleanText string
+	Summary   string
+}
+
+type InsightNLPInput struct {
+	Sentiment InsightSentimentInput
+	Aspects   []InsightAspectInput
+	Entities  []InsightEntityInput
+}
+
+type InsightSentimentInput struct {
+	Label string
+	Score float64
+}
+
+type InsightAspectInput struct {
+	Aspect   string
+	Polarity string
+}
+
+type InsightEntityInput struct {
+	Type  string
+	Value string
+}
+
+type InsightBusinessInput struct {
+	Impact InsightImpactInput
+}
+
+type InsightImpactInput struct {
+	Engagement  InsightEngagementInput
+	ImpactScore float64
+	Priority    string
+}
+
+type InsightEngagementInput struct {
+	Likes    int
+	Comments int
+	Shares   int
+	Views    int
+}
+
+type IndexBatchOutput struct {
+	ProjectID    string
+	TotalRecords int
+	Indexed      int
+	Skipped      int
+	Failed       int
+	Duration     time.Duration
 }

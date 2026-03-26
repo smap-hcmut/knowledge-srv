@@ -15,4 +15,5 @@ type QdrantRepository interface {
 	Delete(ctx context.Context, opt DeleteOptions) error
 	Scroll(ctx context.Context, opt ScrollOptions) ([]model.Point, error)
 	Facet(ctx context.Context, opt FacetOptions) ([]point.FacetOutput, error)
+	EnsureCollection(ctx context.Context, name string, vectorSize uint64) error
 }

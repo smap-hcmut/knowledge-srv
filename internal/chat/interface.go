@@ -11,4 +11,5 @@ type UseCase interface {
 	GetConversation(ctx context.Context, sc model.Scope, input GetConversationInput) (ConversationOutput, error)
 	ListConversations(ctx context.Context, sc model.Scope, input ListConversationsInput) ([]ConversationOutput, error)
 	GetSuggestions(ctx context.Context, sc model.Scope, input GetSuggestionsInput) (SuggestionOutput, error)
+	GetChatJobStatus(ctx context.Context, sc model.Scope, jobID string) (JobStatusOutput, error)
 }

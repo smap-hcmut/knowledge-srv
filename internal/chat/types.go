@@ -10,6 +10,18 @@ const (
 	MaxMessageLength   = 2000
 	MaxTokenWindow     = 28000
 	ModelUsed          = "gemini-2.0-flash"
+
+	JobPending    = "PENDING"
+	JobProcessing = "PROCESSING"
+	JobCompleted  = "COMPLETED"
+	JobFailed     = "FAILED"
+	JobExpired    = "EXPIRED"
+
+	JobStatusPending    = "PENDING"
+	JobStatusProcessing = "PROCESSING"
+	JobStatusCompleted  = "COMPLETED"
+	JobStatusFailed     = "FAILED"
+	JobStatusExpired    = "EXPIRED"
 )
 
 type ChatInput struct {
@@ -48,7 +60,18 @@ type ChatOutput struct {
 	Citations      []Citation
 	Suggestions    []string
 	SearchMetadata SearchMeta
+	Backend        string
+	QueryIntent    string
+	ChatJobID      string
+	IsAsync        bool
 }
+
+type JobStatusOutput struct {
+	State   string
+	Answer  string
+	Backend string
+}
+
 
 type Citation struct {
 	ID             string

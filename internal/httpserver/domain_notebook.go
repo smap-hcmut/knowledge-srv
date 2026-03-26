@@ -1,0 +1,46 @@
+package httpserver
+
+import (
+	"context"
+
+	notebookHTTP "knowledge-srv/internal/notebook/delivery/http"
+	notebookPostgre "knowledge-srv/internal/notebook/repository/postgre"
+	notebookUsecase "knowledge-srv/internal/notebook/usecase"
+
+	"github.com/gin-gonic/gin"
+)
+
+// setupNotebookDomain initializes the components related to the notebook domain.
+func (srv *HTTPServer) setupNotebookDomain(ctx context.Context, r *gin.RouterGroup) error {
+	// Initialize Postgres repositories
+	// Notes: CampaignRepo, SourceRepo, SessionRepo would normally be initialized here too.
+	chatJobRepo := notebookPostgre.NewChatJobRepo(srv.postgresDB)
+
+	cfg := notebookUsecase.Config{
+		NotebookEnabled:    srv.config.Notebook.Enabled,
+		JobPollIntervalMs:  2000,
+		JobPollMaxAttempts: 30,
+		WebhookCallbackURL: srv.config.Maestro.WebhookCallbackURL,
+		WebhookSecret:      srv.config.Maestro.WebhookSecret,
+	}
+
+	uc := notebookUsecase.NewUseCase(
+		srv.maestroClient,
+		nil, // CampaignRepo (not used directly in Chat)
+		nil, // SourceRepo
+		nil, // SessionRepo
+		chatJobRepo,
+		cfg,
+		srv.l,
+	)
+
+	// Setup HTTP Handlers representing the webhooks
+	handler := notebookHTTP.New(srv.l, uc, cfg.WebhookSecret)
+	
+	// Register Routes under /internal
+	handler.RegisterRoutes(r)
+
+	srv.notebookUC = uc
+	srv.l.Infof(ctx, "Notebook domain registered")
+	return nil
+}

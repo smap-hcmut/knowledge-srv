@@ -220,6 +220,7 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 	upsertStart := time.Now()
 	// Call Point Domain
 	err = uc.pointUC.Upsert(ctx, point.UpsertInput{
+		CollectionName: fmt.Sprintf("proj_%s", ip.ProjectID),
 		Points: []model.Point{
 			{
 				ID:      pointID,
@@ -334,72 +335,48 @@ func (uc *implUseCase) generateContentHash(content string) string {
 
 // prepareQdrantPayload - Build Qdrant payload from analytics post
 func (uc *implUseCase) prepareQdrantPayload(record indexing.AnalyticsPost) map[string]interface{} {
-	payload := map[string]interface{}{
-		"analytics_id":            record.ID,
-		"project_id":              record.ProjectID,
-		"source_id":               record.SourceID,
-		"content":                 uc.truncateContent(record.Content, 1000),
-		"content_created_at":      record.ContentCreatedAt.Unix(),
-		"ingested_at":             record.IngestedAt.Unix(),
-		"platform":                record.Platform,
-		"overall_sentiment":       record.OverallSentiment,
-		"overall_sentiment_score": record.OverallSentimentScore,
-		"sentiment_confidence":    record.SentimentConfidence,
-		"keywords":                record.Keywords,
-		"risk_level":              record.RiskLevel,
-		"risk_score":              record.RiskScore,
-		"requires_attention":      record.RequiresAttention,
-		"engagement_score":        record.EngagementScore,
-		"virality_score":          record.ViralityScore,
-		"influence_score":         record.InfluenceScore,
-		"reach_estimate":          record.ReachEstimate,
-		"content_quality_score":   record.ContentQualityScore,
-		"is_spam":                 record.IsSpam,
-		"is_bot":                  record.IsBot,
-		"language":                record.Language,
-		"toxicity_score":          record.ToxicityScore,
-	}
-
-	// Aspects
-	if len(record.Aspects) > 0 {
-		aspects := make([]map[string]interface{}, len(record.Aspects))
-		for i, aspect := range record.Aspects {
-			aspects[i] = map[string]interface{}{
-				"aspect":              aspect.Aspect,
-				"aspect_display_name": aspect.AspectDisplayName,
-				"sentiment":           aspect.Sentiment,
-				"sentiment_score":     aspect.SentimentScore,
-				"keywords":            aspect.Keywords,
-				"impact_score":        aspect.ImpactScore,
-			}
-		}
-		payload["aspects"] = aspects
-	}
-
-	// Metadata
-	metadata := map[string]interface{}{
-		"author":              record.UAPMetadata.Author,
-		"author_display_name": record.UAPMetadata.AuthorDisplayName,
-		"author_followers":    record.UAPMetadata.AuthorFollowers,
-		"engagement": map[string]interface{}{
-			"views":    record.UAPMetadata.Engagement.Views,
-			"likes":    record.UAPMetadata.Engagement.Likes,
-			"comments": record.UAPMetadata.Engagement.Comments,
-			"shares":   record.UAPMetadata.Engagement.Shares,
+	payload := analyticsPayload{
+		AnalyticsID:           record.ID,
+		ProjectID:             record.ProjectID,
+		SourceID:              record.SourceID,
+		Content:               uc.truncateContent(record.Content, 1000),
+		ContentCreatedAt:      record.ContentCreatedAt.Unix(),
+		IngestedAt:            record.IngestedAt.Unix(),
+		Platform:              record.Platform,
+		OverallSentiment:      record.OverallSentiment,
+		OverallSentimentScore: record.OverallSentimentScore,
+		SentimentConfidence:   record.SentimentConfidence,
+		Keywords:              record.Keywords,
+		RiskLevel:             record.RiskLevel,
+		RiskScore:             record.RiskScore,
+		RequiresAttention:     record.RequiresAttention,
+		EngagementScore:       record.EngagementScore,
+		ViralityScore:         record.ViralityScore,
+		InfluenceScore:        record.InfluenceScore,
+		ReachEstimate:         record.ReachEstimate,
+		ContentQualityScore:   record.ContentQualityScore,
+		IsSpam:                record.IsSpam,
+		IsBot:                 record.IsBot,
+		Language:              record.Language,
+		ToxicityScore:         record.ToxicityScore,
+		Aspects:               mapAnalyticsAspects(record.Aspects),
+		Metadata: analyticsMetadataPayload{
+			Author:            record.UAPMetadata.Author,
+			AuthorDisplayName: record.UAPMetadata.AuthorDisplayName,
+			AuthorFollowers:   record.UAPMetadata.AuthorFollowers,
+			Engagement: analyticsEngagementPayload{
+				Views:    record.UAPMetadata.Engagement.Views,
+				Likes:    record.UAPMetadata.Engagement.Likes,
+				Comments: record.UAPMetadata.Engagement.Comments,
+				Shares:   record.UAPMetadata.Engagement.Shares,
+			},
+			VideoURL: record.UAPMetadata.VideoURL,
+			Hashtags: record.UAPMetadata.Hashtags,
+			Location: record.UAPMetadata.Location,
 		},
 	}
-	if record.UAPMetadata.VideoURL != "" {
-		metadata["video_url"] = record.UAPMetadata.VideoURL
-	}
-	if len(record.UAPMetadata.Hashtags) > 0 {
-		metadata["hashtags"] = record.UAPMetadata.Hashtags
-	}
-	if record.UAPMetadata.Location != "" {
-		metadata["location"] = record.UAPMetadata.Location
-	}
-	payload["metadata"] = metadata
 
-	return payload
+	return uc.payloadFromStruct(payload)
 }
 
 // truncateContent - Truncate content to max length

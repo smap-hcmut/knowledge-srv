@@ -8,6 +8,7 @@ import (
 
 func (uc *implUseCase) Count(ctx context.Context, input point.CountInput) (uint64, error) {
 	return uc.repo.Count(ctx, repository.CountOptions{
-		Filter: input.Filter,
+		CollectionName: input.CollectionName,
+		Filter:         input.Filter,
 	})
 }

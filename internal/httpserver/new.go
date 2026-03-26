@@ -5,8 +5,10 @@ import (
 	"errors"
 	"knowledge-srv/config"
 	"knowledge-srv/internal/embedding"
+	"knowledge-srv/internal/notebook"
 	"knowledge-srv/internal/point"
 	"knowledge-srv/internal/search"
+	"knowledge-srv/pkg/maestro"
 	pkgQdrant "knowledge-srv/pkg/qdrant"
 	"knowledge-srv/pkg/voyage"
 
@@ -45,6 +47,9 @@ type HTTPServer struct {
 	cookieConfig config.CookieConfig
 	encrypter    encrypter.Encrypter
 
+	// Maestro - NotebookLM automation (optional)
+	maestroClient maestro.IMaestro
+
 	// Monitoring & Notification Configuration
 	discord discord.IDiscord
 
@@ -52,6 +57,7 @@ type HTTPServer struct {
 	pointUC     point.UseCase
 	embeddingUC embedding.UseCase
 	searchUC    search.UseCase
+	notebookUC  notebook.UseCase
 }
 
 type Config struct {
@@ -86,6 +92,9 @@ type Config struct {
 	CookieConfig config.CookieConfig
 	Encrypter    encrypter.Encrypter
 
+	// Maestro - NotebookLM automation (optional)
+	MaestroClient maestro.IMaestro
+
 	// Monitoring & Notification Configuration
 	Discord discord.IDiscord
 }
@@ -116,6 +125,9 @@ func New(logger log.Logger, cfg Config) (*HTTPServer, error) {
 		redisClient:  cfg.RedisClient,
 		cookieConfig: cfg.CookieConfig,
 		encrypter:    cfg.Encrypter,
+
+		// Maestro - NotebookLM automation (optional)
+		maestroClient: cfg.MaestroClient,
 
 		// Monitoring & Notification Configuration
 		discord: cfg.Discord,

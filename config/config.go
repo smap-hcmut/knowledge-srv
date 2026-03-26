@@ -46,6 +46,15 @@ type Config struct {
 	Encrypter      EncrypterConfig
 	InternalConfig InternalConfig
 
+	// Maestro - NotebookLM browser automation
+	Maestro MaestroConfig
+
+	// Notebook - NotebookLM sync configuration
+	Notebook NotebookConfig
+
+	// Router - Query routing configuration
+	Router RouterConfig
+
 	// Monitoring & Notification Configuration
 	Discord DiscordConfig
 }
@@ -162,6 +171,35 @@ type InternalConfig struct {
 	InternalKey string
 }
 
+// MaestroConfig is the configuration for Maestro NotebookLM automation API
+type MaestroConfig struct {
+	BaseURL                  string
+	APIKey                   string
+	SessionEnv               string // "LOCAL" | "BROWSERBASE"
+	SessionHealthIntervalSec int
+	JobPollIntervalMs        int
+	JobPollMaxAttempts       int
+	WebhookSecret            string
+	WebhookCallbackURL       string
+}
+
+// NotebookConfig is the configuration for NotebookLM sync
+type NotebookConfig struct {
+	Enabled              bool
+	MaxPostsPerPart      int
+	RetentionQuarters    int
+	SyncRetryIntervalMin int
+	SyncMaxRetries       int
+	ChatTimeoutSec       int
+}
+
+// RouterConfig is the configuration for query routing between Qdrant and NotebookLM
+type RouterConfig struct {
+	DefaultBackend          string // "qdrant" | "notebook" | "hybrid"
+	NotebookFallbackEnabled bool
+	IntentClassifier        string // "rules" | "gemini_flash"
+}
+
 // Load loads configuration using Viper
 func Load() (*Config, error) {
 	// Set config file name and paths
@@ -271,6 +309,29 @@ func Load() (*Config, error) {
 	// Discord
 	cfg.Discord.WebhookURL = viper.GetString("discord.webhook_url")
 
+	// Maestro - NotebookLM automation
+	cfg.Maestro.BaseURL = viper.GetString("maestro.base_url")
+	cfg.Maestro.APIKey = viper.GetString("maestro.api_key")
+	cfg.Maestro.SessionEnv = viper.GetString("maestro.session_env")
+	cfg.Maestro.SessionHealthIntervalSec = viper.GetInt("maestro.session_health_interval_sec")
+	cfg.Maestro.JobPollIntervalMs = viper.GetInt("maestro.job_poll_interval_ms")
+	cfg.Maestro.JobPollMaxAttempts = viper.GetInt("maestro.job_poll_max_attempts")
+	cfg.Maestro.WebhookSecret = viper.GetString("maestro.webhook_secret")
+	cfg.Maestro.WebhookCallbackURL = viper.GetString("maestro.webhook_callback_url")
+
+	// Notebook - NotebookLM sync
+	cfg.Notebook.Enabled = viper.GetBool("notebook.enabled")
+	cfg.Notebook.MaxPostsPerPart = viper.GetInt("notebook.max_posts_per_part")
+	cfg.Notebook.RetentionQuarters = viper.GetInt("notebook.retention_quarters")
+	cfg.Notebook.SyncRetryIntervalMin = viper.GetInt("notebook.sync_retry_interval_min")
+	cfg.Notebook.SyncMaxRetries = viper.GetInt("notebook.sync_max_retries")
+	cfg.Notebook.ChatTimeoutSec = viper.GetInt("notebook.chat_timeout_sec")
+
+	// Router - Query routing
+	cfg.Router.DefaultBackend = viper.GetString("router.default_backend")
+	cfg.Router.NotebookFallbackEnabled = viper.GetBool("router.notebook_fallback_enabled")
+	cfg.Router.IntentClassifier = viper.GetString("router.intent_classifier")
+
 	// Validate required fields
 	if err := validate(cfg); err != nil {
 		return nil, err
@@ -354,6 +415,27 @@ func setDefaults() {
 	viper.SetDefault("blacklist.enabled", true)
 	viper.SetDefault("blacklist.backend", "redis")
 	viper.SetDefault("blacklist.key_prefix", "blacklist:")
+
+	// Maestro
+	viper.SetDefault("maestro.base_url", "https://maestro.tantai.dev/maestro")
+	viper.SetDefault("maestro.session_env", "LOCAL")
+	viper.SetDefault("maestro.session_health_interval_sec", 60)
+	viper.SetDefault("maestro.job_poll_interval_ms", 2000)
+	viper.SetDefault("maestro.job_poll_max_attempts", 30)
+	viper.SetDefault("maestro.webhook_callback_url", "http://knowledge-api/internal/notebook/callback")
+
+	// Notebook
+	viper.SetDefault("notebook.enabled", false)
+	viper.SetDefault("notebook.max_posts_per_part", 50)
+	viper.SetDefault("notebook.retention_quarters", 2)
+	viper.SetDefault("notebook.sync_retry_interval_min", 30)
+	viper.SetDefault("notebook.sync_max_retries", 3)
+	viper.SetDefault("notebook.chat_timeout_sec", 45)
+
+	// Router
+	viper.SetDefault("router.default_backend", "qdrant")
+	viper.SetDefault("router.notebook_fallback_enabled", true)
+	viper.SetDefault("router.intent_classifier", "rules")
 }
 
 func validate(cfg *Config) error {

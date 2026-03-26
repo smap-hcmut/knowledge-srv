@@ -24,3 +24,8 @@ CLAUDE.md
 # Auth config with secrets
 knowledge-config.yaml
 secrets/
+
+.idea/
+
+documents/refactor-input/uap-batches
+documents/refactor-input/outputSRM
