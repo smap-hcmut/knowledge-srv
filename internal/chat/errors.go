@@ -10,4 +10,5 @@ var (
 	ErrLLMFailed            = errors.New("chat: LLM generation failed")
 	ErrSearchFailed         = errors.New("chat: search failed")
 	ErrConversationArchived = errors.New("chat: conversation is archived")
+	ErrChatJobNotFound      = errors.New("chat: job not found")
 )

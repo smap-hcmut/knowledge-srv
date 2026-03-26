@@ -365,6 +365,50 @@ func (c *qdrantImpl) CountPoints(ctx context.Context, collectionName string) (ui
 	return resp.Result.Count, nil
 }
 
+// ScrollPoints scrolls points with an optional filter (offset is the next-page cursor from a previous response).
+func (c *qdrantImpl) ScrollPoints(ctx context.Context, collectionName string, filter *pb.Filter, limit uint32, withPayload bool, offset *pb.PointId) ([]Point, *pb.PointId, error) {
+	if collectionName == "" {
+		return nil, nil, ErrEmptyCollection
+	}
+	if limit == 0 {
+		limit = 100
+	}
+	wp := &pb.WithPayloadSelector{SelectorOptions: &pb.WithPayloadSelector_Enable{Enable: withPayload}}
+	resp, err := c.pointsClient.Scroll(ctx, &pb.ScrollPoints{
+		CollectionName: collectionName,
+		Filter:         filter,
+		Limit:          &limit,
+		WithPayload:    wp,
+		Offset:         offset,
+	})
+	if err != nil {
+		return nil, nil, WrapError(err, "failed to scroll points")
+	}
+	out := make([]Point, 0, len(resp.Result))
+	for _, rp := range resp.Result {
+		out = append(out, retrievedPointToPoint(rp))
+	}
+	return out, resp.NextPageOffset, nil
+}
+
+func retrievedPointToPoint(rp *pb.RetrievedPoint) Point {
+	if rp == nil {
+		return Point{}
+	}
+	id := PointIDString(rp.Id)
+	payload := make(map[string]interface{})
+	for k, v := range rp.Payload {
+		payload[k] = valueToInterface(v)
+	}
+	var vector []float32
+	if rp.Vectors != nil {
+		if v := rp.Vectors.GetVector(); v != nil {
+			vector = v.Data
+		}
+	}
+	return Point{ID: id, Vector: vector, Payload: payload}
+}
+
 // searchResultsFromHits maps Qdrant hit results to SearchResult slice.
 func (c *qdrantImpl) searchResultsFromHits(hits []*pb.ScoredPoint) []SearchResult {
 	results := make([]SearchResult, 0, len(hits))
@@ -373,10 +417,7 @@ func (c *qdrantImpl) searchResultsFromHits(hits []*pb.ScoredPoint) []SearchResul
 		for key, value := range hit.Payload {
 			payload[key] = valueToInterface(value)
 		}
-		var id string
-		if hit.Id != nil {
-			id = hit.Id.GetUuid()
-		}
+		id := PointIDString(hit.Id)
 		results = append(results, SearchResult{ID: id, Score: hit.Score, Payload: payload})
 	}
 	return results

@@ -1,11 +1,8 @@
 package usecase
 
 import (
-	"context"
-	"errors"
 	"sync"
 
-	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/notebook"
 	"knowledge-srv/internal/notebook/repository"
 	"knowledge-srv/pkg/maestro"
@@ -46,19 +43,3 @@ func NewUseCase(
 		l:            l,
 	}
 }
-
-// --- Stubs for unimplemented interface methods ---
-
-func (uc *implUseCase) EnsureNotebook(ctx context.Context, sc model.Scope, campaignID, periodLabel string) (notebook.NotebookInfo, error) {
-	return notebook.NotebookInfo{}, errors.New("not implemented")
-}
-
-func (uc *implUseCase) SyncPart(ctx context.Context, sc model.Scope, input notebook.SyncPartInput) error {
-	return errors.New("not implemented")
-}
-
-func (uc *implUseCase) RetryFailed(ctx context.Context, sc model.Scope) (notebook.RetryOutput, error) {
-	return notebook.RetryOutput{}, errors.New("not implemented")
-}
-
-

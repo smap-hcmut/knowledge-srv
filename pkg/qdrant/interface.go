@@ -34,6 +34,8 @@ type PointsOps interface {
 	DeletePoint(ctx context.Context, colName string, pointID string) error
 	GetPoint(ctx context.Context, colName string, pointID string) (*Point, error)
 	CountPoints(ctx context.Context, colName string) (uint64, error)
+	// ScrollPoints iterates points matching filter (offset is next-page cursor from previous call).
+	ScrollPoints(ctx context.Context, colName string, filter *pb.Filter, limit uint32, withPayload bool, offset *pb.PointId) ([]Point, *pb.PointId, error)
 }
 
 // SearchOps defines interface for search operations.

@@ -8,76 +8,58 @@ import (
 type QueryIntent string
 
 const (
-	IntentNarrative  QueryIntent = "NARRATIVE"  // Analytical or overview queries
-	IntentStructured QueryIntent = "STRUCTURED" // Statistical or comparative queries
-	IntentDefault    QueryIntent = "DEFAULT"    // Fallback intent
+	IntentNarrative  QueryIntent = "NARRATIVE"
+	IntentStructured QueryIntent = "STRUCTURED"
 )
 
 // QueryRoute defines the routing decision for a query.
 type QueryRoute struct {
-	Intent        QueryIntent // Classified intent
-	UseNotebook   bool        // Whether to use Notebook for processing
-	UseQdrant     bool        // Whether to use Qdrant for processing
-	QdrantFilters []string    // Filters to apply for Qdrant queries
+	Intent      QueryIntent
+	UseNotebook bool
+	UseQdrant   bool
 }
 
-// ClassifyIntent determines the intent of a query based on its content.
+// ClassifyIntent is rule-based: structured keywords first, then narrative.
+// Default (no match) is STRUCTURED per architecture (safe fallback to Qdrant).
 func ClassifyIntent(query string) QueryIntent {
-	query = strings.ToLower(query)
+	q := strings.ToLower(strings.TrimSpace(query))
 
-	// Keywords for narrative intent
-	narrativeKeywords := []string{"xu hướng", "đánh giá", "tổng quan", "phân tích", "dự đoán"}
-	for _, keyword := range narrativeKeywords {
-		if strings.Contains(query, keyword) {
-			return IntentNarrative
-		}
+	structuredKeywords := []string{
+		"bao nhiêu", "thống kê", "top", "so sánh", "tỷ lệ", "filter", "lọc", "đếm", "count",
 	}
-
-	// Keywords for structured intent
-	structuredKeywords := []string{"bao nhiêu", "thống kê", "top", "so sánh", "tỷ lệ"}
 	for _, keyword := range structuredKeywords {
-		if strings.Contains(query, keyword) {
+		if strings.Contains(q, keyword) {
 			return IntentStructured
 		}
 	}
 
-	// Default intent
-	return IntentDefault
+	narrativeKeywords := []string{
+		"xu hướng", "đánh giá", "tổng quan", "phân tích", "insight", "dự đoán",
+	}
+	for _, keyword := range narrativeKeywords {
+		if strings.Contains(q, keyword) {
+			return IntentNarrative
+		}
+	}
+
+	return IntentStructured
 }
 
-// RouteQuery determines the routing logic for a query based on its intent.
-func RouteQuery(query string, notebookEnabled bool) QueryRoute {
+// RouteQuery sends NARRATIVE to NotebookLM only when enabled and campaign has synced sources; otherwise Qdrant.
+func RouteQuery(query string, notebookEnabled, notebookAvailable bool) QueryRoute {
 	intent := ClassifyIntent(query)
 
-	switch intent {
-	case IntentNarrative:
-		if notebookEnabled {
-			return QueryRoute{
-				Intent:      IntentNarrative,
-				UseNotebook: true,
-				UseQdrant:   false,
-			}
-		}
-		// Fallback to Qdrant if Notebook is disabled
+	if intent == IntentNarrative && notebookEnabled && notebookAvailable {
 		return QueryRoute{
 			Intent:      IntentNarrative,
-			UseNotebook: false,
-			UseQdrant:   true,
+			UseNotebook: true,
+			UseQdrant:   false,
 		}
+	}
 
-	case IntentStructured:
-		return QueryRoute{
-			Intent:      IntentStructured,
-			UseNotebook: false,
-			UseQdrant:   true,
-		}
-
-	default:
-		// Default fallback to Qdrant
-		return QueryRoute{
-			Intent:      IntentDefault,
-			UseNotebook: false,
-			UseQdrant:   true,
-		}
+	return QueryRoute{
+		Intent:      intent,
+		UseNotebook: false,
+		UseQdrant:   true,
 	}
 }

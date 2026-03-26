@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"knowledge-srv/config"
 	"knowledge-srv/internal/indexing"
+	"knowledge-srv/internal/notebook"
+	"knowledge-srv/internal/transform"
 
 	"github.com/smap-hcmut/shared-libs/go/kafka"
 	"github.com/smap-hcmut/shared-libs/go/log"
@@ -22,6 +24,8 @@ type Config struct {
 	Logger      log.Logger
 	KafkaConfig config.KafkaConfig
 	UseCase     indexing.UseCase
+	NotebookUC  notebook.UseCase  // optional
+	TransformUC transform.UseCase // optional
 }
 
 // consumer implements Consumer (thin layer: receive msg → normalize → delegate to usecase).
@@ -29,6 +33,8 @@ type consumer struct {
 	l                      log.Logger
 	kafkaConfig            config.KafkaConfig
 	uc                     indexing.UseCase
+	notebookUC             notebook.UseCase
+	transformUC            transform.UseCase
 	batchCompletedGroup    kafka.IConsumer
 	insightsPublishedGroup kafka.IConsumer
 	reportDigestGroup      kafka.IConsumer
@@ -49,6 +55,8 @@ func New(cfg Config) (Consumer, error) {
 		l:           cfg.Logger,
 		kafkaConfig: cfg.KafkaConfig,
 		uc:          cfg.UseCase,
+		notebookUC:  cfg.NotebookUC,
+		transformUC: cfg.TransformUC,
 	}, nil
 }
 

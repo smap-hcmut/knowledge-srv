@@ -1,100 +1,202 @@
 package usecase
 
 import (
+	"encoding/json"
 	"fmt"
-	"knowledge-srv/internal/transform"
 	"strings"
-	"time"
 )
 
-// buildPostMarkdown converts a single AnalyticsPostLite into a markdown section.
-func buildPostMarkdown(post transform.AnalyticsPostLite, index int) string {
-	var sb strings.Builder
-
-	// Header
-	createdAt := post.ContentCreatedAt.Format(time.RFC3339)
-	sb.WriteString(fmt.Sprintf("### Bài viết #%d\n\n", index+1))
-
-	// Metadata table
-	sb.WriteString("| Thuộc tính | Giá trị |\n")
-	sb.WriteString("| --- | --- |\n")
-	sb.WriteString(fmt.Sprintf("| Nền tảng | %s |\n", post.Platform))
-	sb.WriteString(fmt.Sprintf("| Tác giả | %s |\n", post.Author))
-	sb.WriteString(fmt.Sprintf("| Ngày đăng | %s |\n", createdAt))
-	sb.WriteString(fmt.Sprintf("| Cảm xúc | %s (%.2f) |\n", post.Sentiment, post.SentimentScore))
-
-	if post.RiskLevel != "" {
-		sb.WriteString(fmt.Sprintf("| Mức rủi ro | %s (%.2f) |\n", post.RiskLevel, post.RiskScore))
+func formatDigestFromPayload(pl map[string]interface{}) string {
+	if pl == nil {
+		return ""
 	}
+	domain := str(pl["domain_overlay"])
+	platform := str(pl["platform"])
+	total := intFrom(pl["total_mentions"])
+	start := str(pl["analysis_window_start"])
+	end := str(pl["analysis_window_end"])
 
-	// Engagement
-	sb.WriteString(fmt.Sprintf("| Tương tác | 👍 %d · 💬 %d · 🔄 %d · 👁 %d |\n",
-		post.Likes, post.Comments, post.Shares, post.Views))
-	sb.WriteString(fmt.Sprintf("| Điểm tương tác | %.2f |\n", post.EngagementScore))
-	sb.WriteString("\n")
+	var b strings.Builder
+	fmt.Fprintf(&b, "Campaign Report: %s\n", domain)
+	fmt.Fprintf(&b, "Platform: %s | Total Mentions: %d\n", platform, total)
+	fmt.Fprintf(&b, "Analysis Window: %s to %s\n\n", start, end)
 
-	// Aspects
-	if len(post.Aspects) > 0 {
-		sb.WriteString("**Khía cạnh phân tích:**\n\n")
-		for _, a := range post.Aspects {
-			displayName := a.DisplayName
-			if displayName == "" {
-				displayName = a.Name
-			}
-			kw := ""
-			if len(a.Keywords) > 0 {
-				kw = fmt.Sprintf(" — từ khóa: %s", strings.Join(a.Keywords, ", "))
-			}
-			sb.WriteString(fmt.Sprintf("- **%s**: %s (%.2f)%s\n", displayName, a.Sentiment, a.SentimentScore, kw))
-		}
-		sb.WriteString("\n")
+	if raw, ok := pl["top_entities"]; ok {
+		b.WriteString(formatTopEntities(raw))
 	}
-
-	// Keywords
-	if len(post.Keywords) > 0 {
-		sb.WriteString(fmt.Sprintf("**Từ khóa:** %s\n\n", strings.Join(post.Keywords, ", ")))
+	if raw, ok := pl["top_topics"]; ok {
+		b.WriteString(formatTopTopics(raw))
 	}
-
-	// Content
-	sb.WriteString("**Nội dung:**\n\n")
-	sb.WriteString("> " + strings.ReplaceAll(post.Content, "\n", "\n> "))
-	sb.WriteString("\n\n---\n\n")
-
-	return sb.String()
+	if raw, ok := pl["top_issues"]; ok {
+		b.WriteString(formatTopIssues(raw))
+	}
+	return strings.TrimSpace(b.String())
 }
 
-// buildPartHeader generates the summary header for a markdown part.
-func buildPartHeader(campaignName, weekLabel string, partNum, postCount int, posts []transform.AnalyticsPostLite) string {
-	var sb strings.Builder
-
-	sb.WriteString(fmt.Sprintf("# %s — %s — Phần %d\n\n", campaignName, weekLabel, partNum))
-	sb.WriteString(fmt.Sprintf("**Tổng số bài viết:** %d\n\n", postCount))
-
-	// Sentiment breakdown
-	sentimentCounts := map[string]int{}
-	platformCounts := map[string]int{}
-	for _, p := range posts {
-		sentimentCounts[p.Sentiment]++
-		platformCounts[p.Platform]++
+func formatTopEntities(raw interface{}) string {
+	arr, ok := raw.([]interface{})
+	if !ok || len(arr) == 0 {
+		return ""
 	}
+	var b strings.Builder
+	b.WriteString("### Top Brands\n")
+	limit := len(arr)
+	if limit > 5 {
+		limit = 5
+	}
+	for i := 0; i < limit; i++ {
+		m := asMap(arr[i])
+		name := str(m["entity_name"])
+		mc := intFrom(m["mention_count"])
+		ms := num(m["mention_share"])
+		fmt.Fprintf(&b, "- %s: %d mentions (%.1f%% share)\n", name, mc, ms*100)
+	}
+	b.WriteString("\n")
+	return b.String()
+}
 
-	if len(sentimentCounts) > 0 {
-		sb.WriteString("**Phân bổ cảm xúc:**\n\n")
-		for sentiment, count := range sentimentCounts {
-			pct := float64(count) / float64(postCount) * 100
-			sb.WriteString(fmt.Sprintf("- %s: %d (%.0f%%)\n", sentiment, count, pct))
+func formatTopTopics(raw interface{}) string {
+	arr, ok := raw.([]interface{})
+	if !ok || len(arr) == 0 {
+		return ""
+	}
+	var b strings.Builder
+	b.WriteString("### Key Discussion Topics\n")
+	limit := len(arr)
+	if limit > 5 {
+		limit = 5
+	}
+	for i := 0; i < limit; i++ {
+		m := asMap(arr[i])
+		label := str(m["topic_label"])
+		mc := intFrom(m["mention_count"])
+		fmt.Fprintf(&b, "- %s: %d mentions", label, mc)
+		if q := m["quality_score"]; q != nil {
+			fmt.Fprintf(&b, " (quality: %.2f)", num(q))
 		}
-		sb.WriteString("\n")
-	}
-
-	if len(platformCounts) > 0 {
-		sb.WriteString("**Nền tảng:**\n\n")
-		for platform, count := range platformCounts {
-			sb.WriteString(fmt.Sprintf("- %s: %d bài\n", platform, count))
+		b.WriteString("\n")
+		if reps, ok := m["representative_texts"].([]interface{}); ok && len(reps) > 0 {
+			if s, ok := reps[0].(string); ok {
+				fmt.Fprintf(&b, "  Example: %q\n", truncate(s, 120))
+			}
 		}
-		sb.WriteString("\n")
 	}
+	b.WriteString("\n")
+	return b.String()
+}
 
-	sb.WriteString("---\n\n")
-	return sb.String()
+func formatTopIssues(raw interface{}) string {
+	arr, ok := raw.([]interface{})
+	if !ok || len(arr) == 0 {
+		return ""
+	}
+	var b strings.Builder
+	b.WriteString("### Critical Issues\n")
+	limit := len(arr)
+	if limit > 5 {
+		limit = 5
+	}
+	for i := 0; i < limit; i++ {
+		m := asMap(arr[i])
+		cat := str(m["issue_category"])
+		mc := intFrom(m["mention_count"])
+		pressure := num(m["issue_pressure_proxy"])
+		fmt.Fprintf(&b, "- %s: %d mentions (pressure: %.2f)\n", cat, mc, pressure)
+	}
+	return b.String()
+}
+
+func formatInsightCard(pl map[string]interface{}) string {
+	if pl == nil {
+		return ""
+	}
+	title := str(pl["title"])
+	insightType := str(pl["insight_type"])
+	conf := num(pl["confidence"])
+	summary := str(pl["summary"])
+	var ev []string
+	if raw, ok := pl["evidence_references"]; ok {
+		if a, ok := raw.([]interface{}); ok {
+			for _, x := range a {
+				if s, ok := x.(string); ok {
+					ev = append(ev, s)
+				}
+			}
+		}
+	}
+	var b strings.Builder
+	fmt.Fprintf(&b, "### %s — %s (confidence: %.2f)\n", insightType, title, conf)
+	b.WriteString(strings.TrimSpace(summary))
+	b.WriteString("\n")
+	if len(ev) > 0 {
+		fmt.Fprintf(&b, "Evidence: %s\n", strings.Join(ev, ", "))
+	}
+	return b.String()
+}
+
+func asMap(v interface{}) map[string]interface{} {
+	if m, ok := v.(map[string]interface{}); ok {
+		return m
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return map[string]interface{}{}
+	}
+	var out map[string]interface{}
+	if err := json.Unmarshal(b, &out); err != nil {
+		return map[string]interface{}{}
+	}
+	return out
+}
+
+func str(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return fmt.Sprint(v)
+}
+
+func num(v interface{}) float64 {
+	switch t := v.(type) {
+	case float64:
+		return t
+	case float32:
+		return float64(t)
+	case int:
+		return float64(t)
+	case int64:
+		return float64(t)
+	case json.Number:
+		f, _ := t.Float64()
+		return f
+	default:
+		return 0
+	}
+}
+
+func intFrom(v interface{}) int {
+	switch t := v.(type) {
+	case float64:
+		return int(t)
+	case int:
+		return t
+	case int64:
+		return int(t)
+	case json.Number:
+		i, _ := t.Int64()
+		return int(i)
+	default:
+		return 0
+	}
+}
+
+func truncate(s string, n int) string {
+	runes := []rune(s)
+	if len(runes) <= n {
+		return s
+	}
+	return string(runes[:n]) + "…"
 }

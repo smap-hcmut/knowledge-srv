@@ -12,23 +12,25 @@ import (
 
 // setupNotebookDomain initializes the components related to the notebook domain.
 func (srv *HTTPServer) setupNotebookDomain(ctx context.Context, r *gin.RouterGroup) error {
-	// Initialize Postgres repositories
-	// Notes: CampaignRepo, SourceRepo, SessionRepo would normally be initialized here too.
 	chatJobRepo := notebookPostgre.NewChatJobRepo(srv.postgresDB)
+	campaignRepo := notebookPostgre.NewCampaignRepo(srv.postgresDB)
+	sourceRepo := notebookPostgre.NewSourceRepo(srv.postgresDB)
+	sessionRepo := notebookPostgre.NewSessionRepo()
 
 	cfg := notebookUsecase.Config{
 		NotebookEnabled:    srv.config.Notebook.Enabled,
-		JobPollIntervalMs:  2000,
-		JobPollMaxAttempts: 30,
+		JobPollIntervalMs:  srv.config.Maestro.JobPollIntervalMs,
+		JobPollMaxAttempts: srv.config.Maestro.JobPollMaxAttempts,
+		SyncMaxRetries:     srv.config.Notebook.SyncMaxRetries,
 		WebhookCallbackURL: srv.config.Maestro.WebhookCallbackURL,
 		WebhookSecret:      srv.config.Maestro.WebhookSecret,
 	}
 
 	uc := notebookUsecase.NewUseCase(
 		srv.maestroClient,
-		nil, // CampaignRepo (not used directly in Chat)
-		nil, // SourceRepo
-		nil, // SessionRepo
+		campaignRepo,
+		sourceRepo,
+		sessionRepo,
 		chatJobRepo,
 		cfg,
 		srv.l,

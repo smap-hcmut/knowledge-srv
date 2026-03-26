@@ -2,22 +2,22 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/notebook"
+	"knowledge-srv/internal/notebook/repository"
 )
 
 // HandleWebhook processes webhook callbacks from Maestro.
 func (uc *implUseCase) HandleWebhook(ctx context.Context, sc model.Scope, payload notebook.WebhookPayload) error {
 	switch payload.Action {
 	case "upload_sources":
-		// Phase 2: Update notebook_sources
-		uc.l.Infof(ctx, "Received upload_sources webhook: %v", payload.Data)
-		return nil
+		return uc.handleUploadSourcesWebhook(ctx, payload)
 	case "create_notebook":
-		// Phase 2: Update notebook_campaigns
-		uc.l.Infof(ctx, "Received create_notebook webhook: %v", payload.Data)
+		uc.l.Infof(ctx, "Received create_notebook webhook (campaign already persisted by sync): action=%s jobId=%s", payload.Action, payload.JobID)
 		return nil
 	case "chat":
 		// Phase 3: Update notebook_chat_jobs
@@ -27,7 +27,56 @@ func (uc *implUseCase) HandleWebhook(ctx context.Context, sc model.Scope, payloa
 	}
 }
 
+func (uc *implUseCase) handleUploadSourcesWebhook(ctx context.Context, payload notebook.WebhookPayload) error {
+	if uc.sourceRepo == nil {
+		return nil
+	}
+	jobID := payload.JobID
+	if jobID == "" && payload.Data != nil {
+		if v, ok := payload.Data["jobId"].(string); ok {
+			jobID = v
+		}
+		if jobID == "" {
+			if v, ok := payload.Data["job_id"].(string); ok {
+				jobID = v
+			}
+		}
+	}
+	if jobID == "" {
+		return fmt.Errorf("upload_sources webhook: missing job id")
+	}
+	status := strings.ToLower(strings.TrimSpace(payload.Status))
+	if status == "" && payload.Data != nil {
+		if v, ok := payload.Data["status"].(string); ok {
+			status = strings.ToLower(strings.TrimSpace(v))
+		}
+	}
+	var errMsg *string
+	st := "UPLOADING"
+	switch status {
+	case "completed", "success", "done":
+		st = "SYNCED"
+	case "failed", "error":
+		st = "FAILED"
+		if payload.Data != nil {
+			s := fmt.Sprintf("%v", payload.Data["error"])
+			errMsg = &s
+		}
+	default:
+		return nil
+	}
+	err := uc.sourceRepo.UpdateStatusByMaestroJobID(ctx, jobID, st, errMsg)
+	if err != nil && errors.Is(err, repository.ErrNotFound) {
+		uc.l.Warnf(ctx, "upload_sources webhook: no row for maestro job %s", jobID)
+		return nil
+	}
+	return err
+}
+
 func (uc *implUseCase) handleChatWebhook(ctx context.Context, payload notebook.WebhookPayload) error {
+	if payload.Data == nil {
+		return fmt.Errorf("invalid chat webhook data: missing data")
+	}
 	// Extract internal job ID from payload if we appended it, or handle it via maestro_job_id
 	// Maestro sends its own job_id in Data["job_id"]
 	internalJobID, ok := payload.Data["chat_job_id"].(string)
