@@ -8,7 +8,8 @@ import (
 
 func (uc *implUseCase) Delete(ctx context.Context, input point.DeleteInput) error {
 	return uc.repo.Delete(ctx, repository.DeleteOptions{
-		Filter: input.Filter,
-		Points: input.Points,
+		CollectionName: input.CollectionName,
+		Filter:         input.Filter,
+		Points:         input.Points,
 	})
 }

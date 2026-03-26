@@ -13,6 +13,8 @@ import (
 // Consumer is the delivery interface for Kafka. Same idea as http.Handler: caller depends on interface, not concrete type.
 type Consumer interface {
 	ConsumeBatchCompleted(ctx context.Context) error
+	ConsumeInsightsPublished(ctx context.Context) error
+	ConsumeReportDigest(ctx context.Context) error
 	Close() error
 }
 
@@ -24,10 +26,12 @@ type Config struct {
 
 // consumer implements Consumer (thin layer: receive msg → normalize → delegate to usecase).
 type consumer struct {
-	l                   log.Logger
-	kafkaConfig         config.KafkaConfig
-	uc                  indexing.UseCase
-	batchCompletedGroup kafka.IConsumer
+	l                      log.Logger
+	kafkaConfig            config.KafkaConfig
+	uc                     indexing.UseCase
+	batchCompletedGroup    kafka.IConsumer
+	insightsPublishedGroup kafka.IConsumer
+	reportDigestGroup      kafka.IConsumer
 }
 
 func New(cfg Config) (Consumer, error) {
@@ -49,13 +53,34 @@ func New(cfg Config) (Consumer, error) {
 }
 
 func (c *consumer) Close() error {
+	var firstErr error
+
 	if c.batchCompletedGroup != nil {
 		if err := c.batchCompletedGroup.Close(); err != nil {
 			c.l.Errorf(context.Background(), "indexing.delivery.kafka.consumer.Close: failed to close batch completed group: %v", err)
-			return ErrConsumerGroupNotFound
+			firstErr = ErrConsumerGroupNotFound
 		}
 	}
-	return nil
+
+	if c.insightsPublishedGroup != nil {
+		if err := c.insightsPublishedGroup.Close(); err != nil {
+			c.l.Errorf(context.Background(), "indexing.delivery.kafka.consumer.Close: failed to close insights published group: %v", err)
+			if firstErr == nil {
+				firstErr = ErrConsumerGroupNotFound
+			}
+		}
+	}
+
+	if c.reportDigestGroup != nil {
+		if err := c.reportDigestGroup.Close(); err != nil {
+			c.l.Errorf(context.Background(), "indexing.delivery.kafka.consumer.Close: failed to close report digest group: %v", err)
+			if firstErr == nil {
+				firstErr = ErrConsumerGroupNotFound
+			}
+		}
+	}
+
+	return firstErr
 }
 
 func (c *consumer) createConsumerGroup(groupID string) (kafka.IConsumer, error) {

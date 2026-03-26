@@ -50,7 +50,10 @@ func (uc *implUseCase) Aggregate(ctx context.Context, sc model.Scope, input sear
 
 	// Task 1: Total Docs
 	g.Go(func() error {
-		count, err := uc.pointUC.Count(ctx, point.CountInput{Filter: baseFilter})
+		count, err := uc.pointUC.Count(ctx, point.CountInput{
+			CollectionName: point.CollectionAnalyticsLegacy,
+			Filter:         baseFilter,
+		})
 		if err != nil {
 			return err
 		}
@@ -61,9 +64,10 @@ func (uc *implUseCase) Aggregate(ctx context.Context, sc model.Scope, input sear
 	// Task 2: Sentiment Breakdown
 	g.Go(func() error {
 		res, err := uc.pointUC.Facet(ctx, point.FacetInput{
-			Key:    "overall_sentiment",
-			Filter: baseFilter,
-			Limit:  10,
+			CollectionName: point.CollectionAnalyticsLegacy,
+			Key:            "overall_sentiment",
+			Filter:         baseFilter,
+			Limit:          10,
 		})
 		if err != nil {
 			return err
@@ -75,9 +79,10 @@ func (uc *implUseCase) Aggregate(ctx context.Context, sc model.Scope, input sear
 	// Task 3: Platform Breakdown
 	g.Go(func() error {
 		res, err := uc.pointUC.Facet(ctx, point.FacetInput{
-			Key:    "platform",
-			Filter: baseFilter,
-			Limit:  10,
+			CollectionName: point.CollectionAnalyticsLegacy,
+			Key:            "platform",
+			Filter:         baseFilter,
+			Limit:          10,
 		})
 		if err != nil {
 			return err
@@ -105,9 +110,10 @@ func (uc *implUseCase) Aggregate(ctx context.Context, sc model.Scope, input sear
 		}
 		// Facet on "aspects.aspect" (assuming indexing supports this path)
 		res, err := uc.pointUC.Facet(ctx, point.FacetInput{
-			Key:    "aspects.aspect",
-			Filter: negFilter,
-			Limit:  5,
+			CollectionName: point.CollectionAnalyticsLegacy,
+			Key:            "aspects.aspect",
+			Filter:         negFilter,
+			Limit:          5,
 		})
 		if err != nil {
 			// If aspects are not indexed for faceting, this might fail or return empty.

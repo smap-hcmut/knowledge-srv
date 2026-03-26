@@ -73,6 +73,14 @@ func (srv *ConsumerServer) startConsumers(ctx context.Context, consumers *domain
 		return fmt.Errorf("failed to start indexing consumer: %w", err)
 	}
 
+	if err := consumers.indexingConsumer.ConsumeInsightsPublished(ctx); err != nil {
+		return fmt.Errorf("failed to start insights consumer: %w", err)
+	}
+
+	if err := consumers.indexingConsumer.ConsumeReportDigest(ctx); err != nil {
+		return fmt.Errorf("failed to start digest consumer: %w", err)
+	}
+
 	srv.l.Infof(ctx, "All consumers started successfully")
 	return nil
 }
