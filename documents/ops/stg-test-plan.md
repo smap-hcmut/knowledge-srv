@@ -538,32 +538,32 @@ curl http://qdrant.stg.internal:6333/collections/proj_stg_test_01/points/count
 
 ## Checklist tổng hợp
 
-| Test | Mô tả | Pass Criteria | Status |
-|------|-------|---------------|--------|
-| T0-1 | Service health | All healthy | ☐ |
-| T0-2 | Config check | notebook.enabled=true | ☐ |
-| T0-3 | Maestro connectivity | HTTP 200 | ☐ |
-| T1-1 | Publish batch | Kafka accepted | ☐ |
-| T1-2 | Qdrant indexing | 2 points created | ☐ |
-| T1-3 | rag=false skip | stg_post_003 absent | ☐ |
-| T2-1 | Publish insight | Kafka accepted | ☐ |
-| T2-2 | Insight in Qdrant | 1 point in macro_insights | ☐ |
-| T2-3 | should_index=false skip | trending_topic absent | ☐ |
-| T3-1 | Publish digest | Kafka accepted | ☐ |
-| T3-2 | Digest in Qdrant | digest point exists | ☐ |
-| T3-3 | Notebook trigger logs | BuildParts + SyncPart logged | ☐ |
-| T3-4 | Notebook DB records | nb_campaigns + nb_sources created | ☐ |
-| T4-1 | Webhook completed | nb_sources.status = synced | ☐ |
-| T4-2 | Webhook failed | nb_sources.status = failed | ☐ |
-| T5-1 | Structured chat | HTTP 200, answer non-empty | ☐ |
-| T5-2 | Narrative without notebook | HTTP 200, fallback Qdrant | ☐ |
-| T6-1 | Async chat submit | HTTP 202, chat_job_id | ☐ |
-| T6-2 | Poll job completed | HTTP 200, status=completed | ☐ |
-| T6-3 | Webhook chat | answer from webhook | ☐ |
-| T6-4 | Fallback on timeout | HTTP 200, Qdrant answer | ☐ |
-| T7-1 | 404 on missing job | HTTP 404 | ☐ |
-| T7-2 | should_index=false digest | No notebook trigger | ☐ |
-| T7-3 | Idempotency | point count unchanged | ☐ |
+| Test | Mô tả                      | Pass Criteria                     | Status |
+| ---- | -------------------------- | --------------------------------- | ------ |
+| T0-1 | Service health             | All healthy                       | ☐      |
+| T0-2 | Config check               | notebook.enabled=true             | ☐      |
+| T0-3 | Maestro connectivity       | HTTP 200                          | ☐      |
+| T1-1 | Publish batch              | Kafka accepted                    | ☐      |
+| T1-2 | Qdrant indexing            | 2 points created                  | ☐      |
+| T1-3 | rag=false skip             | stg_post_003 absent               | ☐      |
+| T2-1 | Publish insight            | Kafka accepted                    | ☐      |
+| T2-2 | Insight in Qdrant          | 1 point in macro_insights         | ☐      |
+| T2-3 | should_index=false skip    | trending_topic absent             | ☐      |
+| T3-1 | Publish digest             | Kafka accepted                    | ☐      |
+| T3-2 | Digest in Qdrant           | digest point exists               | ☐      |
+| T3-3 | Notebook trigger logs      | BuildParts + SyncPart logged      | ☐      |
+| T3-4 | Notebook DB records        | nb_campaigns + nb_sources created | ☐      |
+| T4-1 | Webhook completed          | nb_sources.status = synced        | ☐      |
+| T4-2 | Webhook failed             | nb_sources.status = failed        | ☐      |
+| T5-1 | Structured chat            | HTTP 200, answer non-empty        | ☐      |
+| T5-2 | Narrative without notebook | HTTP 200, fallback Qdrant         | ☐      |
+| T6-1 | Async chat submit          | HTTP 202, chat_job_id             | ☐      |
+| T6-2 | Poll job completed         | HTTP 200, status=completed        | ☐      |
+| T6-3 | Webhook chat               | answer from webhook               | ☐      |
+| T6-4 | Fallback on timeout        | HTTP 200, Qdrant answer           | ☐      |
+| T7-1 | 404 on missing job         | HTTP 404                          | ☐      |
+| T7-2 | should_index=false digest  | No notebook trigger               | ☐      |
+| T7-3 | Idempotency                | point count unchanged             | ☐      |
 
 ---
 

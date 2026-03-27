@@ -27,7 +27,7 @@ spec:
         - name: harbor-registry
       containers:
         - name: knowledge-api
-          image: registry.tantai.dev/smap/knowledge-api:260317-000553
+          image: registry.tantai.dev/smap/knowledge-api:260326-215920
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

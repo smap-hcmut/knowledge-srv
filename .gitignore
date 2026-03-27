@@ -8,9 +8,10 @@ vendor/
 .env
 sqlboiler.toml
 
-# Kubernetes secrets
+# Kubernetes secrets and configs with sensitive data
 k8s/secret.yaml
 manifests/secret.yaml
+manifests/configmap.yaml
 
 docs
 

@@ -213,6 +213,70 @@ func Load() (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
+	// Explicit env bindings for keys where AutomaticEnv + replacer doesn't work.
+	// Viper's replacer converts "." -> "_" for env lookup, but env vars also use "_"
+	// as word separator, causing ambiguity (e.g. KAFKA_BROKERS != kafka.brokers).
+	// Postgres
+	_ = viper.BindEnv("postgres.host", "POSTGRES_HOST")
+	_ = viper.BindEnv("postgres.port", "POSTGRES_PORT")
+	_ = viper.BindEnv("postgres.user", "POSTGRES_USER")
+	_ = viper.BindEnv("postgres.password", "POSTGRES_PASSWORD")
+	_ = viper.BindEnv("postgres.dbname", "POSTGRES_DB")
+	_ = viper.BindEnv("postgres.sslmode", "POSTGRES_SSLMODE")
+	_ = viper.BindEnv("postgres.schema", "POSTGRES_SCHEMA")
+	// Redis
+	_ = viper.BindEnv("redis.host", "REDIS_HOST")
+	_ = viper.BindEnv("redis.port", "REDIS_PORT")
+	_ = viper.BindEnv("redis.password", "REDIS_PASSWORD")
+	_ = viper.BindEnv("redis.db", "REDIS_DB")
+	// Kafka
+	_ = viper.BindEnv("kafka.brokers", "KAFKA_BROKERS")
+	_ = viper.BindEnv("kafka.topic", "KAFKA_TOPIC")
+	_ = viper.BindEnv("kafka.group_id", "KAFKA_GROUP_ID")
+	// Qdrant
+	_ = viper.BindEnv("qdrant.host", "QDRANT_HOST")
+	_ = viper.BindEnv("qdrant.port", "QDRANT_PORT")
+	_ = viper.BindEnv("qdrant.api_key", "QDRANT_API_KEY")
+	_ = viper.BindEnv("qdrant.use_tls", "QDRANT_USE_TLS")
+	_ = viper.BindEnv("qdrant.timeout", "QDRANT_TIMEOUT")
+	// MinIO
+	_ = viper.BindEnv("minio.endpoint", "MINIO_ENDPOINT")
+	_ = viper.BindEnv("minio.access_key", "MINIO_ACCESS_KEY")
+	_ = viper.BindEnv("minio.secret_key", "MINIO_SECRET_KEY")
+	_ = viper.BindEnv("minio.use_ssl", "MINIO_USE_SSL")
+	_ = viper.BindEnv("minio.region", "MINIO_REGION")
+	_ = viper.BindEnv("minio.bucket", "MINIO_BUCKET")
+	// Gemini / Voyage
+	_ = viper.BindEnv("gemini.api_key", "GEMINI_API_KEY")
+	_ = viper.BindEnv("gemini.model", "GEMINI_MODEL")
+	_ = viper.BindEnv("voyage.api_key", "VOYAGE_API_KEY")
+	// Maestro
+	_ = viper.BindEnv("maestro.base_url", "MAESTRO_BASE_URL")
+	_ = viper.BindEnv("maestro.api_key", "MAESTRO_API_KEY")
+	_ = viper.BindEnv("maestro.webhook_secret", "MAESTRO_WEBHOOK_SECRET")
+	_ = viper.BindEnv("maestro.webhook_callback_url", "MAESTRO_WEBHOOK_CALLBACK_URL")
+	// Notebook
+	_ = viper.BindEnv("notebook.enabled", "NOTEBOOK_ENABLED")
+	// JWT / Cookie / Encrypter / Internal
+	_ = viper.BindEnv("jwt.secret_key", "JWT_SECRET_KEY")
+	_ = viper.BindEnv("jwt.secret_key", "JWT_SECRET") // alt name used in k8s secret
+	_ = viper.BindEnv("cookie.name", "COOKIE_NAME")
+	_ = viper.BindEnv("cookie.max_age", "COOKIE_MAX_AGE")
+	_ = viper.BindEnv("cookie.domain", "COOKIE_DOMAIN")
+	_ = viper.BindEnv("encrypter.key", "ENCRYPTER_KEY")
+	_ = viper.BindEnv("internal.internal_key", "INTERNAL_KEY")
+	// Project / Environment / HTTP
+	_ = viper.BindEnv("project.url", "PROJECT_URL")
+	_ = viper.BindEnv("project.timeout", "PROJECT_TIMEOUT")
+	_ = viper.BindEnv("environment.name", "ENVIRONMENT_NAME")
+	_ = viper.BindEnv("http_server.port", "HTTP_SERVER_PORT")
+	_ = viper.BindEnv("http_server.mode", "HTTP_SERVER_MODE")
+	// Logger
+	_ = viper.BindEnv("logger.level", "LOGGER_LEVEL")
+	_ = viper.BindEnv("logger.mode", "LOGGER_MODE")
+	_ = viper.BindEnv("logger.encoding", "LOGGER_ENCODING")
+	_ = viper.BindEnv("logger.color_enabled", "LOGGER_COLOR_ENABLED")
+
 	// Set defaults
 	setDefaults()
 
@@ -402,7 +466,7 @@ func setDefaults() {
 
 	// Cookie
 	viper.SetDefault("cookie.name", "smap_auth_token")
-	viper.SetDefault("cookie.max_age", 28800)    // 8 hours
+	viper.SetDefault("cookie.max_age", 28800) // 8 hours
 	viper.SetDefault("cookie.domain", ".tantai.dev")
 	viper.SetDefault("access_control.allowed_redirect_urls", []string{"/dashboard", "/", "http://localhost:3000", "http://localhost:5173"})
 
