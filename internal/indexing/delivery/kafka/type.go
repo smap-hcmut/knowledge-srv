@@ -2,25 +2,27 @@ package kafka
 
 import (
 	"time"
+
+	"github.com/smap-hcmut/shared-libs/go/constants"
 )
 
 // Topic & Group constants
 const (
 	// Layer 3
-	TopicBatchCompleted   = "analytics.batch.completed"
+	TopicBatchCompleted   = constants.TopicAnalyticsBatchCompleted
 	GroupIDBatchCompleted = "knowledge-indexing-batch"
 
 	// Layer 2
-	TopicInsightsPublished   = "analytics.insights.published"
+	TopicInsightsPublished   = constants.TopicAnalyticsInsightsPublished
 	GroupIDInsightsPublished = "knowledge-indexing-insights"
 
 	// Layer 1
-	TopicReportDigest   = "analytics.report.digest"
+	TopicReportDigest   = constants.TopicAnalyticsReportDigest
 	GroupIDReportDigest = "knowledge-indexing-digest"
 
 	// DLQ topics
-	TopicInsightsPublishedDLQ = "analytics.insights.published.dlq"
-	TopicReportDigestDLQ      = "analytics.report.digest.dlq"
+	TopicInsightsPublishedDLQ = constants.TopicInsightsPublishedDLQ
+	TopicReportDigestDLQ      = constants.TopicReportDigestDLQ
 )
 
 // LegacyBatchCompletedMessage is the old format (MinIO file reference).
