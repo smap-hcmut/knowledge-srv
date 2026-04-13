@@ -14,7 +14,7 @@ require (
 	github.com/qdrant/go-client v1.16.2
 	github.com/redis/go-redis/v9 v9.17.3
 	github.com/sirupsen/logrus v1.9.3
-	github.com/smap-hcmut/shared-libs/go v1.0.8
+	github.com/smap-hcmut/shared-libs/go v1.0.9
 	github.com/spf13/viper v1.21.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
