@@ -15,6 +15,7 @@ import (
 	"knowledge-srv/config/redis"
 
 	_ "knowledge-srv/docs"
+	"knowledge-srv/internal/consumer"
 	"knowledge-srv/internal/httpserver"
 	"knowledge-srv/pkg/maestro"
 	"knowledge-srv/pkg/voyage"
@@ -62,7 +63,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	logger.Info(ctx, "Starting Knowledge API Service...")
+	logger.Info(ctx, "Starting Knowledge Service...")
 
 	// Encrypter
 	encrypterInstance := encrypter.New(cfg.Encrypter.Key)
@@ -158,6 +159,34 @@ func main() {
 	jwtManager := auth.NewManager(cfg.JWT.SecretKey)
 	logger.Infof(ctx, "JWT Manager initialized")
 
+	// ── Consumer (Kafka) ────────────────────────────────────────────────────
+	consumerSrv, err := consumer.New(consumer.Config{
+		Logger:        logger,
+		KafkaConfig:   cfg.Kafka,
+		RedisClient:   redisClient,
+		QdrantClient:  qdrantClient,
+		PostgresDB:    postgresDB,
+		MinIOClient:   minioClient,
+		VoyageClient:  voyageClient,
+		GeminiClient:  geminiClient,
+		Discord:       discordClient,
+		KafkaProducer: kafkaProducer,
+		MaestroClient: maestroClient,
+		AppConfig:     cfg,
+	})
+	if err != nil {
+		logger.Errorf(ctx, "Failed to create consumer server: %v", err)
+		return
+	}
+
+	go func() {
+		logger.Info(ctx, "Consumer server starting...")
+		if err := consumerSrv.Run(ctx); err != nil {
+			logger.Errorf(ctx, "Consumer server error: %v", err)
+		}
+	}()
+
+	// ── HTTP Server ─────────────────────────────────────────────────────────
 	// HTTP server
 	httpServer, err := httpserver.New(logger, httpserver.Config{
 		Logger:      logger,

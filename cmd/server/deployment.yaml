@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: knowledge-api
+  name: knowledge-srv
   namespace: smap
   labels:
-    app: knowledge-api
+    app: knowledge-srv
     version: v1
 spec:
   replicas: 1
   revisionHistoryLimit: 5
   selector:
     matchLabels:
-      app: knowledge-api
+      app: knowledge-srv
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -20,14 +20,14 @@ spec:
   template:
     metadata:
       labels:
-        app: knowledge-api
+        app: knowledge-srv
         version: v1
     spec:
       imagePullSecrets:
         - name: harbor-registry
       containers:
-        - name: knowledge-api
-          image: registry.tantai.dev/smap/knowledge-api:260326-215920
+        - name: knowledge-srv
+          image: registry.tantai.dev/smap/knowledge-srv:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -47,7 +47,7 @@ spec:
                 name: knowledge-secrets
           env:
             - name: CONTAINER_NAME
-              value: "knowledge-api"
+              value: "knowledge-srv"
             - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
@@ -102,13 +102,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: knowledge-api
+  name: knowledge-srv
   namespace: smap
   labels:
-    app: knowledge-api
+    app: knowledge-srv
 spec:
   selector:
-    app: knowledge-api
+    app: knowledge-srv
   ports:
     - port: 80
       targetPort: 8080

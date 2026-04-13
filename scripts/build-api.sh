@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SMAP Knowledge API - Build and Push Script
+# SMAP Knowledge Service - Build and Push Script
 # Usage: ./build-api.sh [build-push|login|help]
 
 set -e
@@ -15,8 +15,8 @@ NC='\033[0m'
 # Configuration
 REGISTRY="${HARBOR_REGISTRY:-registry.tantai.dev}"
 PROJECT="smap"
-SERVICE="knowledge-api"
-DOCKERFILE="cmd/api/Dockerfile"
+SERVICE="knowledge-srv"
+DOCKERFILE="cmd/server/Dockerfile"
 PLATFORM="${PLATFORM:-linux/amd64}"
 
 # Harbor credentials (set HARBOR_USERNAME and HARBOR_PASSWORD in ~/.zshrc)

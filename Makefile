@@ -1,4 +1,4 @@
-.PHONY: help run-api run-consumer build-api build-consumer docker-build-api docker-build-consumer test clean
+.PHONY: help run models swagger test clean
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -10,20 +10,15 @@ models: ## Generate models
 	@echo "Generating models"
 	@sqlboiler psql
 
-swagger:
+swagger: ## Generate swagger docs
 	@echo "Generating swagger"
-	@swag init -g cmd/api/main.go --parseVendor
+	@swag init -g cmd/server/main.go --parseVendor
 	@echo "Fixing swagger docs (removing deprecated LeftDelim/RightDelim)..."
 	@sed -i '' '/LeftDelim:/d' docs/docs.go
 	@sed -i '' '/RightDelim:/d' docs/docs.go
 
-run-api:
-	@echo "Generating swagger"
-	@swag init -g cmd/api/main.go --parseVendor
-	@sed -i '' '/LeftDelim:/d' docs/docs.go
-	@sed -i '' '/RightDelim:/d' docs/docs.go
+run: swagger ## Run the knowledge service
 	@echo "Running the application"
-	@go run cmd/api/main.go
+	@go run cmd/server/main.go
 
-run-consumer: ## Run consumer service locally
-	go run cmd/consumer/main.go
+.DEFAULT_GOAL := help
