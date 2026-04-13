@@ -16,8 +16,8 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/auth"
 	"github.com/smap-hcmut/shared-libs/go/discord"
 	"github.com/smap-hcmut/shared-libs/go/encrypter"
-	"github.com/smap-hcmut/shared-libs/go/gemini"
 	"github.com/smap-hcmut/shared-libs/go/kafka"
+	"github.com/smap-hcmut/shared-libs/go/llm"
 	"github.com/smap-hcmut/shared-libs/go/log"
 	"github.com/smap-hcmut/shared-libs/go/middleware"
 	"github.com/smap-hcmut/shared-libs/go/minio"
@@ -36,7 +36,7 @@ type HTTPServer struct {
 	qdrantClient  pkgQdrant.IQdrant
 	postgresDB    *sql.DB
 	voyageClient  voyage.IVoyage
-	geminiClient  gemini.IGemini
+	llmClient     llm.LLM
 	minioClient   minio.MinIO
 	kafkaProducer kafka.IProducer
 
@@ -73,8 +73,8 @@ type Config struct {
 	// Voyage - Embedding
 	VoyageClient voyage.IVoyage
 
-	// Gemini - LLM
-	GeminiClient gemini.IGemini
+	// LLM - Multi-provider with fallback
+	LLMClient llm.LLM
 
 	// MinIO - Storage
 	MinIOClient minio.MinIO
@@ -114,7 +114,7 @@ func New(logger log.Logger, cfg Config) (*HTTPServer, error) {
 		// Database Configuration
 		qdrantClient:  cfg.QdrantClient,
 		voyageClient:  cfg.VoyageClient,
-		geminiClient:  cfg.GeminiClient,
+		llmClient:     cfg.LLMClient,
 		minioClient:   cfg.MinIOClient,
 		kafkaProducer: cfg.KafkaProducer,
 		postgresDB:    cfg.PostgresDB,
@@ -167,8 +167,8 @@ func (srv HTTPServer) validate() error {
 	if srv.voyageClient == nil {
 		return errors.New("voyageClient is required")
 	}
-	if srv.geminiClient == nil {
-		return errors.New("geminiClient is required")
+	if srv.llmClient == nil {
+		return errors.New("llmClient is required")
 	}
 	if srv.minioClient == nil {
 		return errors.New("minioClient is required")

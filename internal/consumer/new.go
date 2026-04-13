@@ -14,7 +14,7 @@ func New(cfg Config) (*ConsumerServer, error) {
 		postgresDB:    cfg.PostgresDB,
 		minioClient:   cfg.MinIOClient,
 		voyageClient:  cfg.VoyageClient,
-		geminiClient:  cfg.GeminiClient,
+		llmClient:     cfg.LLMClient,
 		discord:       cfg.Discord,
 		kafkaProducer: cfg.KafkaProducer,
 		maestroClient: cfg.MaestroClient,
@@ -59,8 +59,8 @@ func (srv *ConsumerServer) validate() error {
 	if srv.voyageClient == nil {
 		return fmt.Errorf("voyage client is required")
 	}
-	if srv.geminiClient == nil {
-		return fmt.Errorf("gemini client is required")
+	if srv.llmClient == nil {
+		return fmt.Errorf("llm client is required")
 	}
 
 	return nil

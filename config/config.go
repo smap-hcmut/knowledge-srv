@@ -22,7 +22,10 @@ type Config struct {
 	// Voyage - Embedding
 	Voyage VoyageConfig
 
-	// Gemini - LLM
+	// LLM - Multi-provider (Gemini, OpenAI, DeepSeek, Qwen) with fallback
+	LLM LLMConfig
+
+	// Gemini - Legacy single-provider config (backward compat, feeds into LLM)
 	Gemini GeminiConfig
 
 	// PostgreSQL - Metadata, conversation history
@@ -105,7 +108,22 @@ type VoyageConfig struct {
 	APIKey string
 }
 
-// GeminiConfig is the configuration for Google Gemini (LLM). Same shape as pkg/gemini.GeminiConfig.
+// LLMProviderConfig configures a single LLM backend.
+type LLMProviderConfig struct {
+	Name    string // "gemini", "openai", "deepseek", "qwen"
+	APIKey  string
+	Model   string // optional, defaults per provider
+	BaseURL string // optional, defaults per provider
+}
+
+// LLMConfig holds multi-provider LLM configuration.
+type LLMConfig struct {
+	Providers []LLMProviderConfig
+}
+
+// GeminiConfig is the legacy configuration for Google Gemini (LLM).
+// Kept for backward compatibility — values feed into LLM.Providers if
+// no explicit llm.providers are configured.
 type GeminiConfig struct {
 	APIKey string
 	Model  string
@@ -246,10 +264,17 @@ func Load() (*Config, error) {
 	_ = viper.BindEnv("minio.use_ssl", "MINIO_USE_SSL")
 	_ = viper.BindEnv("minio.region", "MINIO_REGION")
 	_ = viper.BindEnv("minio.bucket", "MINIO_BUCKET")
-	// Gemini / Voyage
+	// Gemini / Voyage / LLM providers
 	_ = viper.BindEnv("gemini.api_key", "GEMINI_API_KEY")
 	_ = viper.BindEnv("gemini.model", "GEMINI_MODEL")
 	_ = viper.BindEnv("voyage.api_key", "VOYAGE_API_KEY")
+	// Multi-provider LLM env overrides
+	_ = viper.BindEnv("llm.openai_api_key", "OPENAI_API_KEY")
+	_ = viper.BindEnv("llm.openai_model", "OPENAI_MODEL")
+	_ = viper.BindEnv("llm.deepseek_api_key", "DEEPSEEK_API_KEY")
+	_ = viper.BindEnv("llm.deepseek_model", "DEEPSEEK_MODEL")
+	_ = viper.BindEnv("llm.qwen_api_key", "QWEN_API_KEY")
+	_ = viper.BindEnv("llm.qwen_model", "QWEN_MODEL")
 	// Maestro
 	_ = viper.BindEnv("maestro.base_url", "MAESTRO_BASE_URL")
 	_ = viper.BindEnv("maestro.api_key", "MAESTRO_API_KEY")
@@ -312,7 +337,7 @@ func Load() (*Config, error) {
 		cfg.Voyage.APIKey = viper.GetString("ai.voyage_api_key") // backward compat
 	}
 
-	// Gemini - LLM
+	// Gemini - LLM (legacy single-provider)
 	cfg.Gemini.APIKey = viper.GetString("gemini.api_key")
 	if cfg.Gemini.APIKey == "" {
 		cfg.Gemini.APIKey = viper.GetString("ai.gemini_api_key") // backward compat
@@ -321,6 +346,10 @@ func Load() (*Config, error) {
 	if cfg.Gemini.Model == "" {
 		cfg.Gemini.Model = viper.GetString("ai.gemini_model") // backward compat
 	}
+
+	// LLM multi-provider config: build from explicit per-provider env vars + legacy gemini config.
+	// Order: gemini, openai, deepseek, qwen (all equal, round-robin)
+	cfg.LLM.Providers = buildLLMProviders(cfg.Gemini, viper.GetViper())
 
 	// PostgreSQL - Metadata, conversation history
 	cfg.Postgres.Host = viper.GetString("postgres.host")
@@ -572,4 +601,47 @@ func validate(cfg *Config) error {
 	}
 
 	return nil
+}
+
+// buildLLMProviders assembles multi-provider config from env vars and legacy gemini config.
+func buildLLMProviders(geminiCfg GeminiConfig, v *viper.Viper) []LLMProviderConfig {
+	var providers []LLMProviderConfig
+
+	// Gemini (from legacy config or env)
+	if geminiCfg.APIKey != "" {
+		providers = append(providers, LLMProviderConfig{
+			Name:   "gemini",
+			APIKey: geminiCfg.APIKey,
+			Model:  geminiCfg.Model,
+		})
+	}
+
+	// OpenAI
+	if key := v.GetString("llm.openai_api_key"); key != "" {
+		providers = append(providers, LLMProviderConfig{
+			Name:   "openai",
+			APIKey: key,
+			Model:  v.GetString("llm.openai_model"),
+		})
+	}
+
+	// DeepSeek
+	if key := v.GetString("llm.deepseek_api_key"); key != "" {
+		providers = append(providers, LLMProviderConfig{
+			Name:   "deepseek",
+			APIKey: key,
+			Model:  v.GetString("llm.deepseek_model"),
+		})
+	}
+
+	// Qwen
+	if key := v.GetString("llm.qwen_api_key"); key != "" {
+		providers = append(providers, LLMProviderConfig{
+			Name:   "qwen",
+			APIKey: key,
+			Model:  v.GetString("llm.qwen_model"),
+		})
+	}
+
+	return providers
 }

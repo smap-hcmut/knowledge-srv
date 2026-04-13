@@ -13,7 +13,7 @@ import (
 func (srv *HTTPServer) setupReportDomain(ctx context.Context, r *gin.RouterGroup, mw *middleware.Middleware) error {
 	repo := reportPostgre.New(srv.postgresDB, srv.l)
 
-	uc := reportUsecase.New(repo, srv.searchUC, srv.geminiClient, srv.minioClient, srv.l, reportUsecase.Config{})
+	uc := reportUsecase.New(repo, srv.searchUC, srv.llmClient, srv.minioClient, srv.l, reportUsecase.Config{})
 
 	handler := reportHTTP.New(srv.l, uc, srv.discord)
 	handler.RegisterRoutes(r, mw)

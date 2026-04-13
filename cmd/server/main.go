@@ -23,7 +23,7 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/auth"
 	"github.com/smap-hcmut/shared-libs/go/discord"
 	"github.com/smap-hcmut/shared-libs/go/encrypter"
-	"github.com/smap-hcmut/shared-libs/go/gemini"
+	"github.com/smap-hcmut/shared-libs/go/llm"
 	"github.com/smap-hcmut/shared-libs/go/log"
 	_ "github.com/smap-hcmut/shared-libs/go/response" // For swagger type definitions
 )
@@ -85,12 +85,21 @@ func main() {
 	}
 	logger.Info(ctx, "Voyage client initialized")
 
-	geminiClient, err := gemini.NewGemini(gemini.GeminiConfig{APIKey: cfg.Gemini.APIKey, Model: cfg.Gemini.Model})
+	// LLM - Multi-provider with fallback (Gemini, OpenAI, DeepSeek, Qwen)
+	var llmProviderConfigs []llm.ProviderConfig
+	for _, pc := range cfg.LLM.Providers {
+		llmProviderConfigs = append(llmProviderConfigs, llm.ProviderConfig{
+			Name:   pc.Name,
+			APIKey: pc.APIKey,
+			Model:  pc.Model,
+		})
+	}
+	llmClient, err := llm.NewFromConfig(llm.MultiConfig{Providers: llmProviderConfigs})
 	if err != nil {
-		logger.Error(ctx, "Failed to initialize Gemini client: ", err)
+		logger.Error(ctx, "Failed to initialize LLM client: ", err)
 		return
 	}
-	logger.Info(ctx, "Gemini client initialized")
+	logger.Infof(ctx, "LLM client initialized: %s", llmClient.Name())
 
 	// PostgreSQL - Metadata, conversation history
 	postgresDB, err := postgre.Connect(ctx, cfg.Postgres)
@@ -168,7 +177,7 @@ func main() {
 		PostgresDB:    postgresDB,
 		MinIOClient:   minioClient,
 		VoyageClient:  voyageClient,
-		GeminiClient:  geminiClient,
+		LLMClient:     llmClient,
 		Discord:       discordClient,
 		KafkaProducer: kafkaProducer,
 		MaestroClient: maestroClient,
@@ -207,7 +216,7 @@ func main() {
 
 		QdrantClient:  qdrantClient,
 		VoyageClient:  voyageClient,
-		GeminiClient:  geminiClient,
+		LLMClient:     llmClient,
 		MinIOClient:   minioClient,
 		KafkaProducer: kafkaProducer,
 	})

@@ -9,8 +9,8 @@ import (
 	"knowledge-srv/pkg/voyage"
 
 	"github.com/smap-hcmut/shared-libs/go/discord"
-	"github.com/smap-hcmut/shared-libs/go/gemini"
 	"github.com/smap-hcmut/shared-libs/go/kafka"
+	"github.com/smap-hcmut/shared-libs/go/llm"
 	"github.com/smap-hcmut/shared-libs/go/log"
 	"github.com/smap-hcmut/shared-libs/go/minio"
 	"github.com/smap-hcmut/shared-libs/go/redis"
@@ -31,7 +31,7 @@ type ConsumerServer struct {
 
 	// AI/ML clients
 	voyageClient voyage.IVoyage
-	geminiClient gemini.IGemini
+	llmClient    llm.LLM
 
 	// Maestro - NotebookLM automation (optional)
 	maestroClient maestro.IMaestro
@@ -56,7 +56,7 @@ type Config struct {
 
 	// AI/ML clients
 	VoyageClient voyage.IVoyage
-	GeminiClient gemini.IGemini
+	LLMClient    llm.LLM
 
 	// Maestro - NotebookLM automation (optional)
 	MaestroClient maestro.IMaestro

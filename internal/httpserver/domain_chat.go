@@ -20,7 +20,7 @@ func (srv *HTTPServer) setupChatDomain(ctx context.Context, r *gin.RouterGroup, 
 		ChatTimeoutSec:          srv.config.Notebook.ChatTimeoutSec,
 	}
 
-	uc := chatUsecase.New(repo, srv.searchUC, srv.notebookUC, srv.geminiClient, chatCfg, srv.l)
+	uc := chatUsecase.New(repo, srv.searchUC, srv.notebookUC, srv.llmClient, chatCfg, srv.l)
 
 	handler := chatHTTP.New(srv.l, uc, srv.discord)
 	handler.RegisterRoutes(r, mw)

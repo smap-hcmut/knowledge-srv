@@ -73,7 +73,7 @@ func (uc *implUseCase) generateInBackground(reportID string, input report.Genera
 			Aggregation: formatAggregation(searchOutput.Aggregations),
 		})
 
-		content, err := uc.gemini.Generate(ctx, prompt)
+		content, err := uc.llm.Generate(ctx, prompt)
 		if err != nil {
 			uc.l.Errorf(ctx, "report.usecase.generateInBackground: LLM generation failed for section '%s': %v", tmpl.Title, err)
 			_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{

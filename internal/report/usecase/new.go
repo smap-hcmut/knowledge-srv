@@ -5,7 +5,7 @@ import (
 	"knowledge-srv/internal/report/repository"
 	"knowledge-srv/internal/search"
 
-	"github.com/smap-hcmut/shared-libs/go/gemini"
+	"github.com/smap-hcmut/shared-libs/go/llm"
 	"github.com/smap-hcmut/shared-libs/go/log"
 	"github.com/smap-hcmut/shared-libs/go/minio"
 )
@@ -26,7 +26,7 @@ type Config struct {
 type implUseCase struct {
 	repo     repository.PostgresRepository
 	searchUC search.UseCase
-	gemini   gemini.IGemini
+	llm      llm.LLM
 	minio    minio.MinIO
 	l        log.Logger
 	config   Config
@@ -36,7 +36,7 @@ type implUseCase struct {
 func New(
 	repo repository.PostgresRepository,
 	searchUC search.UseCase,
-	gemini gemini.IGemini,
+	llmClient llm.LLM,
 	minioClient minio.MinIO,
 	l log.Logger,
 	cfg Config,
@@ -54,7 +54,7 @@ func New(
 	return &implUseCase{
 		repo:     repo,
 		searchUC: searchUC,
-		gemini:   gemini,
+		llm:      llmClient,
 		minio:    minioClient,
 		l:        l,
 		config:   cfg,
