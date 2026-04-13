@@ -9,7 +9,7 @@
 -- View: indexing_stats_by_project
 -- Purpose: Indexing statistics per project (for dashboard)
 -- =====================================================
-CREATE OR REPLACE VIEW schema_knowledge.indexing_stats_by_project AS
+CREATE OR REPLACE VIEW knowledge.indexing_stats_by_project AS
 SELECT
     project_id,
     
@@ -39,24 +39,19 @@ SELECT
     -- Timestamps (creation and indexing)
     MAX(indexed_at) as last_indexed_at,
     MIN(created_at) as first_created_at,
-    MAX(created_at) as last_created_at,
+    MAX(created_at) as last_created_at
     
-    -- Ingestion method counts
-    COUNT(*) FILTER (WHERE ingestion_method = 'kafka') as total_kafka,
-    COUNT(*) FILTER (WHERE ingestion_method = 'api') as total_api
-    
-FROM schema_knowledge.indexed_documents
+FROM knowledge.indexed_documents
 GROUP BY project_id;
 
 -- =====================================================
 -- View: indexing_stats_by_batch
 -- Purpose: Indexing statistics per batch (for batch monitoring)
 -- =====================================================
-CREATE OR REPLACE VIEW schema_knowledge.indexing_stats_by_batch AS
+CREATE OR REPLACE VIEW knowledge.indexing_stats_by_batch AS
 SELECT
     batch_id,
     project_id,
-    ingestion_method,
     
     -- Document counts
     COUNT(*) as total_records,
@@ -81,15 +76,15 @@ SELECT
     -- Batch duration in seconds
     EXTRACT(EPOCH FROM (MAX(indexed_at) - MIN(created_at))) as batch_duration_seconds
     
-FROM schema_knowledge.indexed_documents
+FROM knowledge.indexed_documents
 WHERE batch_id IS NOT NULL
-GROUP BY batch_id, project_id, ingestion_method;
+GROUP BY batch_id, project_id;
 
 -- =====================================================
 -- View: indexing_error_summary
 -- Purpose: Aggregated errors for troubleshooting
 -- =====================================================
-CREATE OR REPLACE VIEW schema_knowledge.indexing_error_summary AS
+CREATE OR REPLACE VIEW knowledge.indexing_error_summary AS
 SELECT
     error_type,
     COUNT(*) as error_count,
@@ -111,7 +106,7 @@ SELECT
     -- Errors occurred in the last 24 hours
     COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '24 hours') as errors_last_24h
     
-FROM schema_knowledge.indexing_dlq
+FROM knowledge.indexing_dlq
 GROUP BY error_type
 ORDER BY error_count DESC;
 
@@ -119,50 +114,50 @@ ORDER BY error_count DESC;
 -- View: indexing_health_check
 -- Purpose: Quick health check for system monitoring
 -- =====================================================
-CREATE OR REPLACE VIEW schema_knowledge.indexing_health_check AS
+CREATE OR REPLACE VIEW knowledge.indexing_health_check AS
 SELECT
     -- Total count by document status
-    (SELECT COUNT(*) FROM schema_knowledge.indexed_documents WHERE status = 'INDEXED') as total_indexed,
-    (SELECT COUNT(*) FROM schema_knowledge.indexed_documents WHERE status = 'FAILED') as total_failed,
-    (SELECT COUNT(*) FROM schema_knowledge.indexed_documents WHERE status = 'PENDING') as total_pending,
+    (SELECT COUNT(*) FROM knowledge.indexed_documents WHERE status = 'INDEXED') as total_indexed,
+    (SELECT COUNT(*) FROM knowledge.indexed_documents WHERE status = 'FAILED') as total_failed,
+    (SELECT COUNT(*) FROM knowledge.indexed_documents WHERE status = 'PENDING') as total_pending,
     
     -- Number of records created in the last hour
-    (SELECT COUNT(*) FROM schema_knowledge.indexed_documents 
+    (SELECT COUNT(*) FROM knowledge.indexed_documents 
      WHERE created_at > NOW() - INTERVAL '1 hour') as records_last_hour,
     
     -- Number of records indexed in the last hour
-    (SELECT COUNT(*) FROM schema_knowledge.indexed_documents 
+    (SELECT COUNT(*) FROM knowledge.indexed_documents 
      WHERE indexed_at > NOW() - INTERVAL '1 hour') as indexed_last_hour,
     
     -- Pending records that have been pending for more than 10 minutes
-    (SELECT COUNT(*) FROM schema_knowledge.indexed_documents 
+    (SELECT COUNT(*) FROM knowledge.indexed_documents 
      WHERE status = 'PENDING' AND created_at < NOW() - INTERVAL '10 minutes') as stale_pending,
     
     -- Number of unresolved errors in DLQ
-    (SELECT COUNT(*) FROM schema_knowledge.indexing_dlq WHERE resolved = false) as unresolved_errors,
+    (SELECT COUNT(*) FROM knowledge.indexing_dlq WHERE resolved = false) as unresolved_errors,
     
     -- Average processing time for the most recent 1000 indexed records
     (SELECT ROUND(AVG(total_time_ms)) 
-     FROM (SELECT total_time_ms FROM schema_knowledge.indexed_documents 
+     FROM (SELECT total_time_ms FROM knowledge.indexed_documents 
            WHERE status = 'INDEXED' 
            ORDER BY indexed_at DESC 
            LIMIT 1000) recent) as avg_time_ms_recent,
     
     -- Latest indexed timestamp and the current check time
-    (SELECT MAX(indexed_at) FROM schema_knowledge.indexed_documents) as last_indexed_at,
+    (SELECT MAX(indexed_at) FROM knowledge.indexed_documents) as last_indexed_at,
     NOW() as checked_at;
 
 -- =====================================================
 -- Comments
 -- =====================================================
-COMMENT ON VIEW schema_knowledge.indexing_stats_by_project IS 
+COMMENT ON VIEW knowledge.indexing_stats_by_project IS 
     'Per-project indexing statistics for dashboard and monitoring';
 
-COMMENT ON VIEW schema_knowledge.indexing_stats_by_batch IS 
+COMMENT ON VIEW knowledge.indexing_stats_by_batch IS 
     'Per-batch statistics to track batch processing performance';
 
-COMMENT ON VIEW schema_knowledge.indexing_error_summary IS 
+COMMENT ON VIEW knowledge.indexing_error_summary IS 
     'Error aggregation from DLQ for troubleshooting and identifying patterns';
 
-COMMENT ON VIEW schema_knowledge.indexing_health_check IS 
+COMMENT ON VIEW knowledge.indexing_health_check IS 
     'Single-row health check for monitoring systems (Prometheus, Grafana)';

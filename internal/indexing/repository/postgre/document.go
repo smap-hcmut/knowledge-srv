@@ -182,7 +182,7 @@ func (r *implPostgresRepository) CountDocumentsByProject(ctx context.Context, pr
 			COUNT(*) FILTER (WHERE status = 'PENDING') as total_pending,
 			MAX(indexed_at) as last_indexed_at,
 			AVG(total_time_ms) FILTER (WHERE status = 'INDEXED') as avg_index_time_ms
-		FROM schema_knowledge.indexed_documents
+		FROM knowledge.indexed_documents
 		WHERE project_id = $1
 	`
 

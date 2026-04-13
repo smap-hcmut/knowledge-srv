@@ -9,7 +9,7 @@
 -- Table: maestro_sessions
 -- Purpose: Track browser automation sessions with Maestro service
 -- =====================================================
-CREATE TABLE IF NOT EXISTS schema_knowledge.maestro_sessions (
+CREATE TABLE IF NOT EXISTS knowledge.maestro_sessions (
     -- Identity
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     session_id      VARCHAR(255) NOT NULL UNIQUE,   -- Maestro session ID
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS schema_knowledge.maestro_sessions (
 -- Table: notebook_campaigns
 -- Purpose: Map campaigns to NotebookLM notebooks (one notebook per campaign+period)
 -- =====================================================
-CREATE TABLE IF NOT EXISTS schema_knowledge.notebook_campaigns (
+CREATE TABLE IF NOT EXISTS knowledge.notebook_campaigns (
     -- Identity
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     campaign_id     VARCHAR(100) NOT NULL,           -- Campaign this notebook belongs to
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS schema_knowledge.notebook_campaigns (
 -- Table: notebook_sources
 -- Purpose: Track individual markdown source uploads to NotebookLM
 -- =====================================================
-CREATE TABLE IF NOT EXISTS schema_knowledge.notebook_sources (
+CREATE TABLE IF NOT EXISTS knowledge.notebook_sources (
     -- Identity
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     campaign_id     VARCHAR(100) NOT NULL,            -- Campaign scope
@@ -88,43 +88,43 @@ CREATE TABLE IF NOT EXISTS schema_knowledge.notebook_sources (
 
 -- Maestro sessions: lookup by status
 CREATE INDEX IF NOT EXISTS idx_maestro_sessions_status
-    ON schema_knowledge.maestro_sessions(status);
+    ON knowledge.maestro_sessions(status);
 
 -- Notebook campaigns: lookup by campaign
 CREATE INDEX IF NOT EXISTS idx_notebook_campaigns_campaign
-    ON schema_knowledge.notebook_campaigns(campaign_id);
+    ON knowledge.notebook_campaigns(campaign_id);
 
 -- Notebook campaigns: lookup active notebooks
 CREATE INDEX IF NOT EXISTS idx_notebook_campaigns_status
-    ON schema_knowledge.notebook_campaigns(status);
+    ON knowledge.notebook_campaigns(status);
 
 -- Notebook sources: retry failed sources
 CREATE INDEX IF NOT EXISTS idx_notebook_sources_status
-    ON schema_knowledge.notebook_sources(status);
+    ON knowledge.notebook_sources(status);
 
 -- Notebook sources: lookup by campaign
 CREATE INDEX IF NOT EXISTS idx_notebook_sources_campaign
-    ON schema_knowledge.notebook_sources(campaign_id);
+    ON knowledge.notebook_sources(campaign_id);
 
 -- Notebook sources: lookup by maestro job for webhook resolution
 CREATE INDEX IF NOT EXISTS idx_notebook_sources_maestro_job
-    ON schema_knowledge.notebook_sources(maestro_job_id)
+    ON knowledge.notebook_sources(maestro_job_id)
     WHERE maestro_job_id IS NOT NULL;
 
 -- =====================================================
 -- Comments
 -- =====================================================
-COMMENT ON TABLE schema_knowledge.maestro_sessions IS
+COMMENT ON TABLE knowledge.maestro_sessions IS
     'Browser automation sessions with Maestro service for NotebookLM integration';
 
-COMMENT ON TABLE schema_knowledge.notebook_campaigns IS
+COMMENT ON TABLE knowledge.notebook_campaigns IS
     'Maps campaigns to NotebookLM notebooks - one notebook per campaign per quarter';
 
-COMMENT ON TABLE schema_knowledge.notebook_sources IS
+COMMENT ON TABLE knowledge.notebook_sources IS
     'Tracks individual markdown source uploads to NotebookLM notebooks via Maestro';
 
-COMMENT ON COLUMN schema_knowledge.notebook_sources.status IS
+COMMENT ON COLUMN knowledge.notebook_sources.status IS
     'PENDING: Not yet uploaded, UPLOADING: Maestro job in progress, SYNCED: Successfully uploaded, FAILED: Upload failed';
 
-COMMENT ON COLUMN schema_knowledge.notebook_sources.content_hash IS
+COMMENT ON COLUMN knowledge.notebook_sources.content_hash IS
     'SHA256 hash of markdown content for deduplication - skip re-upload if hash matches';

@@ -9,7 +9,7 @@
 -- Table: conversations
 -- Purpose: Track chat conversation sessions between users and the RAG system
 -- =====================================================
-CREATE TABLE IF NOT EXISTS schema_knowledge.conversations (
+CREATE TABLE IF NOT EXISTS knowledge.conversations (
     -- Identity
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     campaign_id     VARCHAR(100) NOT NULL,       -- Campaign this conversation belongs to
@@ -33,34 +33,34 @@ CREATE TABLE IF NOT EXISTS schema_knowledge.conversations (
 
 -- Primary lookup: List conversations by campaign + user
 CREATE INDEX IF NOT EXISTS idx_conversations_campaign_user
-    ON schema_knowledge.conversations(campaign_id, user_id);
+    ON knowledge.conversations(campaign_id, user_id);
 
 -- Filter by status
 CREATE INDEX IF NOT EXISTS idx_conversations_status
-    ON schema_knowledge.conversations(status);
+    ON knowledge.conversations(status);
 
 -- Sort by last activity
 CREATE INDEX IF NOT EXISTS idx_conversations_last_message
-    ON schema_knowledge.conversations(last_message_at DESC NULLS LAST);
+    ON knowledge.conversations(last_message_at DESC NULLS LAST);
 
 -- Sort by creation time
 CREATE INDEX IF NOT EXISTS idx_conversations_created
-    ON schema_knowledge.conversations(created_at DESC);
+    ON knowledge.conversations(created_at DESC);
 
 -- =====================================================
 -- Comments
 -- =====================================================
-COMMENT ON TABLE schema_knowledge.conversations IS
+COMMENT ON TABLE knowledge.conversations IS
     'Chat conversation sessions for RAG Q&A system - tracks multi-turn conversations between users and the AI assistant';
 
-COMMENT ON COLUMN schema_knowledge.conversations.campaign_id IS
+COMMENT ON COLUMN knowledge.conversations.campaign_id IS
     'Campaign scope - conversations are scoped to a specific campaign for data isolation';
 
-COMMENT ON COLUMN schema_knowledge.conversations.status IS
+COMMENT ON COLUMN knowledge.conversations.status IS
     'ACTIVE: Ongoing conversation, ARCHIVED: Conversation is archived and read-only';
 
-COMMENT ON COLUMN schema_knowledge.conversations.message_count IS
+COMMENT ON COLUMN knowledge.conversations.message_count IS
     'Denormalized count of messages for quick display without JOIN';
 
-COMMENT ON COLUMN schema_knowledge.conversations.last_message_at IS
+COMMENT ON COLUMN knowledge.conversations.last_message_at IS
     'Timestamp of the most recent message, used for sorting conversations by activity';

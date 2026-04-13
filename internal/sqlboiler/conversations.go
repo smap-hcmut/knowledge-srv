@@ -177,15 +177,15 @@ var ConversationWhere = struct {
 	CreatedAt     whereHelpernull_Time
 	UpdatedAt     whereHelpernull_Time
 }{
-	ID:            whereHelperstring{field: "\"schema_knowledge\".\"conversations\".\"id\""},
-	CampaignID:    whereHelperstring{field: "\"schema_knowledge\".\"conversations\".\"campaign_id\""},
-	UserID:        whereHelperstring{field: "\"schema_knowledge\".\"conversations\".\"user_id\""},
-	Title:         whereHelperstring{field: "\"schema_knowledge\".\"conversations\".\"title\""},
-	Status:        whereHelperstring{field: "\"schema_knowledge\".\"conversations\".\"status\""},
-	MessageCount:  whereHelperint{field: "\"schema_knowledge\".\"conversations\".\"message_count\""},
-	LastMessageAt: whereHelpernull_Time{field: "\"schema_knowledge\".\"conversations\".\"last_message_at\""},
-	CreatedAt:     whereHelpernull_Time{field: "\"schema_knowledge\".\"conversations\".\"created_at\""},
-	UpdatedAt:     whereHelpernull_Time{field: "\"schema_knowledge\".\"conversations\".\"updated_at\""},
+	ID:            whereHelperstring{field: "\"knowledge\".\"conversations\".\"id\""},
+	CampaignID:    whereHelperstring{field: "\"knowledge\".\"conversations\".\"campaign_id\""},
+	UserID:        whereHelperstring{field: "\"knowledge\".\"conversations\".\"user_id\""},
+	Title:         whereHelperstring{field: "\"knowledge\".\"conversations\".\"title\""},
+	Status:        whereHelperstring{field: "\"knowledge\".\"conversations\".\"status\""},
+	MessageCount:  whereHelperint{field: "\"knowledge\".\"conversations\".\"message_count\""},
+	LastMessageAt: whereHelpernull_Time{field: "\"knowledge\".\"conversations\".\"last_message_at\""},
+	CreatedAt:     whereHelpernull_Time{field: "\"knowledge\".\"conversations\".\"created_at\""},
+	UpdatedAt:     whereHelpernull_Time{field: "\"knowledge\".\"conversations\".\"updated_at\""},
 }
 
 // ConversationRels is where relationship names are stored.
@@ -545,7 +545,7 @@ func (o *Conversation) Messages(mods ...qm.QueryMod) messageQuery {
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"schema_knowledge\".\"messages\".\"conversation_id\"=?", o.ID),
+		qm.Where("\"knowledge\".\"messages\".\"conversation_id\"=?", o.ID),
 	)
 
 	return Messages(queryMods...)
@@ -606,8 +606,8 @@ func (conversationL) LoadMessages(ctx context.Context, e boil.ContextExecutor, s
 	}
 
 	query := NewQuery(
-		qm.From(`schema_knowledge.messages`),
-		qm.WhereIn(`schema_knowledge.messages.conversation_id in ?`, argsSlice...),
+		qm.From(`knowledge.messages`),
+		qm.WhereIn(`knowledge.messages.conversation_id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -678,7 +678,7 @@ func (o *Conversation) AddMessages(ctx context.Context, exec boil.ContextExecuto
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"schema_knowledge\".\"messages\" SET %s WHERE %s",
+				"UPDATE \"knowledge\".\"messages\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"conversation_id"}),
 				strmangle.WhereClause("\"", "\"", 2, messagePrimaryKeyColumns),
 			)
@@ -719,10 +719,10 @@ func (o *Conversation) AddMessages(ctx context.Context, exec boil.ContextExecuto
 
 // Conversations retrieves all the records using an executor.
 func Conversations(mods ...qm.QueryMod) conversationQuery {
-	mods = append(mods, qm.From("\"schema_knowledge\".\"conversations\""))
+	mods = append(mods, qm.From("\"knowledge\".\"conversations\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"schema_knowledge\".\"conversations\".*"})
+		queries.SetSelect(q, []string{"\"knowledge\".\"conversations\".*"})
 	}
 
 	return conversationQuery{q}
@@ -738,7 +738,7 @@ func FindConversation(ctx context.Context, exec boil.ContextExecutor, iD string,
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"schema_knowledge\".\"conversations\" where \"id\"=$1", sel,
+		"select %s from \"knowledge\".\"conversations\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -805,9 +805,9 @@ func (o *Conversation) Insert(ctx context.Context, exec boil.ContextExecutor, co
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"schema_knowledge\".\"conversations\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"knowledge\".\"conversations\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"schema_knowledge\".\"conversations\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"knowledge\".\"conversations\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -879,7 +879,7 @@ func (o *Conversation) Update(ctx context.Context, exec boil.ContextExecutor, co
 			return 0, errors.New("sqlboiler: unable to update conversations, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"schema_knowledge\".\"conversations\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"knowledge\".\"conversations\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, conversationPrimaryKeyColumns),
 		)
@@ -960,7 +960,7 @@ func (o ConversationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecu
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"schema_knowledge\".\"conversations\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"knowledge\".\"conversations\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, conversationPrimaryKeyColumns, len(o)))
 
@@ -1064,7 +1064,7 @@ func (o *Conversation) Upsert(ctx context.Context, exec boil.ContextExecutor, up
 			conflict = make([]string, len(conversationPrimaryKeyColumns))
 			copy(conflict, conversationPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"schema_knowledge\".\"conversations\"", updateOnConflict, ret, update, conflict, insert, opts...)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"knowledge\".\"conversations\"", updateOnConflict, ret, update, conflict, insert, opts...)
 
 		cache.valueMapping, err = queries.BindMapping(conversationType, conversationMapping, insert)
 		if err != nil {
@@ -1123,7 +1123,7 @@ func (o *Conversation) Delete(ctx context.Context, exec boil.ContextExecutor) (i
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), conversationPrimaryKeyMapping)
-	sql := "DELETE FROM \"schema_knowledge\".\"conversations\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"knowledge\".\"conversations\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1188,7 +1188,7 @@ func (o ConversationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecu
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"schema_knowledge\".\"conversations\" WHERE " +
+	sql := "DELETE FROM \"knowledge\".\"conversations\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, conversationPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1243,7 +1243,7 @@ func (o *ConversationSlice) ReloadAll(ctx context.Context, exec boil.ContextExec
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"schema_knowledge\".\"conversations\".* FROM \"schema_knowledge\".\"conversations\" WHERE " +
+	sql := "SELECT \"knowledge\".\"conversations\".* FROM \"knowledge\".\"conversations\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, conversationPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1261,7 +1261,7 @@ func (o *ConversationSlice) ReloadAll(ctx context.Context, exec boil.ContextExec
 // ConversationExists checks if the Conversation row exists.
 func ConversationExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"schema_knowledge\".\"conversations\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"knowledge\".\"conversations\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

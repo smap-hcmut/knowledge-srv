@@ -35,18 +35,16 @@ type IndexedDocument struct {
 	// SHA-256 hash of the document content for duplicate detection across different sources
 	ContentHash string `boil:"content_hash" json:"content_hash" toml:"content_hash" yaml:"content_hash"`
 	// PENDING: Awaiting processing, INDEXED: Successfully indexed, FAILED: Error during indexing, RE_INDEXING: Currently being re-indexed
-	Status       string      `boil:"status" json:"status" toml:"status" yaml:"status"`
-	ErrorMessage null.String `boil:"error_message" json:"error_message,omitempty" toml:"error_message" yaml:"error_message,omitempty"`
-	RetryCount   null.Int    `boil:"retry_count" json:"retry_count,omitempty" toml:"retry_count" yaml:"retry_count,omitempty"`
-	BatchID      null.String `boil:"batch_id" json:"batch_id,omitempty" toml:"batch_id" yaml:"batch_id,omitempty"`
-	// How the data was ingested: kafka (from Kafka topic) or api (from HTTP endpoint)
-	IngestionMethod string    `boil:"ingestion_method" json:"ingestion_method" toml:"ingestion_method" yaml:"ingestion_method"`
-	EmbeddingTimeMS null.Int  `boil:"embedding_time_ms" json:"embedding_time_ms,omitempty" toml:"embedding_time_ms" yaml:"embedding_time_ms,omitempty"`
-	UpsertTimeMS    null.Int  `boil:"upsert_time_ms" json:"upsert_time_ms,omitempty" toml:"upsert_time_ms" yaml:"upsert_time_ms,omitempty"`
-	TotalTimeMS     null.Int  `boil:"total_time_ms" json:"total_time_ms,omitempty" toml:"total_time_ms" yaml:"total_time_ms,omitempty"`
-	IndexedAt       null.Time `boil:"indexed_at" json:"indexed_at,omitempty" toml:"indexed_at" yaml:"indexed_at,omitempty"`
-	CreatedAt       null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt       null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	Status          string      `boil:"status" json:"status" toml:"status" yaml:"status"`
+	ErrorMessage    null.String `boil:"error_message" json:"error_message,omitempty" toml:"error_message" yaml:"error_message,omitempty"`
+	RetryCount      null.Int    `boil:"retry_count" json:"retry_count,omitempty" toml:"retry_count" yaml:"retry_count,omitempty"`
+	BatchID         null.String `boil:"batch_id" json:"batch_id,omitempty" toml:"batch_id" yaml:"batch_id,omitempty"`
+	EmbeddingTimeMS null.Int    `boil:"embedding_time_ms" json:"embedding_time_ms,omitempty" toml:"embedding_time_ms" yaml:"embedding_time_ms,omitempty"`
+	UpsertTimeMS    null.Int    `boil:"upsert_time_ms" json:"upsert_time_ms,omitempty" toml:"upsert_time_ms" yaml:"upsert_time_ms,omitempty"`
+	TotalTimeMS     null.Int    `boil:"total_time_ms" json:"total_time_ms,omitempty" toml:"total_time_ms" yaml:"total_time_ms,omitempty"`
+	IndexedAt       null.Time   `boil:"indexed_at" json:"indexed_at,omitempty" toml:"indexed_at" yaml:"indexed_at,omitempty"`
+	CreatedAt       null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt       null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *indexedDocumentR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L indexedDocumentL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -64,7 +62,6 @@ var IndexedDocumentColumns = struct {
 	ErrorMessage    string
 	RetryCount      string
 	BatchID         string
-	IngestionMethod string
 	EmbeddingTimeMS string
 	UpsertTimeMS    string
 	TotalTimeMS     string
@@ -83,7 +80,6 @@ var IndexedDocumentColumns = struct {
 	ErrorMessage:    "error_message",
 	RetryCount:      "retry_count",
 	BatchID:         "batch_id",
-	IngestionMethod: "ingestion_method",
 	EmbeddingTimeMS: "embedding_time_ms",
 	UpsertTimeMS:    "upsert_time_ms",
 	TotalTimeMS:     "total_time_ms",
@@ -104,7 +100,6 @@ var IndexedDocumentTableColumns = struct {
 	ErrorMessage    string
 	RetryCount      string
 	BatchID         string
-	IngestionMethod string
 	EmbeddingTimeMS string
 	UpsertTimeMS    string
 	TotalTimeMS     string
@@ -123,7 +118,6 @@ var IndexedDocumentTableColumns = struct {
 	ErrorMessage:    "indexed_documents.error_message",
 	RetryCount:      "indexed_documents.retry_count",
 	BatchID:         "indexed_documents.batch_id",
-	IngestionMethod: "indexed_documents.ingestion_method",
 	EmbeddingTimeMS: "indexed_documents.embedding_time_ms",
 	UpsertTimeMS:    "indexed_documents.upsert_time_ms",
 	TotalTimeMS:     "indexed_documents.total_time_ms",
@@ -240,7 +234,6 @@ var IndexedDocumentWhere = struct {
 	ErrorMessage    whereHelpernull_String
 	RetryCount      whereHelpernull_Int
 	BatchID         whereHelpernull_String
-	IngestionMethod whereHelperstring
 	EmbeddingTimeMS whereHelpernull_Int
 	UpsertTimeMS    whereHelpernull_Int
 	TotalTimeMS     whereHelpernull_Int
@@ -248,24 +241,23 @@ var IndexedDocumentWhere = struct {
 	CreatedAt       whereHelpernull_Time
 	UpdatedAt       whereHelpernull_Time
 }{
-	ID:              whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"id\""},
-	AnalyticsID:     whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"analytics_id\""},
-	ProjectID:       whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"project_id\""},
-	SourceID:        whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"source_id\""},
-	QdrantPointID:   whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"qdrant_point_id\""},
-	CollectionName:  whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"collection_name\""},
-	ContentHash:     whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"content_hash\""},
-	Status:          whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"status\""},
-	ErrorMessage:    whereHelpernull_String{field: "\"schema_knowledge\".\"indexed_documents\".\"error_message\""},
-	RetryCount:      whereHelpernull_Int{field: "\"schema_knowledge\".\"indexed_documents\".\"retry_count\""},
-	BatchID:         whereHelpernull_String{field: "\"schema_knowledge\".\"indexed_documents\".\"batch_id\""},
-	IngestionMethod: whereHelperstring{field: "\"schema_knowledge\".\"indexed_documents\".\"ingestion_method\""},
-	EmbeddingTimeMS: whereHelpernull_Int{field: "\"schema_knowledge\".\"indexed_documents\".\"embedding_time_ms\""},
-	UpsertTimeMS:    whereHelpernull_Int{field: "\"schema_knowledge\".\"indexed_documents\".\"upsert_time_ms\""},
-	TotalTimeMS:     whereHelpernull_Int{field: "\"schema_knowledge\".\"indexed_documents\".\"total_time_ms\""},
-	IndexedAt:       whereHelpernull_Time{field: "\"schema_knowledge\".\"indexed_documents\".\"indexed_at\""},
-	CreatedAt:       whereHelpernull_Time{field: "\"schema_knowledge\".\"indexed_documents\".\"created_at\""},
-	UpdatedAt:       whereHelpernull_Time{field: "\"schema_knowledge\".\"indexed_documents\".\"updated_at\""},
+	ID:              whereHelperstring{field: "\"knowledge\".\"indexed_documents\".\"id\""},
+	AnalyticsID:     whereHelperstring{field: "\"knowledge\".\"indexed_documents\".\"analytics_id\""},
+	ProjectID:       whereHelperstring{field: "\"knowledge\".\"indexed_documents\".\"project_id\""},
+	SourceID:        whereHelperstring{field: "\"knowledge\".\"indexed_documents\".\"source_id\""},
+	QdrantPointID:   whereHelperstring{field: "\"knowledge\".\"indexed_documents\".\"qdrant_point_id\""},
+	CollectionName:  whereHelperstring{field: "\"knowledge\".\"indexed_documents\".\"collection_name\""},
+	ContentHash:     whereHelperstring{field: "\"knowledge\".\"indexed_documents\".\"content_hash\""},
+	Status:          whereHelperstring{field: "\"knowledge\".\"indexed_documents\".\"status\""},
+	ErrorMessage:    whereHelpernull_String{field: "\"knowledge\".\"indexed_documents\".\"error_message\""},
+	RetryCount:      whereHelpernull_Int{field: "\"knowledge\".\"indexed_documents\".\"retry_count\""},
+	BatchID:         whereHelpernull_String{field: "\"knowledge\".\"indexed_documents\".\"batch_id\""},
+	EmbeddingTimeMS: whereHelpernull_Int{field: "\"knowledge\".\"indexed_documents\".\"embedding_time_ms\""},
+	UpsertTimeMS:    whereHelpernull_Int{field: "\"knowledge\".\"indexed_documents\".\"upsert_time_ms\""},
+	TotalTimeMS:     whereHelpernull_Int{field: "\"knowledge\".\"indexed_documents\".\"total_time_ms\""},
+	IndexedAt:       whereHelpernull_Time{field: "\"knowledge\".\"indexed_documents\".\"indexed_at\""},
+	CreatedAt:       whereHelpernull_Time{field: "\"knowledge\".\"indexed_documents\".\"created_at\""},
+	UpdatedAt:       whereHelpernull_Time{field: "\"knowledge\".\"indexed_documents\".\"updated_at\""},
 }
 
 // IndexedDocumentRels is where relationship names are stored.
@@ -285,8 +277,8 @@ func (*indexedDocumentR) NewStruct() *indexedDocumentR {
 type indexedDocumentL struct{}
 
 var (
-	indexedDocumentAllColumns            = []string{"id", "analytics_id", "project_id", "source_id", "qdrant_point_id", "collection_name", "content_hash", "status", "error_message", "retry_count", "batch_id", "ingestion_method", "embedding_time_ms", "upsert_time_ms", "total_time_ms", "indexed_at", "created_at", "updated_at"}
-	indexedDocumentColumnsWithoutDefault = []string{"analytics_id", "project_id", "source_id", "qdrant_point_id", "collection_name", "content_hash", "ingestion_method"}
+	indexedDocumentAllColumns            = []string{"id", "analytics_id", "project_id", "source_id", "qdrant_point_id", "collection_name", "content_hash", "status", "error_message", "retry_count", "batch_id", "embedding_time_ms", "upsert_time_ms", "total_time_ms", "indexed_at", "created_at", "updated_at"}
+	indexedDocumentColumnsWithoutDefault = []string{"analytics_id", "project_id", "source_id", "qdrant_point_id", "collection_name", "content_hash"}
 	indexedDocumentColumnsWithDefault    = []string{"id", "status", "error_message", "retry_count", "batch_id", "embedding_time_ms", "upsert_time_ms", "total_time_ms", "indexed_at", "created_at", "updated_at"}
 	indexedDocumentPrimaryKeyColumns     = []string{"id"}
 	indexedDocumentGeneratedColumns      = []string{}
@@ -599,10 +591,10 @@ func (q indexedDocumentQuery) Exists(ctx context.Context, exec boil.ContextExecu
 
 // IndexedDocuments retrieves all the records using an executor.
 func IndexedDocuments(mods ...qm.QueryMod) indexedDocumentQuery {
-	mods = append(mods, qm.From("\"schema_knowledge\".\"indexed_documents\""))
+	mods = append(mods, qm.From("\"knowledge\".\"indexed_documents\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"schema_knowledge\".\"indexed_documents\".*"})
+		queries.SetSelect(q, []string{"\"knowledge\".\"indexed_documents\".*"})
 	}
 
 	return indexedDocumentQuery{q}
@@ -618,7 +610,7 @@ func FindIndexedDocument(ctx context.Context, exec boil.ContextExecutor, iD stri
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"schema_knowledge\".\"indexed_documents\" where \"id\"=$1", sel,
+		"select %s from \"knowledge\".\"indexed_documents\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -685,9 +677,9 @@ func (o *IndexedDocument) Insert(ctx context.Context, exec boil.ContextExecutor,
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"schema_knowledge\".\"indexed_documents\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"knowledge\".\"indexed_documents\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"schema_knowledge\".\"indexed_documents\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"knowledge\".\"indexed_documents\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -759,7 +751,7 @@ func (o *IndexedDocument) Update(ctx context.Context, exec boil.ContextExecutor,
 			return 0, errors.New("sqlboiler: unable to update indexed_documents, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"schema_knowledge\".\"indexed_documents\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"knowledge\".\"indexed_documents\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, indexedDocumentPrimaryKeyColumns),
 		)
@@ -840,7 +832,7 @@ func (o IndexedDocumentSlice) UpdateAll(ctx context.Context, exec boil.ContextEx
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"schema_knowledge\".\"indexed_documents\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"knowledge\".\"indexed_documents\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, indexedDocumentPrimaryKeyColumns, len(o)))
 
@@ -944,7 +936,7 @@ func (o *IndexedDocument) Upsert(ctx context.Context, exec boil.ContextExecutor,
 			conflict = make([]string, len(indexedDocumentPrimaryKeyColumns))
 			copy(conflict, indexedDocumentPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"schema_knowledge\".\"indexed_documents\"", updateOnConflict, ret, update, conflict, insert, opts...)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"knowledge\".\"indexed_documents\"", updateOnConflict, ret, update, conflict, insert, opts...)
 
 		cache.valueMapping, err = queries.BindMapping(indexedDocumentType, indexedDocumentMapping, insert)
 		if err != nil {
@@ -1003,7 +995,7 @@ func (o *IndexedDocument) Delete(ctx context.Context, exec boil.ContextExecutor)
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), indexedDocumentPrimaryKeyMapping)
-	sql := "DELETE FROM \"schema_knowledge\".\"indexed_documents\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"knowledge\".\"indexed_documents\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1068,7 +1060,7 @@ func (o IndexedDocumentSlice) DeleteAll(ctx context.Context, exec boil.ContextEx
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"schema_knowledge\".\"indexed_documents\" WHERE " +
+	sql := "DELETE FROM \"knowledge\".\"indexed_documents\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, indexedDocumentPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1123,7 +1115,7 @@ func (o *IndexedDocumentSlice) ReloadAll(ctx context.Context, exec boil.ContextE
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"schema_knowledge\".\"indexed_documents\".* FROM \"schema_knowledge\".\"indexed_documents\" WHERE " +
+	sql := "SELECT \"knowledge\".\"indexed_documents\".* FROM \"knowledge\".\"indexed_documents\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, indexedDocumentPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1141,7 +1133,7 @@ func (o *IndexedDocumentSlice) ReloadAll(ctx context.Context, exec boil.ContextE
 // IndexedDocumentExists checks if the IndexedDocument row exists.
 func IndexedDocumentExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"schema_knowledge\".\"indexed_documents\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"knowledge\".\"indexed_documents\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

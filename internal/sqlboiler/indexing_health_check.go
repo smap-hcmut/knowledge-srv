@@ -99,16 +99,16 @@ var IndexingHealthCheckWhere = struct {
 	LastIndexedAt    whereHelpernull_Time
 	CheckedAt        whereHelpernull_Time
 }{
-	TotalIndexed:     whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_health_check\".\"total_indexed\""},
-	TotalFailed:      whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_health_check\".\"total_failed\""},
-	TotalPending:     whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_health_check\".\"total_pending\""},
-	RecordsLastHour:  whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_health_check\".\"records_last_hour\""},
-	IndexedLastHour:  whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_health_check\".\"indexed_last_hour\""},
-	StalePending:     whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_health_check\".\"stale_pending\""},
-	UnresolvedErrors: whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_health_check\".\"unresolved_errors\""},
-	AvgTimeMSRecent:  whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_health_check\".\"avg_time_ms_recent\""},
-	LastIndexedAt:    whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_health_check\".\"last_indexed_at\""},
-	CheckedAt:        whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_health_check\".\"checked_at\""},
+	TotalIndexed:     whereHelpernull_Int64{field: "\"knowledge\".\"indexing_health_check\".\"total_indexed\""},
+	TotalFailed:      whereHelpernull_Int64{field: "\"knowledge\".\"indexing_health_check\".\"total_failed\""},
+	TotalPending:     whereHelpernull_Int64{field: "\"knowledge\".\"indexing_health_check\".\"total_pending\""},
+	RecordsLastHour:  whereHelpernull_Int64{field: "\"knowledge\".\"indexing_health_check\".\"records_last_hour\""},
+	IndexedLastHour:  whereHelpernull_Int64{field: "\"knowledge\".\"indexing_health_check\".\"indexed_last_hour\""},
+	StalePending:     whereHelpernull_Int64{field: "\"knowledge\".\"indexing_health_check\".\"stale_pending\""},
+	UnresolvedErrors: whereHelpernull_Int64{field: "\"knowledge\".\"indexing_health_check\".\"unresolved_errors\""},
+	AvgTimeMSRecent:  whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_health_check\".\"avg_time_ms_recent\""},
+	LastIndexedAt:    whereHelpernull_Time{field: "\"knowledge\".\"indexing_health_check\".\"last_indexed_at\""},
+	CheckedAt:        whereHelpernull_Time{field: "\"knowledge\".\"indexing_health_check\".\"checked_at\""},
 }
 
 var (
@@ -260,10 +260,10 @@ func (q indexingHealthCheckQuery) Exists(ctx context.Context, exec boil.ContextE
 
 // IndexingHealthChecks retrieves all the records using an executor.
 func IndexingHealthChecks(mods ...qm.QueryMod) indexingHealthCheckQuery {
-	mods = append(mods, qm.From("\"schema_knowledge\".\"indexing_health_check\""))
+	mods = append(mods, qm.From("\"knowledge\".\"indexing_health_check\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"schema_knowledge\".\"indexing_health_check\".*"})
+		queries.SetSelect(q, []string{"\"knowledge\".\"indexing_health_check\".*"})
 	}
 
 	return indexingHealthCheckQuery{q}

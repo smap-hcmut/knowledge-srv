@@ -9,11 +9,11 @@
 -- Table: messages
 -- Purpose: Store user and assistant messages with metadata
 -- =====================================================
-CREATE TABLE IF NOT EXISTS schema_knowledge.messages (
+CREATE TABLE IF NOT EXISTS knowledge.messages (
     -- Identity
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     conversation_id   UUID NOT NULL               -- FK to conversations.id
-                      REFERENCES schema_knowledge.conversations(id)
+                      REFERENCES knowledge.conversations(id)
                       ON DELETE CASCADE,
 
     -- Message Content
@@ -36,25 +36,25 @@ CREATE TABLE IF NOT EXISTS schema_knowledge.messages (
 
 -- Primary lookup: List messages by conversation, ordered by time
 CREATE INDEX IF NOT EXISTS idx_messages_conversation_created
-    ON schema_knowledge.messages(conversation_id, created_at ASC);
+    ON knowledge.messages(conversation_id, created_at ASC);
 
 -- =====================================================
 -- Comments
 -- =====================================================
-COMMENT ON TABLE schema_knowledge.messages IS
+COMMENT ON TABLE knowledge.messages IS
     'Individual messages within chat conversations - stores both user questions and assistant responses with metadata';
 
-COMMENT ON COLUMN schema_knowledge.messages.role IS
+COMMENT ON COLUMN knowledge.messages.role IS
     'Message author role: user (human question) or assistant (AI response)';
 
-COMMENT ON COLUMN schema_knowledge.messages.citations IS
+COMMENT ON COLUMN knowledge.messages.citations IS
     'JSONB array of citation objects extracted from search results (assistant messages only)';
 
-COMMENT ON COLUMN schema_knowledge.messages.search_metadata IS
+COMMENT ON COLUMN knowledge.messages.search_metadata IS
     'JSONB object with search processing stats: total_docs_searched, docs_used, processing_time_ms, model_used';
 
-COMMENT ON COLUMN schema_knowledge.messages.suggestions IS
+COMMENT ON COLUMN knowledge.messages.suggestions IS
     'JSONB array of follow-up question suggestions (assistant messages only)';
 
-COMMENT ON COLUMN schema_knowledge.messages.filters_used IS
+COMMENT ON COLUMN knowledge.messages.filters_used IS
     'JSONB object with the search filters that were applied (user messages only)';

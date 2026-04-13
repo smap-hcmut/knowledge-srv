@@ -4,15 +4,23 @@
 package sqlboiler
 
 var TableNames = struct {
-	Conversations    string
-	IndexedDocuments string
-	IndexingDLQ      string
-	Messages         string
-	Reports          string
+	Conversations     string
+	IndexedDocuments  string
+	IndexingDLQ       string
+	MaestroSessions   string
+	Messages          string
+	NotebookCampaigns string
+	NotebookChatJobs  string
+	NotebookSources   string
+	Reports           string
 }{
-	Conversations:    "conversations",
-	IndexedDocuments: "indexed_documents",
-	IndexingDLQ:      "indexing_dlq",
-	Messages:         "messages",
-	Reports:          "reports",
+	Conversations:     "conversations",
+	IndexedDocuments:  "indexed_documents",
+	IndexingDLQ:       "indexing_dlq",
+	MaestroSessions:   "maestro_sessions",
+	Messages:          "messages",
+	NotebookCampaigns: "notebook_campaigns",
+	NotebookChatJobs:  "notebook_chat_jobs",
+	NotebookSources:   "notebook_sources",
+	Reports:           "reports",
 }

@@ -5,7 +5,7 @@
 -- Created: 2026-02-16
 -- =====================================================
 
-CREATE TABLE IF NOT EXISTS schema_knowledge.reports (
+CREATE TABLE IF NOT EXISTS knowledge.reports (
     -- Identity
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     campaign_id     UUID NOT NULL,              -- Thuộc campaign nào
@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS schema_knowledge.reports (
 );
 
 -- Indexes
-CREATE INDEX idx_reports_campaign ON schema_knowledge.reports(campaign_id);
-CREATE INDEX idx_reports_user ON schema_knowledge.reports(user_id);
-CREATE INDEX idx_reports_status ON schema_knowledge.reports(status);
-CREATE INDEX idx_reports_params_hash ON schema_knowledge.reports(params_hash, status);
-CREATE INDEX idx_reports_created ON schema_knowledge.reports(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reports_campaign ON knowledge.reports(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_reports_user ON knowledge.reports(user_id);
+CREATE INDEX IF NOT EXISTS idx_reports_status ON knowledge.reports(status);
+CREATE INDEX IF NOT EXISTS idx_reports_params_hash ON knowledge.reports(params_hash, status);
+CREATE INDEX IF NOT EXISTS idx_reports_created ON knowledge.reports(created_at DESC);

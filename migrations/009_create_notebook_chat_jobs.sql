@@ -1,6 +1,6 @@
 -- Migration: Create notebook_chat_jobs table
 
-CREATE TABLE notebook_chat_jobs (
+CREATE TABLE IF NOT EXISTS knowledge.notebook_chat_jobs (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     conversation_id UUID NOT NULL,
     campaign_id     UUID NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE notebook_chat_jobs (
 );
 
 -- Indexes for faster lookups
-CREATE INDEX idx_notebook_chat_jobs_conversation_id ON notebook_chat_jobs (conversation_id);
-CREATE INDEX idx_notebook_chat_jobs_campaign_id ON notebook_chat_jobs (campaign_id);
-CREATE INDEX idx_notebook_chat_jobs_status ON notebook_chat_jobs (status);
-CREATE INDEX idx_notebook_chat_jobs_expires_at ON notebook_chat_jobs (expires_at);
+CREATE INDEX IF NOT EXISTS idx_notebook_chat_jobs_conversation_id ON knowledge.notebook_chat_jobs (conversation_id);
+CREATE INDEX IF NOT EXISTS idx_notebook_chat_jobs_campaign_id ON knowledge.notebook_chat_jobs (campaign_id);
+CREATE INDEX IF NOT EXISTS idx_notebook_chat_jobs_status ON knowledge.notebook_chat_jobs (status);
+CREATE INDEX IF NOT EXISTS idx_notebook_chat_jobs_expires_at ON knowledge.notebook_chat_jobs (expires_at);

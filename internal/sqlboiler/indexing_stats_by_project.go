@@ -40,8 +40,6 @@ type IndexingStatsByProject struct {
 	LastIndexedAt      null.Time         `boil:"last_indexed_at" json:"last_indexed_at,omitempty" toml:"last_indexed_at" yaml:"last_indexed_at,omitempty"`
 	FirstCreatedAt     null.Time         `boil:"first_created_at" json:"first_created_at,omitempty" toml:"first_created_at" yaml:"first_created_at,omitempty"`
 	LastCreatedAt      null.Time         `boil:"last_created_at" json:"last_created_at,omitempty" toml:"last_created_at" yaml:"last_created_at,omitempty"`
-	TotalKafka         null.Int64        `boil:"total_kafka" json:"total_kafka,omitempty" toml:"total_kafka" yaml:"total_kafka,omitempty"`
-	TotalAPI           null.Int64        `boil:"total_api" json:"total_api,omitempty" toml:"total_api" yaml:"total_api,omitempty"`
 }
 
 var IndexingStatsByProjectColumns = struct {
@@ -60,8 +58,6 @@ var IndexingStatsByProjectColumns = struct {
 	LastIndexedAt      string
 	FirstCreatedAt     string
 	LastCreatedAt      string
-	TotalKafka         string
-	TotalAPI           string
 }{
 	ProjectID:          "project_id",
 	TotalIndexed:       "total_indexed",
@@ -78,8 +74,6 @@ var IndexingStatsByProjectColumns = struct {
 	LastIndexedAt:      "last_indexed_at",
 	FirstCreatedAt:     "first_created_at",
 	LastCreatedAt:      "last_created_at",
-	TotalKafka:         "total_kafka",
-	TotalAPI:           "total_api",
 }
 
 var IndexingStatsByProjectTableColumns = struct {
@@ -98,8 +92,6 @@ var IndexingStatsByProjectTableColumns = struct {
 	LastIndexedAt      string
 	FirstCreatedAt     string
 	LastCreatedAt      string
-	TotalKafka         string
-	TotalAPI           string
 }{
 	ProjectID:          "indexing_stats_by_project.project_id",
 	TotalIndexed:       "indexing_stats_by_project.total_indexed",
@@ -116,8 +108,6 @@ var IndexingStatsByProjectTableColumns = struct {
 	LastIndexedAt:      "indexing_stats_by_project.last_indexed_at",
 	FirstCreatedAt:     "indexing_stats_by_project.first_created_at",
 	LastCreatedAt:      "indexing_stats_by_project.last_created_at",
-	TotalKafka:         "indexing_stats_by_project.total_kafka",
-	TotalAPI:           "indexing_stats_by_project.total_api",
 }
 
 // Generated where
@@ -138,32 +128,28 @@ var IndexingStatsByProjectWhere = struct {
 	LastIndexedAt      whereHelpernull_Time
 	FirstCreatedAt     whereHelpernull_Time
 	LastCreatedAt      whereHelpernull_Time
-	TotalKafka         whereHelpernull_Int64
-	TotalAPI           whereHelpernull_Int64
 }{
-	ProjectID:          whereHelpernull_String{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"project_id\""},
-	TotalIndexed:       whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"total_indexed\""},
-	TotalFailed:        whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"total_failed\""},
-	TotalPending:       whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"total_pending\""},
-	TotalReindexing:    whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"total_reindexing\""},
-	TotalAll:           whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"total_all\""},
-	SuccessRatePercent: whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"success_rate_percent\""},
-	AvgTotalTimeMS:     whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"avg_total_time_ms\""},
-	AvgEmbeddingTimeMS: whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"avg_embedding_time_ms\""},
-	AvgUpsertTimeMS:    whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"avg_upsert_time_ms\""},
-	MinTotalTimeMS:     whereHelpernull_Int{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"min_total_time_ms\""},
-	MaxTotalTimeMS:     whereHelpernull_Int{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"max_total_time_ms\""},
-	LastIndexedAt:      whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"last_indexed_at\""},
-	FirstCreatedAt:     whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"first_created_at\""},
-	LastCreatedAt:      whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"last_created_at\""},
-	TotalKafka:         whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"total_kafka\""},
-	TotalAPI:           whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_project\".\"total_api\""},
+	ProjectID:          whereHelpernull_String{field: "\"knowledge\".\"indexing_stats_by_project\".\"project_id\""},
+	TotalIndexed:       whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_project\".\"total_indexed\""},
+	TotalFailed:        whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_project\".\"total_failed\""},
+	TotalPending:       whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_project\".\"total_pending\""},
+	TotalReindexing:    whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_project\".\"total_reindexing\""},
+	TotalAll:           whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_project\".\"total_all\""},
+	SuccessRatePercent: whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_stats_by_project\".\"success_rate_percent\""},
+	AvgTotalTimeMS:     whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_stats_by_project\".\"avg_total_time_ms\""},
+	AvgEmbeddingTimeMS: whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_stats_by_project\".\"avg_embedding_time_ms\""},
+	AvgUpsertTimeMS:    whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_stats_by_project\".\"avg_upsert_time_ms\""},
+	MinTotalTimeMS:     whereHelpernull_Int{field: "\"knowledge\".\"indexing_stats_by_project\".\"min_total_time_ms\""},
+	MaxTotalTimeMS:     whereHelpernull_Int{field: "\"knowledge\".\"indexing_stats_by_project\".\"max_total_time_ms\""},
+	LastIndexedAt:      whereHelpernull_Time{field: "\"knowledge\".\"indexing_stats_by_project\".\"last_indexed_at\""},
+	FirstCreatedAt:     whereHelpernull_Time{field: "\"knowledge\".\"indexing_stats_by_project\".\"first_created_at\""},
+	LastCreatedAt:      whereHelpernull_Time{field: "\"knowledge\".\"indexing_stats_by_project\".\"last_created_at\""},
 }
 
 var (
-	indexingStatsByProjectAllColumns            = []string{"project_id", "total_indexed", "total_failed", "total_pending", "total_reindexing", "total_all", "success_rate_percent", "avg_total_time_ms", "avg_embedding_time_ms", "avg_upsert_time_ms", "min_total_time_ms", "max_total_time_ms", "last_indexed_at", "first_created_at", "last_created_at", "total_kafka", "total_api"}
+	indexingStatsByProjectAllColumns            = []string{"project_id", "total_indexed", "total_failed", "total_pending", "total_reindexing", "total_all", "success_rate_percent", "avg_total_time_ms", "avg_embedding_time_ms", "avg_upsert_time_ms", "min_total_time_ms", "max_total_time_ms", "last_indexed_at", "first_created_at", "last_created_at"}
 	indexingStatsByProjectColumnsWithoutDefault = []string{}
-	indexingStatsByProjectColumnsWithDefault    = []string{"project_id", "total_indexed", "total_failed", "total_pending", "total_reindexing", "total_all", "success_rate_percent", "avg_total_time_ms", "avg_embedding_time_ms", "avg_upsert_time_ms", "min_total_time_ms", "max_total_time_ms", "last_indexed_at", "first_created_at", "last_created_at", "total_kafka", "total_api"}
+	indexingStatsByProjectColumnsWithDefault    = []string{"project_id", "total_indexed", "total_failed", "total_pending", "total_reindexing", "total_all", "success_rate_percent", "avg_total_time_ms", "avg_embedding_time_ms", "avg_upsert_time_ms", "min_total_time_ms", "max_total_time_ms", "last_indexed_at", "first_created_at", "last_created_at"}
 	indexingStatsByProjectPrimaryKeyColumns     = []string{}
 	indexingStatsByProjectGeneratedColumns      = []string{}
 )
@@ -309,10 +295,10 @@ func (q indexingStatsByProjectQuery) Exists(ctx context.Context, exec boil.Conte
 
 // IndexingStatsByProjects retrieves all the records using an executor.
 func IndexingStatsByProjects(mods ...qm.QueryMod) indexingStatsByProjectQuery {
-	mods = append(mods, qm.From("\"schema_knowledge\".\"indexing_stats_by_project\""))
+	mods = append(mods, qm.From("\"knowledge\".\"indexing_stats_by_project\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"schema_knowledge\".\"indexing_stats_by_project\".*"})
+		queries.SetSelect(q, []string{"\"knowledge\".\"indexing_stats_by_project\".*"})
 	}
 
 	return indexingStatsByProjectQuery{q}

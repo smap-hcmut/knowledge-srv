@@ -156,17 +156,17 @@ var IndexingDLQWhere = struct {
 	CreatedAt    whereHelpernull_Time
 	UpdatedAt    whereHelpernull_Time
 }{
-	ID:           whereHelperstring{field: "\"schema_knowledge\".\"indexing_dlq\".\"id\""},
-	AnalyticsID:  whereHelperstring{field: "\"schema_knowledge\".\"indexing_dlq\".\"analytics_id\""},
-	BatchID:      whereHelpernull_String{field: "\"schema_knowledge\".\"indexing_dlq\".\"batch_id\""},
-	RawPayload:   whereHelpertypes_JSON{field: "\"schema_knowledge\".\"indexing_dlq\".\"raw_payload\""},
-	ErrorMessage: whereHelperstring{field: "\"schema_knowledge\".\"indexing_dlq\".\"error_message\""},
-	ErrorType:    whereHelperstring{field: "\"schema_knowledge\".\"indexing_dlq\".\"error_type\""},
-	RetryCount:   whereHelpernull_Int{field: "\"schema_knowledge\".\"indexing_dlq\".\"retry_count\""},
-	MaxRetries:   whereHelpernull_Int{field: "\"schema_knowledge\".\"indexing_dlq\".\"max_retries\""},
-	Resolved:     whereHelpernull_Bool{field: "\"schema_knowledge\".\"indexing_dlq\".\"resolved\""},
-	CreatedAt:    whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_dlq\".\"created_at\""},
-	UpdatedAt:    whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_dlq\".\"updated_at\""},
+	ID:           whereHelperstring{field: "\"knowledge\".\"indexing_dlq\".\"id\""},
+	AnalyticsID:  whereHelperstring{field: "\"knowledge\".\"indexing_dlq\".\"analytics_id\""},
+	BatchID:      whereHelpernull_String{field: "\"knowledge\".\"indexing_dlq\".\"batch_id\""},
+	RawPayload:   whereHelpertypes_JSON{field: "\"knowledge\".\"indexing_dlq\".\"raw_payload\""},
+	ErrorMessage: whereHelperstring{field: "\"knowledge\".\"indexing_dlq\".\"error_message\""},
+	ErrorType:    whereHelperstring{field: "\"knowledge\".\"indexing_dlq\".\"error_type\""},
+	RetryCount:   whereHelpernull_Int{field: "\"knowledge\".\"indexing_dlq\".\"retry_count\""},
+	MaxRetries:   whereHelpernull_Int{field: "\"knowledge\".\"indexing_dlq\".\"max_retries\""},
+	Resolved:     whereHelpernull_Bool{field: "\"knowledge\".\"indexing_dlq\".\"resolved\""},
+	CreatedAt:    whereHelpernull_Time{field: "\"knowledge\".\"indexing_dlq\".\"created_at\""},
+	UpdatedAt:    whereHelpernull_Time{field: "\"knowledge\".\"indexing_dlq\".\"updated_at\""},
 }
 
 // IndexingDLQRels is where relationship names are stored.
@@ -500,10 +500,10 @@ func (q indexingDLQQuery) Exists(ctx context.Context, exec boil.ContextExecutor)
 
 // IndexingDLQS retrieves all the records using an executor.
 func IndexingDLQS(mods ...qm.QueryMod) indexingDLQQuery {
-	mods = append(mods, qm.From("\"schema_knowledge\".\"indexing_dlq\""))
+	mods = append(mods, qm.From("\"knowledge\".\"indexing_dlq\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"schema_knowledge\".\"indexing_dlq\".*"})
+		queries.SetSelect(q, []string{"\"knowledge\".\"indexing_dlq\".*"})
 	}
 
 	return indexingDLQQuery{q}
@@ -519,7 +519,7 @@ func FindIndexingDLQ(ctx context.Context, exec boil.ContextExecutor, iD string, 
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"schema_knowledge\".\"indexing_dlq\" where \"id\"=$1", sel,
+		"select %s from \"knowledge\".\"indexing_dlq\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -586,9 +586,9 @@ func (o *IndexingDLQ) Insert(ctx context.Context, exec boil.ContextExecutor, col
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"schema_knowledge\".\"indexing_dlq\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"knowledge\".\"indexing_dlq\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"schema_knowledge\".\"indexing_dlq\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"knowledge\".\"indexing_dlq\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -660,7 +660,7 @@ func (o *IndexingDLQ) Update(ctx context.Context, exec boil.ContextExecutor, col
 			return 0, errors.New("sqlboiler: unable to update indexing_dlq, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"schema_knowledge\".\"indexing_dlq\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"knowledge\".\"indexing_dlq\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, indexingDLQPrimaryKeyColumns),
 		)
@@ -741,7 +741,7 @@ func (o IndexingDLQSlice) UpdateAll(ctx context.Context, exec boil.ContextExecut
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"schema_knowledge\".\"indexing_dlq\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"knowledge\".\"indexing_dlq\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, indexingDLQPrimaryKeyColumns, len(o)))
 
@@ -845,7 +845,7 @@ func (o *IndexingDLQ) Upsert(ctx context.Context, exec boil.ContextExecutor, upd
 			conflict = make([]string, len(indexingDLQPrimaryKeyColumns))
 			copy(conflict, indexingDLQPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"schema_knowledge\".\"indexing_dlq\"", updateOnConflict, ret, update, conflict, insert, opts...)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"knowledge\".\"indexing_dlq\"", updateOnConflict, ret, update, conflict, insert, opts...)
 
 		cache.valueMapping, err = queries.BindMapping(indexingDLQType, indexingDLQMapping, insert)
 		if err != nil {
@@ -904,7 +904,7 @@ func (o *IndexingDLQ) Delete(ctx context.Context, exec boil.ContextExecutor) (in
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), indexingDLQPrimaryKeyMapping)
-	sql := "DELETE FROM \"schema_knowledge\".\"indexing_dlq\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"knowledge\".\"indexing_dlq\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -969,7 +969,7 @@ func (o IndexingDLQSlice) DeleteAll(ctx context.Context, exec boil.ContextExecut
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"schema_knowledge\".\"indexing_dlq\" WHERE " +
+	sql := "DELETE FROM \"knowledge\".\"indexing_dlq\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, indexingDLQPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1024,7 +1024,7 @@ func (o *IndexingDLQSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"schema_knowledge\".\"indexing_dlq\".* FROM \"schema_knowledge\".\"indexing_dlq\" WHERE " +
+	sql := "SELECT \"knowledge\".\"indexing_dlq\".* FROM \"knowledge\".\"indexing_dlq\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, indexingDLQPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1042,7 +1042,7 @@ func (o *IndexingDLQSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 // IndexingDLQExists checks if the IndexingDLQ row exists.
 func IndexingDLQExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"schema_knowledge\".\"indexing_dlq\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"knowledge\".\"indexing_dlq\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

@@ -27,7 +27,6 @@ import (
 type IndexingStatsByBatch struct {
 	BatchID              null.String       `boil:"batch_id" json:"batch_id,omitempty" toml:"batch_id" yaml:"batch_id,omitempty"`
 	ProjectID            null.String       `boil:"project_id" json:"project_id,omitempty" toml:"project_id" yaml:"project_id,omitempty"`
-	IngestionMethod      null.String       `boil:"ingestion_method" json:"ingestion_method,omitempty" toml:"ingestion_method" yaml:"ingestion_method,omitempty"`
 	TotalRecords         null.Int64        `boil:"total_records" json:"total_records,omitempty" toml:"total_records" yaml:"total_records,omitempty"`
 	IndexedCount         null.Int64        `boil:"indexed_count" json:"indexed_count,omitempty" toml:"indexed_count" yaml:"indexed_count,omitempty"`
 	FailedCount          null.Int64        `boil:"failed_count" json:"failed_count,omitempty" toml:"failed_count" yaml:"failed_count,omitempty"`
@@ -42,7 +41,6 @@ type IndexingStatsByBatch struct {
 var IndexingStatsByBatchColumns = struct {
 	BatchID              string
 	ProjectID            string
-	IngestionMethod      string
 	TotalRecords         string
 	IndexedCount         string
 	FailedCount          string
@@ -55,7 +53,6 @@ var IndexingStatsByBatchColumns = struct {
 }{
 	BatchID:              "batch_id",
 	ProjectID:            "project_id",
-	IngestionMethod:      "ingestion_method",
 	TotalRecords:         "total_records",
 	IndexedCount:         "indexed_count",
 	FailedCount:          "failed_count",
@@ -70,7 +67,6 @@ var IndexingStatsByBatchColumns = struct {
 var IndexingStatsByBatchTableColumns = struct {
 	BatchID              string
 	ProjectID            string
-	IngestionMethod      string
 	TotalRecords         string
 	IndexedCount         string
 	FailedCount          string
@@ -83,7 +79,6 @@ var IndexingStatsByBatchTableColumns = struct {
 }{
 	BatchID:              "indexing_stats_by_batch.batch_id",
 	ProjectID:            "indexing_stats_by_batch.project_id",
-	IngestionMethod:      "indexing_stats_by_batch.ingestion_method",
 	TotalRecords:         "indexing_stats_by_batch.total_records",
 	IndexedCount:         "indexing_stats_by_batch.indexed_count",
 	FailedCount:          "indexing_stats_by_batch.failed_count",
@@ -100,7 +95,6 @@ var IndexingStatsByBatchTableColumns = struct {
 var IndexingStatsByBatchWhere = struct {
 	BatchID              whereHelpernull_String
 	ProjectID            whereHelpernull_String
-	IngestionMethod      whereHelpernull_String
 	TotalRecords         whereHelpernull_Int64
 	IndexedCount         whereHelpernull_Int64
 	FailedCount          whereHelpernull_Int64
@@ -111,24 +105,23 @@ var IndexingStatsByBatchWhere = struct {
 	BatchCompletedAt     whereHelpernull_Time
 	BatchDurationSeconds whereHelpertypes_NullDecimal
 }{
-	BatchID:              whereHelpernull_String{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"batch_id\""},
-	ProjectID:            whereHelpernull_String{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"project_id\""},
-	IngestionMethod:      whereHelpernull_String{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"ingestion_method\""},
-	TotalRecords:         whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"total_records\""},
-	IndexedCount:         whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"indexed_count\""},
-	FailedCount:          whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"failed_count\""},
-	PendingCount:         whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"pending_count\""},
-	SuccessRatePercent:   whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"success_rate_percent\""},
-	AvgProcessingTimeMS:  whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"avg_processing_time_ms\""},
-	BatchStartedAt:       whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"batch_started_at\""},
-	BatchCompletedAt:     whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"batch_completed_at\""},
-	BatchDurationSeconds: whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_stats_by_batch\".\"batch_duration_seconds\""},
+	BatchID:              whereHelpernull_String{field: "\"knowledge\".\"indexing_stats_by_batch\".\"batch_id\""},
+	ProjectID:            whereHelpernull_String{field: "\"knowledge\".\"indexing_stats_by_batch\".\"project_id\""},
+	TotalRecords:         whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_batch\".\"total_records\""},
+	IndexedCount:         whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_batch\".\"indexed_count\""},
+	FailedCount:          whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_batch\".\"failed_count\""},
+	PendingCount:         whereHelpernull_Int64{field: "\"knowledge\".\"indexing_stats_by_batch\".\"pending_count\""},
+	SuccessRatePercent:   whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_stats_by_batch\".\"success_rate_percent\""},
+	AvgProcessingTimeMS:  whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_stats_by_batch\".\"avg_processing_time_ms\""},
+	BatchStartedAt:       whereHelpernull_Time{field: "\"knowledge\".\"indexing_stats_by_batch\".\"batch_started_at\""},
+	BatchCompletedAt:     whereHelpernull_Time{field: "\"knowledge\".\"indexing_stats_by_batch\".\"batch_completed_at\""},
+	BatchDurationSeconds: whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_stats_by_batch\".\"batch_duration_seconds\""},
 }
 
 var (
-	indexingStatsByBatchAllColumns            = []string{"batch_id", "project_id", "ingestion_method", "total_records", "indexed_count", "failed_count", "pending_count", "success_rate_percent", "avg_processing_time_ms", "batch_started_at", "batch_completed_at", "batch_duration_seconds"}
+	indexingStatsByBatchAllColumns            = []string{"batch_id", "project_id", "total_records", "indexed_count", "failed_count", "pending_count", "success_rate_percent", "avg_processing_time_ms", "batch_started_at", "batch_completed_at", "batch_duration_seconds"}
 	indexingStatsByBatchColumnsWithoutDefault = []string{}
-	indexingStatsByBatchColumnsWithDefault    = []string{"batch_id", "project_id", "ingestion_method", "total_records", "indexed_count", "failed_count", "pending_count", "success_rate_percent", "avg_processing_time_ms", "batch_started_at", "batch_completed_at", "batch_duration_seconds"}
+	indexingStatsByBatchColumnsWithDefault    = []string{"batch_id", "project_id", "total_records", "indexed_count", "failed_count", "pending_count", "success_rate_percent", "avg_processing_time_ms", "batch_started_at", "batch_completed_at", "batch_duration_seconds"}
 	indexingStatsByBatchPrimaryKeyColumns     = []string{}
 	indexingStatsByBatchGeneratedColumns      = []string{}
 )
@@ -274,10 +267,10 @@ func (q indexingStatsByBatchQuery) Exists(ctx context.Context, exec boil.Context
 
 // IndexingStatsByBatches retrieves all the records using an executor.
 func IndexingStatsByBatches(mods ...qm.QueryMod) indexingStatsByBatchQuery {
-	mods = append(mods, qm.From("\"schema_knowledge\".\"indexing_stats_by_batch\""))
+	mods = append(mods, qm.From("\"knowledge\".\"indexing_stats_by_batch\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"schema_knowledge\".\"indexing_stats_by_batch\".*"})
+		queries.SetSelect(q, []string{"\"knowledge\".\"indexing_stats_by_batch\".*"})
 	}
 
 	return indexingStatsByBatchQuery{q}

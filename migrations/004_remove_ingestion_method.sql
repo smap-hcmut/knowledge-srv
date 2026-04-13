@@ -1,19 +1,14 @@
 -- =====================================================
--- Migration: 004 - Remove ingestion_method column
+-- Migration: 004 - Remove ingestion_method column (if exists)
 -- Purpose: Remove unnecessary tracking of data ingestion method
 -- Domain: Indexing (Vector Database Tracking)
 -- Created: 2026-02-16
+-- Note: Column was removed from 001 DDL; this migration is kept
+--       for environments that ran the old 001 before the fix.
 -- =====================================================
 
--- =====================================================
--- Drop ingestion_method from indexed_documents table
--- =====================================================
-
--- Remove the comment first
-COMMENT ON COLUMN schema_knowledge.indexed_documents.ingestion_method IS NULL;
-
--- Drop the column
-ALTER TABLE schema_knowledge.indexed_documents 
+-- Drop the column (IF EXISTS makes this idempotent)
+ALTER TABLE knowledge.indexed_documents 
     DROP COLUMN IF EXISTS ingestion_method;
 
 -- =====================================================

@@ -187,24 +187,24 @@ var ReportWhere = struct {
 	CreatedAt         whereHelpernull_Time
 	UpdatedAt         whereHelpernull_Time
 }{
-	ID:                whereHelperstring{field: "\"schema_knowledge\".\"reports\".\"id\""},
-	CampaignID:        whereHelperstring{field: "\"schema_knowledge\".\"reports\".\"campaign_id\""},
-	UserID:            whereHelperstring{field: "\"schema_knowledge\".\"reports\".\"user_id\""},
-	Title:             whereHelpernull_String{field: "\"schema_knowledge\".\"reports\".\"title\""},
-	ReportType:        whereHelperstring{field: "\"schema_knowledge\".\"reports\".\"report_type\""},
-	ParamsHash:        whereHelperstring{field: "\"schema_knowledge\".\"reports\".\"params_hash\""},
-	Filters:           whereHelpernull_JSON{field: "\"schema_knowledge\".\"reports\".\"filters\""},
-	Status:            whereHelperstring{field: "\"schema_knowledge\".\"reports\".\"status\""},
-	ErrorMessage:      whereHelpernull_String{field: "\"schema_knowledge\".\"reports\".\"error_message\""},
-	FileURL:           whereHelpernull_String{field: "\"schema_knowledge\".\"reports\".\"file_url\""},
-	FileSizeBytes:     whereHelpernull_Int64{field: "\"schema_knowledge\".\"reports\".\"file_size_bytes\""},
-	FileFormat:        whereHelpernull_String{field: "\"schema_knowledge\".\"reports\".\"file_format\""},
-	TotalDocsAnalyzed: whereHelpernull_Int{field: "\"schema_knowledge\".\"reports\".\"total_docs_analyzed\""},
-	SectionsCount:     whereHelpernull_Int{field: "\"schema_knowledge\".\"reports\".\"sections_count\""},
-	GenerationTimeMS:  whereHelpernull_Int64{field: "\"schema_knowledge\".\"reports\".\"generation_time_ms\""},
-	CompletedAt:       whereHelpernull_Time{field: "\"schema_knowledge\".\"reports\".\"completed_at\""},
-	CreatedAt:         whereHelpernull_Time{field: "\"schema_knowledge\".\"reports\".\"created_at\""},
-	UpdatedAt:         whereHelpernull_Time{field: "\"schema_knowledge\".\"reports\".\"updated_at\""},
+	ID:                whereHelperstring{field: "\"knowledge\".\"reports\".\"id\""},
+	CampaignID:        whereHelperstring{field: "\"knowledge\".\"reports\".\"campaign_id\""},
+	UserID:            whereHelperstring{field: "\"knowledge\".\"reports\".\"user_id\""},
+	Title:             whereHelpernull_String{field: "\"knowledge\".\"reports\".\"title\""},
+	ReportType:        whereHelperstring{field: "\"knowledge\".\"reports\".\"report_type\""},
+	ParamsHash:        whereHelperstring{field: "\"knowledge\".\"reports\".\"params_hash\""},
+	Filters:           whereHelpernull_JSON{field: "\"knowledge\".\"reports\".\"filters\""},
+	Status:            whereHelperstring{field: "\"knowledge\".\"reports\".\"status\""},
+	ErrorMessage:      whereHelpernull_String{field: "\"knowledge\".\"reports\".\"error_message\""},
+	FileURL:           whereHelpernull_String{field: "\"knowledge\".\"reports\".\"file_url\""},
+	FileSizeBytes:     whereHelpernull_Int64{field: "\"knowledge\".\"reports\".\"file_size_bytes\""},
+	FileFormat:        whereHelpernull_String{field: "\"knowledge\".\"reports\".\"file_format\""},
+	TotalDocsAnalyzed: whereHelpernull_Int{field: "\"knowledge\".\"reports\".\"total_docs_analyzed\""},
+	SectionsCount:     whereHelpernull_Int{field: "\"knowledge\".\"reports\".\"sections_count\""},
+	GenerationTimeMS:  whereHelpernull_Int64{field: "\"knowledge\".\"reports\".\"generation_time_ms\""},
+	CompletedAt:       whereHelpernull_Time{field: "\"knowledge\".\"reports\".\"completed_at\""},
+	CreatedAt:         whereHelpernull_Time{field: "\"knowledge\".\"reports\".\"created_at\""},
+	UpdatedAt:         whereHelpernull_Time{field: "\"knowledge\".\"reports\".\"updated_at\""},
 }
 
 // ReportRels is where relationship names are stored.
@@ -538,10 +538,10 @@ func (q reportQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (boo
 
 // Reports retrieves all the records using an executor.
 func Reports(mods ...qm.QueryMod) reportQuery {
-	mods = append(mods, qm.From("\"schema_knowledge\".\"reports\""))
+	mods = append(mods, qm.From("\"knowledge\".\"reports\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"schema_knowledge\".\"reports\".*"})
+		queries.SetSelect(q, []string{"\"knowledge\".\"reports\".*"})
 	}
 
 	return reportQuery{q}
@@ -557,7 +557,7 @@ func FindReport(ctx context.Context, exec boil.ContextExecutor, iD string, selec
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"schema_knowledge\".\"reports\" where \"id\"=$1", sel,
+		"select %s from \"knowledge\".\"reports\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -624,9 +624,9 @@ func (o *Report) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"schema_knowledge\".\"reports\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"knowledge\".\"reports\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"schema_knowledge\".\"reports\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"knowledge\".\"reports\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -698,7 +698,7 @@ func (o *Report) Update(ctx context.Context, exec boil.ContextExecutor, columns 
 			return 0, errors.New("sqlboiler: unable to update reports, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"schema_knowledge\".\"reports\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"knowledge\".\"reports\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, reportPrimaryKeyColumns),
 		)
@@ -779,7 +779,7 @@ func (o ReportSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, c
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"schema_knowledge\".\"reports\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"knowledge\".\"reports\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, reportPrimaryKeyColumns, len(o)))
 
@@ -883,7 +883,7 @@ func (o *Report) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOn
 			conflict = make([]string, len(reportPrimaryKeyColumns))
 			copy(conflict, reportPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"schema_knowledge\".\"reports\"", updateOnConflict, ret, update, conflict, insert, opts...)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"knowledge\".\"reports\"", updateOnConflict, ret, update, conflict, insert, opts...)
 
 		cache.valueMapping, err = queries.BindMapping(reportType, reportMapping, insert)
 		if err != nil {
@@ -942,7 +942,7 @@ func (o *Report) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, 
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), reportPrimaryKeyMapping)
-	sql := "DELETE FROM \"schema_knowledge\".\"reports\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"knowledge\".\"reports\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1007,7 +1007,7 @@ func (o ReportSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"schema_knowledge\".\"reports\" WHERE " +
+	sql := "DELETE FROM \"knowledge\".\"reports\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, reportPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1062,7 +1062,7 @@ func (o *ReportSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) 
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"schema_knowledge\".\"reports\".* FROM \"schema_knowledge\".\"reports\" WHERE " +
+	sql := "SELECT \"knowledge\".\"reports\".* FROM \"knowledge\".\"reports\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, reportPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1080,7 +1080,7 @@ func (o *ReportSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) 
 // ReportExists checks if the Report row exists.
 func ReportExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"schema_knowledge\".\"reports\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"knowledge\".\"reports\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

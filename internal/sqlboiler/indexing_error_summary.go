@@ -131,17 +131,17 @@ var IndexingErrorSummaryWhere = struct {
 	LastErrorAt     whereHelpernull_Time
 	ErrorsLast24H   whereHelpernull_Int64
 }{
-	ErrorType:       whereHelpernull_String{field: "\"schema_knowledge\".\"indexing_error_summary\".\"error_type\""},
-	ErrorCount:      whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_error_summary\".\"error_count\""},
-	UniqueRecords:   whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_error_summary\".\"unique_records\""},
-	AffectedBatches: whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_error_summary\".\"affected_batches\""},
-	ResolvedCount:   whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_error_summary\".\"resolved_count\""},
-	UnresolvedCount: whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_error_summary\".\"unresolved_count\""},
-	AvgRetryCount:   whereHelpertypes_NullDecimal{field: "\"schema_knowledge\".\"indexing_error_summary\".\"avg_retry_count\""},
-	MaxRetryCount:   whereHelpernull_Int{field: "\"schema_knowledge\".\"indexing_error_summary\".\"max_retry_count\""},
-	FirstErrorAt:    whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_error_summary\".\"first_error_at\""},
-	LastErrorAt:     whereHelpernull_Time{field: "\"schema_knowledge\".\"indexing_error_summary\".\"last_error_at\""},
-	ErrorsLast24H:   whereHelpernull_Int64{field: "\"schema_knowledge\".\"indexing_error_summary\".\"errors_last_24h\""},
+	ErrorType:       whereHelpernull_String{field: "\"knowledge\".\"indexing_error_summary\".\"error_type\""},
+	ErrorCount:      whereHelpernull_Int64{field: "\"knowledge\".\"indexing_error_summary\".\"error_count\""},
+	UniqueRecords:   whereHelpernull_Int64{field: "\"knowledge\".\"indexing_error_summary\".\"unique_records\""},
+	AffectedBatches: whereHelpernull_Int64{field: "\"knowledge\".\"indexing_error_summary\".\"affected_batches\""},
+	ResolvedCount:   whereHelpernull_Int64{field: "\"knowledge\".\"indexing_error_summary\".\"resolved_count\""},
+	UnresolvedCount: whereHelpernull_Int64{field: "\"knowledge\".\"indexing_error_summary\".\"unresolved_count\""},
+	AvgRetryCount:   whereHelpertypes_NullDecimal{field: "\"knowledge\".\"indexing_error_summary\".\"avg_retry_count\""},
+	MaxRetryCount:   whereHelpernull_Int{field: "\"knowledge\".\"indexing_error_summary\".\"max_retry_count\""},
+	FirstErrorAt:    whereHelpernull_Time{field: "\"knowledge\".\"indexing_error_summary\".\"first_error_at\""},
+	LastErrorAt:     whereHelpernull_Time{field: "\"knowledge\".\"indexing_error_summary\".\"last_error_at\""},
+	ErrorsLast24H:   whereHelpernull_Int64{field: "\"knowledge\".\"indexing_error_summary\".\"errors_last_24h\""},
 }
 
 var (
@@ -293,10 +293,10 @@ func (q indexingErrorSummaryQuery) Exists(ctx context.Context, exec boil.Context
 
 // IndexingErrorSummaries retrieves all the records using an executor.
 func IndexingErrorSummaries(mods ...qm.QueryMod) indexingErrorSummaryQuery {
-	mods = append(mods, qm.From("\"schema_knowledge\".\"indexing_error_summary\""))
+	mods = append(mods, qm.From("\"knowledge\".\"indexing_error_summary\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"schema_knowledge\".\"indexing_error_summary\".*"})
+		queries.SetSelect(q, []string{"\"knowledge\".\"indexing_error_summary\".*"})
 	}
 
 	return indexingErrorSummaryQuery{q}
