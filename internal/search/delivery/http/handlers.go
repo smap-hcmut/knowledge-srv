@@ -15,7 +15,7 @@ import (
 // @Success 200 {object} searchResp
 // @Failure 400 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /api/v1/search [post]
+// @Router /search [post]
 func (h *handler) Search(c *gin.Context) {
 	ctx := c.Request.Context()
 

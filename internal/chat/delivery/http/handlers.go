@@ -20,7 +20,7 @@ import (
 // @Success 200 {object} chatResp
 // @Failure 400 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /api/v1/chat [post]
+// @Router /chat [post]
 func (h *handler) Chat(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -40,12 +40,12 @@ func (h *handler) Chat(c *gin.Context) {
 
 	if o.IsAsync {
 		c.JSON(http.StatusAccepted, gin.H{
-			"status":           "ACCEPTED",
-			"conversation_id":  o.ConversationID,
-			"chat_job_id":      o.ChatJobID,
-			"query_intent":     o.QueryIntent,
-			"backend":          o.Backend,
-			"poll_jobs_path":   "GET /api/v1/knowledge/chat/jobs/:job_id",
+			"status":          "ACCEPTED",
+			"conversation_id": o.ConversationID,
+			"chat_job_id":     o.ChatJobID,
+			"query_intent":    o.QueryIntent,
+			"backend":         o.Backend,
+			"poll_jobs_path":  "GET /api/v1/knowledge/chat/jobs/:job_id",
 		})
 		return
 	}
@@ -107,7 +107,7 @@ func (h *handler) GetChatJob(c *gin.Context) {
 // @Success 200 {object} conversationResp
 // @Failure 400 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /api/v1/conversations/{conversation_id} [get]
+// @Router /conversations/{conversation_id} [get]
 func (h *handler) GetConversation(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -138,7 +138,7 @@ func (h *handler) GetConversation(c *gin.Context) {
 // @Success 200 {array} conversationResp
 // @Failure 400 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /api/v1/campaigns/{campaign_id}/conversations [get]
+// @Router /campaigns/{campaign_id}/conversations [get]
 func (h *handler) ListConversations(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -167,7 +167,7 @@ func (h *handler) ListConversations(c *gin.Context) {
 // @Success 200 {object} suggestionsResp
 // @Failure 400 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /api/v1/campaigns/{campaign_id}/suggestions [get]
+// @Router /campaigns/{campaign_id}/suggestions [get]
 func (h *handler) GetSuggestions(c *gin.Context) {
 	ctx := c.Request.Context()
 

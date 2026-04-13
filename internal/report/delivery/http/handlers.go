@@ -14,7 +14,7 @@ import (
 // @Success 200 {object} generateReportResp
 // @Failure 400 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /api/v1/reports/generate [post]
+// @Router /reports/generate [post]
 func (h *handler) GenerateReport(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -44,7 +44,7 @@ func (h *handler) GenerateReport(c *gin.Context) {
 // @Failure 400 {object} response.Resp
 // @Failure 404 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /api/v1/reports/{report_id} [get]
+// @Router /reports/{report_id} [get]
 func (h *handler) GetReport(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -74,7 +74,7 @@ func (h *handler) GetReport(c *gin.Context) {
 // @Failure 400 {object} response.Resp
 // @Failure 404 {object} response.Resp
 // @Failure 500 {object} response.Resp
-// @Router /api/v1/reports/{report_id}/download [get]
+// @Router /reports/{report_id}/download [get]
 func (h *handler) DownloadReport(c *gin.Context) {
 	ctx := c.Request.Context()
 

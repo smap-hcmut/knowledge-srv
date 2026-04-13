@@ -31,8 +31,8 @@ import (
 // @title       SMAP Knowledge Service API
 // @description SMAP Knowledge Service API documentation.
 // @version     1
-// @host        localhost:8080
-// @schemes     http
+// @schemes     https http
+// @BasePath    /knowledge/api/v1/knowledge
 //
 // @securityDefinitions.apikey CookieAuth
 // @in cookie
