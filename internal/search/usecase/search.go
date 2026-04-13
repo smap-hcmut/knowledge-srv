@@ -4,17 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
+	"strings"
+	"sync"
 	"time"
 
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/point"
 	"knowledge-srv/internal/search"
-	// For builders
+
+	"golang.org/x/sync/errgroup"
 )
 
 // Search - Main search method
-// Flow: check cache → resolve campaign → embed query → search Qdrant → filter by Score → aggregate → cache → return
+// Flow: check cache → resolve campaign → embed query → search per-project Qdrant collections → filter by Score → aggregate → cache → return
 func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.SearchInput) (search.SearchOutput, error) {
 	startTime := time.Now()
 
@@ -54,6 +58,12 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	if err != nil {
 		return search.SearchOutput{}, err
 	}
+	if len(projectIDs) == 0 {
+		return search.SearchOutput{
+			NoRelevantContext: true,
+			ProcessingTimeMs:  time.Since(startTime).Milliseconds(),
+		}, nil
+	}
 
 	// Step 3: Embed query (Via Embedding Domain)
 	generateOutput, err := uc.embeddingUC.Generate(ctx, embedding.GenerateInput{
@@ -65,31 +75,30 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	}
 	vector := generateOutput.Vector
 
-	// Step 4: Build Qdrant filter
-	filter := uc.buildSearchFilter(projectIDs, input.Filters)
+	// Step 4: Build Qdrant filter (without project_id — implicit by collection)
+	filter := uc.buildSearchFilter(nil, input.Filters)
 
-	// Step 5: Search Qdrant (Via Point Domain)
-	// Note: ScoreThreshold is implicit or handled by post-filtering
-	pointResults, err := uc.pointUC.Search(ctx, point.SearchInput{
-		CollectionName: point.CollectionAnalyticsLegacy,
-		Vector:         vector,
-		Filter:         filter,
-		Limit:          uint64(limit),
-		WithPayload:    true,
-		ScoreThreshold: 0,
-	})
+	// Step 5: Search per-project Qdrant collections in parallel
+	pointResults, err := uc.searchMultipleCollections(ctx, projectIDs, vector, filter, uint64(limit))
 	if err != nil {
-		uc.l.Errorf(ctx, "search.usecase.Search: Point search failed: %v", err)
+		uc.l.Errorf(ctx, "search.usecase.Search: Multi-collection search failed: %v", err)
 		return search.SearchOutput{}, fmt.Errorf("%w: %v", search.ErrSearchFailed, err)
 	}
 
-	// Step 6: Filter by min score + map to domain results
+	// Step 6: Sort by score descending, filter by min score, apply limit
+	sort.Slice(pointResults, func(i, j int) bool {
+		return pointResults[i].Score > pointResults[j].Score
+	})
+
 	var results []search.SearchResult
 	for _, r := range pointResults {
 		if float64(r.Score) < minScore {
 			continue
 		}
 		results = append(results, uc.mapQdrantResult(r))
+		if len(results) >= limit {
+			break
+		}
 	}
 
 	// Step 7: Hallucination control — NO relevant context flag
@@ -115,10 +124,72 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		}
 	}
 
-	uc.l.Infof(ctx, "search.usecase.Search: query=%q, results=%d, no_context=%v, duration=%dms",
-		input.Query, len(results), noRelevantContext, output.ProcessingTimeMs)
+	uc.l.Infof(ctx, "search.usecase.Search: query=%q, projects=%d, results=%d, no_context=%v, duration=%dms",
+		input.Query, len(projectIDs), len(results), noRelevantContext, output.ProcessingTimeMs)
 
 	return output, nil
+}
+
+// searchMultipleCollections searches across per-project Qdrant collections in parallel.
+// Non-existent collections are silently skipped (project may not have indexed data yet).
+func (uc *implUseCase) searchMultipleCollections(
+	ctx context.Context,
+	projectIDs []string,
+	vector []float32,
+	filter *point.Filter,
+	limit uint64,
+) ([]point.SearchOutput, error) {
+	var (
+		allResults []point.SearchOutput
+		mu         sync.Mutex
+	)
+
+	g, gCtx := errgroup.WithContext(ctx)
+
+	for _, pid := range projectIDs {
+		collectionName := point.CollectionForProject(pid)
+		g.Go(func() error {
+			results, err := uc.pointUC.Search(gCtx, point.SearchInput{
+				CollectionName: collectionName,
+				Vector:         vector,
+				Filter:         filter,
+				Limit:          limit,
+				WithPayload:    true,
+				ScoreThreshold: 0,
+			})
+			if err != nil {
+				// Skip non-existent collections (project may not have data yet)
+				if isCollectionNotFoundError(err) {
+					uc.l.Debugf(gCtx, "search.usecase.searchMultipleCollections: collection %s not found, skipping", collectionName)
+					return nil
+				}
+				return fmt.Errorf("search collection %s: %w", collectionName, err)
+			}
+
+			mu.Lock()
+			allResults = append(allResults, results...)
+			mu.Unlock()
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	return allResults, nil
+}
+
+// isCollectionNotFoundError checks if the Qdrant error indicates a missing collection.
+func isCollectionNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "Not found") ||
+		strings.Contains(msg, "not found") ||
+		strings.Contains(msg, "doesn't exist") ||
+		strings.Contains(msg, "does not exist")
 }
 
 // validateInput - Validate search input

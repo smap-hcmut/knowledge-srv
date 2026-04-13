@@ -6,27 +6,16 @@ import (
 	pb "github.com/qdrant/go-client/qdrant"
 )
 
-// buildSearchFilter - Build Qdrant filter from domain filters
+// buildSearchFilter - Build Qdrant filter from domain filters.
+// projectIDs is no longer used for filtering since we now query per-project collections directly.
+// The parameter is kept for API compatibility but ignored.
 func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.SearchFilters) *pb.Filter {
 	must := []*pb.Condition{}
 
-	// 1. Filter by Project IDs (must match one of them)
-	if len(projectIDs) > 0 {
-		must = append(must, &pb.Condition{
-			ConditionOneOf: &pb.Condition_Field{
-				Field: &pb.FieldCondition{
-					Key: "project_id",
-					Match: &pb.Match{
-						MatchValue: &pb.Match_Keywords{
-							Keywords: &pb.RepeatedStrings{Strings: projectIDs},
-						},
-					},
-				},
-			},
-		})
-	}
+	// Note: project_id filtering is implicit — we query proj_{project_id} collections directly.
+	// No need for a project_id condition in the filter.
 
-	// 2. Filter by Platform
+	// 1. Filter by Platform
 	if len(filters.Platforms) > 0 {
 		must = append(must, &pb.Condition{
 			ConditionOneOf: &pb.Condition_Field{
