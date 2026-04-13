@@ -15,7 +15,8 @@ func New(cfg ProjectConfig) IProject {
 		cfg.HTTPClient = defaultHTTPClient()
 	}
 	return &projectImpl{
-		baseURL:    cfg.BaseURL,
-		httpClient: cfg.HTTPClient,
+		baseURL:     cfg.BaseURL,
+		internalKey: cfg.InternalKey,
+		httpClient:  cfg.HTTPClient,
 	}
 }

@@ -15,7 +15,8 @@ func (srv *HTTPServer) setupSearchDomain(ctx context.Context, r *gin.RouterGroup
 	cacheRepo := searchRedis.New(srv.redisClient, srv.l)
 
 	projectSrv := projectsrv.New(projectsrv.ProjectConfig{
-		BaseURL: srv.config.Project.URL,
+		BaseURL:     srv.config.Project.URL,
+		InternalKey: srv.config.InternalConfig.InternalKey,
 	})
 
 	uc := searchUsecase.New(srv.pointUC, srv.embeddingUC, cacheRepo, projectSrv, srv.l)

@@ -13,6 +13,7 @@ const (
 
 // API path segments (for reference; full URLs built in projectsrv.go).
 const (
-	PathCampaigns = "/api/v1/campaigns"
-	PathProjects  = "/api/v1/projects"
+	PathCampaigns         = "/api/v1/internal/campaigns"
+	PathProjects          = "/api/v1/projects"
+	InternalKeyHeaderName = "X-Internal-Key"
 )

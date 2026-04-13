@@ -4,8 +4,9 @@ import pkghttp "github.com/smap-hcmut/shared-libs/go/httpclient"
 
 // ProjectConfig holds configuration for the Project Service client.
 type ProjectConfig struct {
-	BaseURL    string
-	HTTPClient pkghttp.Client
+	BaseURL     string
+	InternalKey string
+	HTTPClient  pkghttp.Client
 }
 
 // Campaign represents a campaign in the Project Service.
@@ -17,6 +18,7 @@ type Campaign struct {
 
 // projectImpl implements IProject.
 type projectImpl struct {
-	baseURL    string
-	httpClient pkghttp.Client
+	baseURL     string
+	internalKey string
+	httpClient  pkghttp.Client
 }

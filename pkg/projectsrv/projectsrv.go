@@ -21,7 +21,12 @@ func defaultHTTPClient() pkghttp.Client {
 func (c *projectImpl) GetCampaign(ctx context.Context, campaignID string) (*Campaign, error) {
 	url := fmt.Sprintf("%s%s/%s", c.baseURL, PathCampaigns, campaignID)
 
-	body, statusCode, err := c.httpClient.Get(ctx, url, nil)
+	headers := map[string]string{}
+	if c.internalKey != "" {
+		headers[InternalKeyHeaderName] = c.internalKey
+	}
+
+	body, statusCode, err := c.httpClient.Get(ctx, url, headers)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get campaign: %w", err)
 	}
