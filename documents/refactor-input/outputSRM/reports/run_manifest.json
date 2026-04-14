@@ -1,0 +1,491 @@
+{
+  "manifest_version": "2026.03.21-phobert-core-r1",
+  "release_name": "R1",
+  "run_id": "run-20260323T165146Z",
+  "generated_at": "2026-03-23T19:00:49.848160+00:00",
+  "input_inspection": {
+    "input_path": "uap-batches-cleanser-vn.zip",
+    "input_kind": "zip",
+    "jsonl_entry_count": 20,
+    "total_container_entries": 20,
+    "batch_entries": [
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00001.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00002.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00003.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00004.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00005.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00006.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00007.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00008.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00009.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00010.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00011.jsonl",
+        "kind": "jsonl"
+      },
+      {
+        "source_path": "uap-batches-cleanser-vn.zip!uap-batches/44444444-4444-4444-4444-444444444444/20000000-0000-0000-0000-000000000002/raw-tiktok-full_flow-2a5d7c6e-5c30-4b4a-9f2e-facialcleans/part-00012.jsonl",
+        "kind": "jsonl"
+      }
+    ],
+    "warnings": []
+  },
+  "sample_input_selection": null,
+  "runtime": {
+    "requested_mode": "default_intelligence",
+    "effective_mode": "default_intelligence",
+    "provider_modes": {
+      "entity": "ml_enabled",
+      "semantic": "ml_enabled",
+      "topic": "ml_enabled",
+      "language_id": "degraded_fallback"
+    },
+    "provider_provenance": {
+      "language_id": {
+        "provider_kind": "language_id",
+        "provider_name": "heuristic_lid",
+        "provider_version": "heuristic-lid-v2",
+        "model_id": "heuristic-social-lid"
+      },
+      "embedding": {
+        "provider_kind": "phobert",
+        "model_id": "vinai/phobert-base-v2",
+        "device": "cpu",
+        "provider_name": "phobert_embedding"
+      },
+      "vector_index": {
+        "provider_kind": "faiss",
+        "fallback_provider_kind": "memory"
+      },
+      "ner": {
+        "provider_kind": "phobert_ner",
+        "provider_name": "phobert_ner",
+        "model_id": "vinai/phobert-base-v2"
+      },
+      "topic": {
+        "provider_kind": "ontology_topic",
+        "enabled": true,
+        "model_id": "vinai/phobert-base-v2",
+        "device": "cpu"
+      },
+      "analytics": {
+        "weighting_mode": "raw",
+        "dedup_enabled": true,
+        "spam_enabled": true
+      }
+    },
+    "doctor": {
+      "cpu_or_gpu": "cpu",
+      "will_run": {
+        "language_id": {
+          "component": "language_id",
+          "requested": "fasttext",
+          "selected": "heuristic_lid",
+          "available": true,
+          "model_available": false,
+          "degraded": true,
+          "device": "cpu",
+          "detail": "var\\models\\lid.176.ftz"
+        },
+        "embeddings": {
+          "component": "embeddings",
+          "requested": "phobert",
+          "selected": "phobert_embedding",
+          "available": true,
+          "model_available": true,
+          "degraded": false,
+          "device": "cpu",
+          "detail": "vinai/phobert-base-v2"
+        },
+        "topics": {
+          "component": "topics",
+          "requested": "ontology_guided",
+          "selected": "ontology_topic",
+          "available": true,
+          "model_available": true,
+          "degraded": false,
+          "device": "cpu",
+          "detail": "vinai/phobert-base-v2"
+        },
+        "vector_index": {
+          "component": "vector_index",
+          "requested": "faiss",
+          "selected": "faiss",
+          "available": true,
+          "model_available": true,
+          "degraded": false,
+          "device": "cpu",
+          "detail": "var\\data\\intelligence\\vector_index"
+        }
+      },
+      "warnings": [
+        "fastText was requested for LID but runtime will use heuristic fallback."
+      ]
+    },
+    "warnings": [
+      "Default intelligence was requested but some components degraded to fallback: language_id"
+    ]
+  },
+  "ontology_runtime": {
+    "base_path": "configs\\ontology.yaml",
+    "base_name": "smap-social-intel-base",
+    "base_version": "2026.03.22-identity-spine",
+    "base_fingerprint": "1ea74fbac19a5844",
+    "overlays": [
+      {
+        "overlay_path": "E:\\smap\\configs\\overlays\\domain_facial_cleanser_vn.yaml",
+        "overlay_name": "domain-facial-cleanser-vn",
+        "overlay_version": "2026.03.23-synthetic",
+        "layer_kind": "domain_overlay",
+        "source": "curated_synthetic",
+        "activation_mode": "corpus_auto",
+        "activation_reason": "corpus_match",
+        "activation_score": 7104.4,
+        "matched_record_count": 1901,
+        "matched_terms": [
+          "eucerin ph5 facial cleanser",
+          "ph5 facial cleanser",
+          "eucerin ph5",
+          "cetaphil",
+          "effaclar",
+          "cerave",
+          "da nhay cam",
+          "simple refreshing"
+        ],
+        "fingerprint": "271171e0429fef1b"
+      }
+    ]
+  },
+  "record_counts": {
+    "total_records": 2000,
+    "valid_records": 2000,
+    "invalid_records": 0
+  },
+  "stage_timings": {
+    "ingest": 0.2241,
+    "ontology": 0.5543,
+    "normalize": 0.9969,
+    "dedup": 0.4157,
+    "spam": 0.1358,
+    "threads": 0.0363,
+    "entity": 532.1205,
+    "semantic": 6985.1048,
+    "topic": 142.4277,
+    "review": 30.988,
+    "persist_facts": 1.5914,
+    "marts": 2.0761,
+    "metrics": 0.1548,
+    "bi_reports": 13.5996,
+    "insights": 0.0,
+    "persist_reports": 0.031,
+    "manifest": 0.3005,
+    "pipeline": 7745.2583,
+    "qa": 364.3736,
+    "exports": 0.0131,
+    "viewer": 0.0019
+  },
+  "window_semantics": {
+    "analysis_start": "2026-02-01T10:17:00Z",
+    "analysis_end": "2026-02-10T21:24:00Z",
+    "delta_kind": "intra_window_delta",
+    "delta_comparison_mode": "chronological_half_split"
+  },
+  "report_versions": {
+    "bi_schema_version": "2026.03.20-analysis-r1",
+    "sov_report_version": "1.2.0",
+    "buzz_report_version": "1.2.0",
+    "emerging_topics_report_version": "1.1.0",
+    "top_issues_report_version": "1.1.0",
+    "thread_controversy_report_version": "1.0.0",
+    "creator_source_breakdown_report_version": "1.0.0",
+    "insight_card_bundle_version": "2.0.0"
+  },
+  "qa_suites_run": [
+    "ev_suite",
+    "analyst_feedback_qa"
+  ],
+  "output_artifacts": [
+    {
+      "artifact_name": "bi_reports",
+      "path": "var\\data\\reports\\bi_reports.json"
+    },
+    {
+      "artifact_name": "bronze_raw_jsonl",
+      "path": "var\\data\\bronze\\uap_records.jsonl"
+    },
+    {
+      "artifact_name": "dim_entities",
+      "path": "var\\data\\gold\\marts\\dim_entities.parquet"
+    },
+    {
+      "artifact_name": "dim_projects",
+      "path": "var\\data\\gold\\marts\\dim_projects.parquet"
+    },
+    {
+      "artifact_name": "dim_sources",
+      "path": "var\\data\\gold\\marts\\dim_sources.parquet"
+    },
+    {
+      "artifact_name": "dim_taxonomy",
+      "path": "var\\data\\gold\\marts\\dim_taxonomy.parquet"
+    },
+    {
+      "artifact_name": "dim_time",
+      "path": "var\\data\\gold\\marts\\dim_time.parquet"
+    },
+    {
+      "artifact_name": "fact_aspects",
+      "path": "var\\data\\gold\\marts\\fact_aspects.parquet"
+    },
+    {
+      "artifact_name": "fact_author_quality",
+      "path": "var\\data\\gold\\marts\\fact_author_quality.parquet"
+    },
+    {
+      "artifact_name": "fact_dedup_clusters",
+      "path": "var\\data\\gold\\marts\\fact_dedup_clusters.parquet"
+    },
+    {
+      "artifact_name": "fact_entity_candidate_clusters",
+      "path": "var\\data\\gold\\marts\\fact_entity_candidate_clusters.parquet"
+    },
+    {
+      "artifact_name": "fact_entity_mentions",
+      "path": "var\\data\\gold\\marts\\fact_entity_mentions.parquet"
+    },
+    {
+      "artifact_name": "fact_intents",
+      "path": "var\\data\\gold\\marts\\fact_intents.parquet"
+    },
+    {
+      "artifact_name": "fact_issue_signals",
+      "path": "var\\data\\gold\\marts\\fact_issue_signals.parquet"
+    },
+    {
+      "artifact_name": "fact_mentions",
+      "path": "var\\data\\gold\\marts\\fact_mentions.parquet"
+    },
+    {
+      "artifact_name": "fact_sentiment",
+      "path": "var\\data\\gold\\marts\\fact_sentiment.parquet"
+    },
+    {
+      "artifact_name": "fact_target_sentiment",
+      "path": "var\\data\\gold\\marts\\fact_target_sentiment.parquet"
+    },
+    {
+      "artifact_name": "fact_threads",
+      "path": "var\\data\\gold\\marts\\fact_threads.parquet"
+    },
+    {
+      "artifact_name": "fact_topic_artifacts",
+      "path": "var\\data\\gold\\marts\\fact_topic_artifacts.parquet"
+    },
+    {
+      "artifact_name": "fact_topics",
+      "path": "var\\data\\gold\\marts\\fact_topics.parquet"
+    },
+    {
+      "artifact_name": "gold_aspects",
+      "path": "var\\data\\gold\\aspect_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_entities",
+      "path": "var\\data\\gold\\entity_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_entity_candidate_clusters",
+      "path": "var\\data\\gold\\entity_candidate_clusters.parquet"
+    },
+    {
+      "artifact_name": "gold_intents",
+      "path": "var\\data\\gold\\intent_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_issues",
+      "path": "var\\data\\gold\\issue_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_keywords",
+      "path": "var\\data\\gold\\keyword_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_sentiment",
+      "path": "var\\data\\gold\\sentiment_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_sources",
+      "path": "var\\data\\gold\\source_influence_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_stance",
+      "path": "var\\data\\gold\\stance_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_target_sentiment",
+      "path": "var\\data\\gold\\target_sentiment_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_topic_artifacts",
+      "path": "var\\data\\gold\\topic_artifacts.parquet"
+    },
+    {
+      "artifact_name": "gold_topics",
+      "path": "var\\data\\gold\\topic_facts.parquet"
+    },
+    {
+      "artifact_name": "insights",
+      "path": "var\\data\\insights\\insights.jsonl"
+    },
+    {
+      "artifact_name": "metrics",
+      "path": "var\\data\\reports\\metrics.json"
+    },
+    {
+      "artifact_name": "run_manifest",
+      "path": "var\\data\\reports\\run_manifest.json"
+    },
+    {
+      "artifact_name": "semantic_benchmark_gold_store",
+      "path": "var\\data\\intelligence\\feedback\\semantic_benchmark_gold.jsonl"
+    },
+    {
+      "artifact_name": "semantic_feedback_store",
+      "path": "var\\data\\intelligence\\feedback\\approved_semantic_annotations.jsonl"
+    },
+    {
+      "artifact_name": "semantic_promoted_store",
+      "path": "var\\data\\intelligence\\feedback\\promoted_semantic_knowledge.jsonl"
+    },
+    {
+      "artifact_name": "silver_author_quality",
+      "path": "var\\data\\silver\\author_quality.parquet"
+    },
+    {
+      "artifact_name": "silver_dedup_clusters",
+      "path": "var\\data\\silver\\dedup_clusters.parquet"
+    },
+    {
+      "artifact_name": "silver_mentions",
+      "path": "var\\data\\silver\\mentions.parquet"
+    },
+    {
+      "artifact_name": "silver_thread_contexts",
+      "path": "var\\data\\silver\\mention_contexts.parquet"
+    },
+    {
+      "artifact_name": "silver_thread_edges",
+      "path": "var\\data\\silver\\thread_edges.parquet"
+    },
+    {
+      "artifact_name": "silver_thread_summaries",
+      "path": "var\\data\\silver\\thread_summaries.parquet"
+    },
+    {
+      "artifact_name": "topic_artifact_snapshot",
+      "path": "var\\data\\intelligence\\topics\\latest_topic_artifacts.jsonl"
+    },
+    {
+      "artifact_name": "topic_feedback_store",
+      "path": "var\\data\\intelligence\\feedback\\approved_topic_reviews.jsonl"
+    },
+    {
+      "artifact_name": "topic_lineage_store",
+      "path": "var\\data\\intelligence\\feedback\\promoted_topic_lineage.jsonl"
+    },
+    {
+      "artifact_name": "vector_index_dir",
+      "path": "var\\data\\intelligence\\vector_index"
+    },
+    {
+      "artifact_name": "qa_reports",
+      "path": "var\\data\\reports\\qa_reports.json"
+    },
+    {
+      "artifact_name": "qa_summary",
+      "path": "var\\data\\reports\\qa_summary.json"
+    },
+    {
+      "artifact_name": "sov_report_csv",
+      "path": "var\\data\\reports\\exports\\sov_report.csv"
+    },
+    {
+      "artifact_name": "buzz_entities_csv",
+      "path": "var\\data\\reports\\exports\\buzz_entities.csv"
+    },
+    {
+      "artifact_name": "buzz_topics_csv",
+      "path": "var\\data\\reports\\exports\\buzz_topics.csv"
+    },
+    {
+      "artifact_name": "emerging_topics_csv",
+      "path": "var\\data\\reports\\exports\\emerging_topics.csv"
+    },
+    {
+      "artifact_name": "top_issues_csv",
+      "path": "var\\data\\reports\\exports\\top_issues.csv"
+    },
+    {
+      "artifact_name": "thread_controversy_csv",
+      "path": "var\\data\\reports\\exports\\thread_controversy.csv"
+    },
+    {
+      "artifact_name": "creators_csv",
+      "path": "var\\data\\reports\\exports\\creators.csv"
+    },
+    {
+      "artifact_name": "sources_csv",
+      "path": "var\\data\\reports\\exports\\sources.csv"
+    },
+    {
+      "artifact_name": "insight_cards_csv",
+      "path": "var\\data\\reports\\exports\\insight_cards.csv"
+    },
+    {
+      "artifact_name": "overview_html",
+      "path": "var\\data\\reports\\viewer\\index.html"
+    },
+    {
+      "artifact_name": "release_summary",
+      "path": "var\\data\\reports\\release_summary.json"
+    }
+  ],
+  "warnings": [
+    "Default intelligence was requested but some components degraded to fallback: language_id"
+  ],
+  "notes": [
+    "Execution profile `release` applied for Optimization Program O1.",
+    "CSV exports were generated.",
+    "Viewer snapshot was requested."
+  ]
+}

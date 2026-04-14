@@ -2,10 +2,12 @@ package qdrant
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 
 	pb "github.com/qdrant/go-client/qdrant"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -41,7 +43,7 @@ type PointsOps interface {
 // SearchOps defines interface for search operations.
 type SearchOps interface {
 	Search(ctx context.Context, colName string, vector []float32, limit uint64) ([]SearchResult, error)
-	SearchWithFilter(ctx context.Context, colName string, vector []float32, limit uint64, filter *pb.Filter) ([]SearchResult, error)
+	SearchWithFilter(ctx context.Context, colName string, vector []float32, limit uint64, filter *pb.Filter, scoreThreshold float32) ([]SearchResult, error)
 	SearchBatch(ctx context.Context, colName string, vectors [][]float32, limit uint64) ([][]SearchResult, error)
 	SearchGroups(ctx context.Context, colName string, vector []float32, limit uint64, groupBy string, groupLimit uint64, filter *pb.Filter) ([]GroupResult, error)
 	Facet(ctx context.Context, colName string, key string, limit uint64, filter *pb.Filter) ([]FacetResult, error)
@@ -65,7 +67,7 @@ func NewQdrant(cfg QdrantConfig) (IQdrant, error) {
 
 	var opts []grpc.DialOption
 	if cfg.UseTLS {
-		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	} else {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}

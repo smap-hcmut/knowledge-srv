@@ -12,7 +12,7 @@ func (c *qdrantImpl) Facet(ctx context.Context, collectionName string, key strin
 		return nil, ErrEmptyCollection
 	}
 	if key == "" {
-		return nil, ErrInvalidVector // Use a proper error
+		return nil, ErrEmptyKey
 	}
 
 	// Try using the PointsClient.Facet method if available

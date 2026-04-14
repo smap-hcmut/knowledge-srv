@@ -17,7 +17,6 @@ import (
 	_ "knowledge-srv/docs"
 	"knowledge-srv/internal/consumer"
 	"knowledge-srv/internal/httpserver"
-	"knowledge-srv/pkg/maestro"
 	"knowledge-srv/pkg/voyage"
 
 	"github.com/smap-hcmut/shared-libs/go/auth"
@@ -27,6 +26,26 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/log"
 	_ "github.com/smap-hcmut/shared-libs/go/response" // For swagger type definitions
 )
+
+// rateLimitedLLM wraps llm.LLM with a concurrency semaphore to protect API quotas.
+type rateLimitedLLM struct {
+	inner llm.LLM
+	sem   chan struct{}
+}
+
+func (r *rateLimitedLLM) Generate(ctx context.Context, prompt string) (string, error) {
+	select {
+	case r.sem <- struct{}{}:
+		defer func() { <-r.sem }()
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
+	return r.inner.Generate(ctx, prompt)
+}
+
+func (r *rateLimitedLLM) Name() string {
+	return r.inner.Name()
+}
 
 // @title       SMAP Knowledge Service API
 // @description SMAP Knowledge Service API documentation.
@@ -94,12 +113,15 @@ func main() {
 			Model:  pc.Model,
 		})
 	}
-	llmClient, err := llm.NewFromConfig(llm.MultiConfig{Providers: llmProviderConfigs})
+	llmBase, err := llm.NewFromConfig(llm.MultiConfig{Providers: llmProviderConfigs})
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize LLM client: ", err)
 		return
 	}
-	logger.Infof(ctx, "LLM client initialized: %s", llmClient.Name())
+	logger.Infof(ctx, "LLM client initialized: %s", llmBase.Name())
+
+	// Wrap LLM with concurrency limiter (max 5 concurrent calls across chat + report)
+	var llmClient llm.LLM = &rateLimitedLLM{inner: llmBase, sem: make(chan struct{}, 5)}
 
 	// PostgreSQL - Metadata, conversation history
 	postgresDB, err := postgre.Connect(ctx, cfg.Postgres)
@@ -138,23 +160,6 @@ func main() {
 		logger.Infof(ctx, "Kafka producer client initialized")
 	}
 
-	// Maestro - NotebookLM automation (optional - only needed when notebook.enabled=true)
-	var maestroClient maestro.IMaestro
-	if cfg.Maestro.APIKey != "" {
-		maestroClient, err = maestro.NewMaestro(maestro.MaestroConfig{
-			BaseURL: cfg.Maestro.BaseURL,
-			APIKey:  cfg.Maestro.APIKey,
-		})
-		if err != nil {
-			logger.Warnf(ctx, "Maestro client not configured (optional): %v", err)
-			maestroClient = nil
-		} else {
-			logger.Info(ctx, "Maestro client initialized")
-		}
-	} else {
-		logger.Info(ctx, "Maestro client skipped (no API key configured)")
-	}
-
 	// Discord - Monitoring & Notification
 	discordClient, err := discord.New(logger, cfg.Discord.WebhookURL)
 	if err != nil {
@@ -180,23 +185,21 @@ func main() {
 		LLMClient:     llmClient,
 		Discord:       discordClient,
 		KafkaProducer: kafkaProducer,
-		MaestroClient: maestroClient,
-		AppConfig:     cfg,
 	})
 	if err != nil {
 		logger.Errorf(ctx, "Failed to create consumer server: %v", err)
 		return
 	}
 
+	consumerErr := make(chan error, 1)
 	go func() {
 		logger.Info(ctx, "Consumer server starting...")
 		if err := consumerSrv.Run(ctx); err != nil {
-			logger.Errorf(ctx, "Consumer server error: %v", err)
+			consumerErr <- err
 		}
 	}()
 
 	// ── HTTP Server ─────────────────────────────────────────────────────────
-	// HTTP server
 	httpServer, err := httpserver.New(logger, httpserver.Config{
 		Logger:      logger,
 		Port:        cfg.HTTPServer.Port,
@@ -211,8 +214,7 @@ func main() {
 		CookieConfig: cfg.Cookie,
 		Encrypter:    encrypterInstance,
 
-		Discord:       discordClient,
-		MaestroClient: maestroClient,
+		Discord: discordClient,
 
 		QdrantClient:  qdrantClient,
 		VoyageClient:  voyageClient,
@@ -225,10 +227,26 @@ func main() {
 		return
 	}
 
-	if err := httpServer.Run(); err != nil {
-		logger.Error(ctx, "Failed to run server: ", err)
-		return
+	httpErr := make(chan error, 1)
+	go func() {
+		if err := httpServer.Run(ctx); err != nil {
+			httpErr <- err
+		}
+	}()
+
+	logger.Info(ctx, "Knowledge Service started")
+
+	// ── Wait for shutdown signal or fatal error ─────────────────────────────
+	select {
+	case <-ctx.Done():
+		logger.Info(ctx, "Shutdown signal received")
+	case err := <-consumerErr:
+		logger.Errorf(ctx, "Consumer fatal error, shutting down: %v", err)
+		stop()
+	case err := <-httpErr:
+		logger.Errorf(ctx, "HTTP server fatal error, shutting down: %v", err)
+		stop()
 	}
 
-	logger.Info(ctx, "API server stopped gracefully")
+	logger.Info(ctx, "Knowledge Service stopped gracefully")
 }

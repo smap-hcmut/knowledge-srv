@@ -15,7 +15,7 @@ func (c *qdrantImpl) SearchGroups(ctx context.Context, collectionName string, ve
 		return nil, ErrInvalidVector
 	}
 	if groupBy == "" {
-		return nil, ErrInvalidVector // Reuse error or create new one
+		return nil, ErrMissingGroupField
 	}
 
 	resp, err := c.pointsClient.SearchGroups(ctx, &pb.SearchPointGroups{

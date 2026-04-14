@@ -1,0 +1,11 @@
+controversy_thread_count,conversation_share,creator_id,evidence_references,mention_count,top_issue_categories,top_topic_keys
+0,0.0005,author_0001,['tt_p_fc_0001'],1,['irritation_redness'],"['cleanser_recommendation_by_skin_type', 'performance_and_battery', 'pricing_and_value']"
+0,0.0005,author_0002,['tt_p_fc_0002'],1,[],"['cleanser_texture_foam_scent', 'oily_acne_cleansers', 'performance_and_battery']"
+0,0.0005,author_0003,['tt_p_fc_0003'],1,[],"['cleanser_authenticity_and_fake_goods', 'cleanser_price_value_and_promo']"
+0,0.0005,author_0004,['tt_p_fc_0004'],1,"['dryness_tightness_problem', 'performance_problem', 'usability_problem']","['oily_acne_cleansers', 'performance_and_battery']"
+0,0.0005,author_0005,['tt_p_fc_0005'],1,[],"['cleanser_texture_foam_scent', 'pricing_and_value']"
+0,0.0005,author_0006,['tt_p_fc_0006'],1,[],"['pricing_and_value', 'gentle_hydrating_cleansers']"
+0,0.0005,author_0007,['tt_p_fc_0007'],1,[],"['cleanser_brand_comparison', 'cleanser_recommendation_by_skin_type', 'cleanser_texture_foam_scent']"
+0,0.0005,author_0008,['tt_p_fc_0008'],1,[],['cleanser_texture_foam_scent']
+0,0.0005,author_0009,['tt_p_fc_0009'],1,[],"['cleanser_brand_comparison', 'pricing_and_value']"
+0,0.0005,author_0010,['tt_p_fc_0010'],1,[],['cleanser_brand_comparison']

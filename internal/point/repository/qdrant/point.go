@@ -12,7 +12,7 @@ import (
 )
 
 func (r *implRepository) Search(ctx context.Context, opt repository.SearchOptions) ([]point.SearchOutput, error) {
-	pkgResults, err := r.client.SearchWithFilter(ctx, opt.CollectionName, opt.Vector, opt.Limit, opt.Filter)
+	pkgResults, err := r.client.SearchWithFilter(ctx, opt.CollectionName, opt.Vector, opt.Limit, opt.Filter, opt.ScoreThreshold)
 	if err != nil {
 		r.l.Errorf(ctx, "point.repository.qdrant.Search: Failed to search points: %v", err)
 		return nil, err

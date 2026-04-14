@@ -1,0 +1,192 @@
+{
+  "qa_schema_version": "2026.03.16-r1",
+  "metadata": {
+    "name": "ev_suite",
+    "version": "1.0.0",
+    "description": "Release-oriented EV-like QA suite for the primary sample/demo path.",
+    "suite_family": "ev_suite"
+  },
+  "checks": [
+    {
+      "kind": "pipeline",
+      "check_id": "ev_pipeline_sanity",
+      "title": "EV-like pipeline sanity on the primary run artifact",
+      "passed": true,
+      "warnings": [],
+      "artifacts": [
+        {
+          "artifact_name": "bi_reports",
+          "path": "var\\data\\reports\\bi_reports.json"
+        },
+        {
+          "artifact_name": "insights",
+          "path": "var\\data\\insights\\insights.jsonl"
+        },
+        {
+          "artifact_name": "metrics",
+          "path": "var\\data\\reports\\metrics.json"
+        },
+        {
+          "artifact_name": "run_manifest",
+          "path": "var\\data\\reports\\run_manifest.json"
+        }
+      ],
+      "input_path": "uap-batches-cleanser-vn.zip",
+      "used_existing_run": true,
+      "total_valid_records": 2000,
+      "insight_card_count": 7,
+      "unresolved_ratio": 0.0855,
+      "runtime_mode": "default_intelligence",
+      "delta_kind": "intra_window_delta",
+      "report_row_counts": [
+        {
+          "report_name": "sov_report",
+          "collection_name": "entities",
+          "count": 10
+        },
+        {
+          "report_name": "buzz_report",
+          "collection_name": "entity_buzz",
+          "count": 10
+        },
+        {
+          "report_name": "buzz_report",
+          "collection_name": "topic_buzz",
+          "count": 10
+        },
+        {
+          "report_name": "emerging_topics_report",
+          "collection_name": "topics",
+          "count": 10
+        },
+        {
+          "report_name": "top_issues_report",
+          "collection_name": "issues",
+          "count": 10
+        },
+        {
+          "report_name": "thread_controversy_report",
+          "collection_name": "threads",
+          "count": 10
+        },
+        {
+          "report_name": "creator_source_breakdown_report",
+          "collection_name": "creators",
+          "count": 10
+        },
+        {
+          "report_name": "creator_source_breakdown_report",
+          "collection_name": "sources",
+          "count": 1
+        },
+        {
+          "report_name": "insight_card_bundle",
+          "collection_name": "cards",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "kind": "bi_metric_alignment",
+      "check_id": "ev_bi_alignment",
+      "title": "BI report concepts stay aligned with shared metrics on the primary run",
+      "passed": true,
+      "warnings": [],
+      "artifacts": [],
+      "input_path": "uap-batches-cleanser-vn.zip",
+      "mismatch_count": 0,
+      "mismatches": []
+    },
+    {
+      "kind": "intelligence_eval",
+      "check_id": "ev_intelligence_regression",
+      "title": "EV-like intelligence regression floor",
+      "passed": false,
+      "warnings": [],
+      "artifacts": [],
+      "spec_path": "E:\\smap\\benchmarks\\specs\\intelligence_suite.yaml",
+      "threshold_results": [
+        {
+          "metric_name": "entity_span_f1",
+          "actual_value": 0.1231,
+          "min_value": 0.15,
+          "max_value": null,
+          "equals": null,
+          "passed": false,
+          "note": null
+        },
+        {
+          "metric_name": "semantic_expectation_accuracy",
+          "actual_value": 0.3077,
+          "min_value": 0.15,
+          "max_value": null,
+          "equals": null,
+          "passed": true,
+          "note": null
+        },
+        {
+          "metric_name": "topic_artifact_expectation_accuracy",
+          "actual_value": 0.1538,
+          "min_value": 0.1,
+          "max_value": null,
+          "equals": null,
+          "passed": true,
+          "note": null
+        }
+      ],
+      "overall_metrics": {
+        "entity_span_f1": 0.1231,
+        "entity_link_top1_accuracy": 0.1538,
+        "entity_resolution_usefulness_proxy": 0.4154,
+        "semantic_expectation_accuracy": 0.3077,
+        "topic_expectation_accuracy": 0.3077,
+        "topic_artifact_expectation_accuracy": 0.1538,
+        "topic_stability": 0.0935,
+        "topic_usefulness_proxy": 0.6642,
+        "topic_label_cleanliness_proxy": 0.8654,
+        "semantic_feedback_accuracy": 0.2308,
+        "topic_lineage_accuracy": 0.0769,
+        "feedback_loop_accuracy": 0.3077,
+        "review_pressure": 12.1538,
+        "ml_enabled_case_ratio": 1.0,
+        "default_intelligence_requested_case_ratio": 1.0
+      },
+      "metric_families": {
+        "extraction_linking_quality_gold": {
+          "entity_span_f1": 0.1231,
+          "entity_link_top1_accuracy": 0.1538
+        },
+        "extraction_linking_quality_proxies": {
+          "entity_resolution_usefulness_proxy": 0.4154
+        },
+        "semantic_enrichment_quality_gold": {
+          "semantic_expectation_accuracy": 0.3077,
+          "semantic_feedback_accuracy": 0.2308
+        },
+        "topic_artifact_quality_gold": {
+          "topic_expectation_accuracy": 0.3077,
+          "topic_artifact_expectation_accuracy": 0.1538,
+          "topic_stability": 0.0935,
+          "topic_lineage_accuracy": 0.0769,
+          "feedback_loop_accuracy": 0.3077
+        },
+        "topic_artifact_quality_proxies": {
+          "topic_usefulness_proxy": 0.6642,
+          "topic_label_cleanliness_proxy": 0.8654
+        },
+        "operations_operational": {
+          "review_pressure": 12.1538,
+          "ml_enabled_case_ratio": 1.0
+        },
+        "mode_comparison_operational": {
+          "ml_enabled_case_ratio": 1.0,
+          "default_intelligence_requested_case_ratio": 1.0
+        }
+      }
+    }
+  ],
+  "passed_checks": 2,
+  "failed_checks": 1,
+  "warning_count": 0,
+  "warnings": []
+}

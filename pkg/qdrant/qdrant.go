@@ -8,9 +8,14 @@ import (
 	"time"
 
 	pb "github.com/qdrant/go-client/qdrant"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // ... (rest of the code remains the same)
+
+// reUUID is a pre-compiled regex for UUID validation.
+var reUUID = regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
 
 // Ping checks if Qdrant is reachable.
 func (c *qdrantImpl) Ping(ctx context.Context) error {
@@ -80,7 +85,10 @@ func (c *qdrantImpl) CollectionExists(ctx context.Context, name string) (bool, e
 	}
 	resp, err := c.collectionsClient.Get(ctx, &pb.GetCollectionInfoRequest{CollectionName: name})
 	if err != nil {
-		return false, nil
+		if status.Code(err) == codes.NotFound {
+			return false, nil
+		}
+		return false, fmt.Errorf("check collection: %w", err)
 	}
 	return resp != nil, nil
 }
@@ -289,8 +297,9 @@ func (c *qdrantImpl) Search(ctx context.Context, collectionName string, vector [
 	return c.searchResultsFromHits(resp.Result), nil
 }
 
-// SearchWithFilter performs a vector similarity search with payload filter.
-func (c *qdrantImpl) SearchWithFilter(ctx context.Context, collectionName string, vector []float32, limit uint64, filter *pb.Filter) ([]SearchResult, error) {
+// SearchWithFilter performs a vector similarity search with payload filter and optional score threshold.
+// If scoreThreshold > 0, Qdrant will only return results with score >= threshold (server-side filtering).
+func (c *qdrantImpl) SearchWithFilter(ctx context.Context, collectionName string, vector []float32, limit uint64, filter *pb.Filter, scoreThreshold float32) ([]SearchResult, error) {
 	if collectionName == "" {
 		return nil, ErrEmptyCollection
 	}
@@ -300,13 +309,17 @@ func (c *qdrantImpl) SearchWithFilter(ctx context.Context, collectionName string
 	if limit == 0 {
 		limit = DefaultSearchLimit
 	}
-	resp, err := c.pointsClient.Search(ctx, &pb.SearchPoints{
+	req := &pb.SearchPoints{
 		CollectionName: collectionName,
 		Vector:         vector,
 		Limit:          limit,
 		Filter:         filter,
 		WithPayload:    &pb.WithPayloadSelector{SelectorOptions: &pb.WithPayloadSelector_Enable{Enable: true}},
-	})
+	}
+	if scoreThreshold > 0 {
+		req.ScoreThreshold = &scoreThreshold
+	}
+	resp, err := c.pointsClient.Search(ctx, req)
 	if err != nil {
 		return nil, WrapError(err, "failed to search with filter")
 	}
@@ -423,10 +436,9 @@ func (c *qdrantImpl) searchResultsFromHits(hits []*pb.ScoredPoint) []SearchResul
 	return results
 }
 
-// isValidUUID checks if the string is a valid UUID
+// isValidUUID checks if the string is a valid UUID using the pre-compiled reUUID regex.
 func isValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
+	return reUUID.MatchString(uuid)
 }
 
 // generateHashNumber generates a numeric hash from string ID

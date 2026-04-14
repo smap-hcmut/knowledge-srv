@@ -35,13 +35,12 @@ func (uc *implUseCase) Generate(ctx context.Context, input embedding.GenerateInp
 	}
 	vector := vectors[0]
 
-	// 3. Save cache
+	// 3. Save cache (non-fatal — embedding already succeeded)
 	if err := uc.repo.Save(ctx, repository.SaveOptions{
 		Key:    hash,
 		Vector: vector,
 	}); err != nil {
-		uc.l.Errorf(ctx, "embedding.usecase.Generate: cache save failed: %v", err)
-		return embedding.GenerateOutput{}, err
+		uc.l.Warnf(ctx, "embedding.usecase.Generate: cache save failed (non-fatal): %v", err)
 	}
 
 	return embedding.GenerateOutput{Vector: vector}, nil
@@ -92,8 +91,7 @@ func (uc *implUseCase) GenerateMany(ctx context.Context, input embedding.Generat
 			Key:    hashes[origIdx],
 			Vector: vector,
 		}); err != nil {
-			uc.l.Errorf(ctx, "embedding.usecase.GenerateMany: cache save failed: %v", err)
-			return embedding.GenerateManyOutput{}, err
+			uc.l.Warnf(ctx, "embedding.usecase.GenerateMany: cache save failed (non-fatal): %v", err)
 		}
 	}
 

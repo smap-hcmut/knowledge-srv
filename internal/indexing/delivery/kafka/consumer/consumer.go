@@ -3,6 +3,7 @@ package consumer
 import (
 	"context"
 	"knowledge-srv/internal/indexing/delivery/kafka"
+	"time"
 )
 
 // ConsumeBatchCompleted starts consuming analytics.batch.completed messages
@@ -28,6 +29,11 @@ func (c *consumer) ConsumeBatchCompleted(ctx context.Context) error {
 			default:
 				if err := group.ConsumeWithContext(ctx, []string{kafka.TopicBatchCompleted}, handler); err != nil {
 					c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.ConsumeBatchCompleted: Consumer error: %v", err)
+					select {
+					case <-ctx.Done():
+						return
+					case <-time.After(5 * time.Second):
+					}
 				}
 			}
 		}
@@ -63,6 +69,11 @@ func (c *consumer) ConsumeReportDigest(ctx context.Context) error {
 			default:
 				if err := group.ConsumeWithContext(ctx, []string{kafka.TopicReportDigest}, handler); err != nil {
 					c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.ConsumeReportDigest: Consumer error: %v", err)
+					select {
+					case <-ctx.Done():
+						return
+					case <-time.After(5 * time.Second):
+					}
 				}
 			}
 		}
@@ -98,6 +109,11 @@ func (c *consumer) ConsumeInsightsPublished(ctx context.Context) error {
 			default:
 				if err := group.ConsumeWithContext(ctx, []string{kafka.TopicInsightsPublished}, handler); err != nil {
 					c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.ConsumeInsightsPublished: Consumer error: %v", err)
+					select {
+					case <-ctx.Done():
+						return
+					case <-time.After(5 * time.Second):
+					}
 				}
 			}
 		}

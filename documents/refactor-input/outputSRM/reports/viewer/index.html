@@ -1,0 +1,80 @@
+
+    <html>
+      <head>
+        <title>SMAP R1 Overview</title>
+        <style>
+          body { font-family: Segoe UI, sans-serif; margin: 2rem; line-height: 1.4; }
+          table { border-collapse: collapse; width: 100%; margin-bottom: 1.5rem; }
+          th, td { border: 1px solid #ccc; padding: 0.4rem; text-align: left; }
+          h1, h2 { margin-top: 1.5rem; }
+        </style>
+      </head>
+      <body>
+        <h1>SMAP Release R1 Overview</h1>
+        
+        <h2>Run</h2>
+        <p>Run ID: run-20260323T165146Z</p>
+        <p>Input: uap-batches-cleanser-vn.zip</p>
+        <p>Mode: default_intelligence</p>
+        <p>Delta kind: intra_window_delta</p>
+        
+        <h2>QA</h2><ul><li>ev_suite: 2 passed / 1 failed</li><li>analyst_feedback_qa: 1 passed / 0 failed</li></ul>
+        <h2>Top SOV</h2>
+        <table><thead><tr><th>entity</th><th>mention_share</th><th>entity_hit_share</th></tr></thead><tbody><tr><td>Cetaphil</td><td>11.70%</td><td>6.59%</td></tr><tr><td>CeraVe</td><td>11.65%</td><td>6.56%</td></tr><tr><td>Hada Labo</td><td>10.90%</td><td>6.14%</td></tr><tr><td>Simple</td><td>9.25%</td><td>5.21%</td></tr><tr><td>Hada Labo Acne Care Calming Cleanser</td><td>7.15%</td><td>4.02%</td></tr></tbody></table>
+        <h2>Topic Buzz</h2>
+        <table><thead><tr><th>topic</th><th>mentions</th><th>buzz_score</th></tr></thead><tbody><tr><td>Cleanser Brand and Product Comparison</td><td>364</td><td>429.37</td></tr><tr><td>Cleanser Recommendation by Skin Type</td><td>375</td><td>385.12</td></tr><tr><td>Oily and Acne-Prone Skin Cleansers</td><td>371</td><td>371.00</td></tr><tr><td>Cleanser Authenticity and Fake Goods</td><td>307</td><td>325.54</td></tr><tr><td>Pricing and Value</td><td>280</td><td>288.12</td></tr></tbody></table>
+        <h2>Emerging Topics</h2>
+        <table><thead><tr><th>topic</th><th>growth_delta</th><th>quality</th></tr></thead><tbody><tr><td>Cleanser Recommendation by Skin Type</td><td>428.00</td><td>0.98</td></tr><tr><td>Oily and Acne-Prone Skin Cleansers</td><td>403.00</td><td>0.98</td></tr><tr><td>Cleanser Brand and Product Comparison</td><td>376.00</td><td>0.99</td></tr><tr><td>Cleanser Authenticity and Fake Goods</td><td>307.00</td><td>1.00</td></tr><tr><td>Pricing and Value</td><td>301.00</td><td>0.99</td></tr></tbody></table>
+        <h2>Top Issues</h2>
+        <table><thead><tr><th>issue</th><th>pressure</th><th>mentions</th></tr></thead><tbody><tr><td>fake_authenticity_concern</td><td>149.48</td><td>200</td></tr><tr><td>breakout_after_use</td><td>98.99</td><td>146</td></tr><tr><td>irritation_redness</td><td>88.14</td><td>135</td></tr><tr><td>dryness_tightness_problem</td><td>84.33</td><td>128</td></tr><tr><td>overpriced_concern</td><td>26.02</td><td>36</td></tr></tbody></table>
+        <h2>Thread Controversy</h2>
+        <table><thead><tr><th>thread</th><th>controversy_proxy</th><th>mentions</th></tr></thead><tbody><tr><td>tt_p_fc_0014</td><td>0.42</td><td>20</td></tr><tr><td>tt_p_fc_0033</td><td>0.40</td><td>20</td></tr><tr><td>tt_p_fc_0094</td><td>0.40</td><td>20</td></tr><tr><td>tt_p_fc_0024</td><td>0.39</td><td>20</td></tr><tr><td>tt_p_fc_0013</td><td>0.39</td><td>20</td></tr></tbody></table>
+        <h2>Top Creators</h2>
+        <table><thead><tr><th>creator</th><th>mentions</th><th>conversation_share</th></tr></thead><tbody><tr><td>author_0001</td><td>1</td><td>0.05%</td></tr><tr><td>author_0002</td><td>1</td><td>0.05%</td></tr><tr><td>author_0003</td><td>1</td><td>0.05%</td></tr><tr><td>author_0004</td><td>1</td><td>0.05%</td></tr><tr><td>author_0005</td><td>1</td><td>0.05%</td></tr></tbody></table>
+        <h2>Insight Cards</h2>
+        <ul>
+        <li>
+          <strong>Share of voice shift detected for Cetaphil</strong><br>
+          <span>Cetaphil lost 22 mention(s) in the later half of the window.</span><br>
+          <small>confidence=0.56; reports=sov_report, buzz_report</small>
+        </li>
+        
+        <li>
+          <strong>Topic gaining volume: Cleanser Brand and Product Comparison</strong><br>
+          <span>Cleanser Brand and Product Comparison is reportable in 364 raw mentions and 364.00 effective mentions.</span><br>
+          <small>confidence=0.69; reports=buzz_report</small>
+        </li>
+        
+        <li>
+          <strong>Topic buzz concentrating around Cleanser Brand and Product Comparison</strong><br>
+          <span>Cleanser Brand and Product Comparison appears in 364 mentions with buzz score 429.3744.</span><br>
+          <small>confidence=0.70; reports=buzz_report</small>
+        </li>
+        
+        <li>
+          <strong>Emerging topic: Cleanser Recommendation by Skin Type</strong><br>
+          <span>Cleanser Recommendation by Skin Type passed quality gates with growth delta 428.0 and reportability score 0.94.</span><br>
+          <small>confidence=0.85; reports=emerging_topics_report</small>
+        </li>
+        
+        <li>
+          <strong>Issue pressure around fake_authenticity_concern</strong><br>
+          <span>fake_authenticity_concern leads the issue report with pressure score 149.477 across 200 mentions.</span><br>
+          <small>confidence=0.76; reports=top_issues_report</small>
+        </li>
+        
+        <li>
+          <strong>Controversy proxy elevated for thread tt_p_fc_0014</strong><br>
+          <span>Thread tt_p_fc_0014 scored 0.421 on the controversy proxy from reply density, recursion, polarity conflict, and diversity signals.</span><br>
+          <small>confidence=0.63; reports=thread_controversy_report</small>
+        </li>
+        
+        <li>
+          <strong>Creator concentration around author_0001</strong><br>
+          <span>author_0001 contributed 1 mentions, or 0.05% of the slice.</span><br>
+          <small>confidence=0.50; reports=creator_source_breakdown_report</small>
+        </li>
+        </ul>
+      </body>
+    </html>
+    

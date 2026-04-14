@@ -1,0 +1,5614 @@
+{
+  "metrics_schema_version": "2026.03.20-analysis-r1",
+  "metric_definition_versions": {
+    "diagnostics": "3.0.0",
+    "presence_attention": "2.0.0",
+    "perception": "3.0.0",
+    "interaction_structure": "2.0.0"
+  },
+  "diagnostics": {
+    "mention_volume": 2000,
+    "raw_mention_volume": 2000,
+    "effective_mention_volume": 2000.0,
+    "dedup_weighted_mention_volume": 1605.0,
+    "quality_weighted_mention_volume": 1542.2037,
+    "active_weighting_mode": "raw",
+    "resolved_entity_mention_rate": 0.9145,
+    "concept_target_mention_rate": 0.2625,
+    "reviewable_low_confidence_rate": 0.394,
+    "batch_candidate_cluster_count": 11,
+    "aspect_fact_total": 2039,
+    "language_distribution": [
+      {
+        "language": "vi",
+        "count": 1811,
+        "ratio": 0.9055
+      },
+      {
+        "language": "mixed",
+        "count": 189,
+        "ratio": 0.0945
+      }
+    ],
+    "language_source_distribution": [
+      {
+        "language_source": "inferred",
+        "count": 2000,
+        "ratio": 1.0
+      }
+    ],
+    "explicit_language_ratio": 0.0,
+    "inferred_language_ratio": 1.0,
+    "duplicate_rate": 0.2755,
+    "exact_duplicate_rate": 0.2635,
+    "near_duplicate_rate": 0.012,
+    "spam_suspicion_rate": 0.0,
+    "suspicious_author_concentration": {
+      "count": 0,
+      "suspicious_author_share": 0.0,
+      "top_share": 0.0,
+      "leaders": []
+    }
+  },
+  "presence_attention": {
+    "sov_by_mentions": [
+      {
+        "canonical_entity_id": "brand.cetaphil",
+        "mention_count": 234,
+        "ratio": 0.117
+      },
+      {
+        "canonical_entity_id": "brand.cerave",
+        "mention_count": 233,
+        "ratio": 0.1165
+      },
+      {
+        "canonical_entity_id": "brand.hada_labo",
+        "mention_count": 218,
+        "ratio": 0.109
+      },
+      {
+        "canonical_entity_id": "brand.simple",
+        "mention_count": 185,
+        "ratio": 0.0925
+      },
+      {
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "mention_count": 143,
+        "ratio": 0.07150000000000001
+      },
+      {
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "mention_count": 138,
+        "ratio": 0.069
+      },
+      {
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "mention_count": 135,
+        "ratio": 0.0675
+      },
+      {
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "mention_count": 135,
+        "ratio": 0.0675
+      },
+      {
+        "canonical_entity_id": "brand.bioderma",
+        "mention_count": 130,
+        "ratio": 0.065
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "mention_count": 130,
+        "ratio": 0.065
+      },
+      {
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "mention_count": 128,
+        "ratio": 0.064
+      },
+      {
+        "canonical_entity_id": "brand.la_roche_posay",
+        "mention_count": 127,
+        "ratio": 0.0635
+      },
+      {
+        "canonical_entity_id": "brand.senka",
+        "mention_count": 125,
+        "ratio": 0.0625
+      },
+      {
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "mention_count": 123,
+        "ratio": 0.0615
+      },
+      {
+        "canonical_entity_id": "brand.eucerin",
+        "mention_count": 119,
+        "ratio": 0.059500000000000004
+      },
+      {
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "mention_count": 116,
+        "ratio": 0.058
+      },
+      {
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "mention_count": 116,
+        "ratio": 0.058
+      },
+      {
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "mention_count": 106,
+        "ratio": 0.053
+      },
+      {
+        "canonical_entity_id": "brand.cocoon",
+        "mention_count": 102,
+        "ratio": 0.051000000000000004
+      },
+      {
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "mention_count": 93,
+        "ratio": 0.0465
+      },
+      {
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "mention_count": 89,
+        "ratio": 0.0445
+      },
+      {
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "mention_count": 86,
+        "ratio": 0.043000000000000003
+      },
+      {
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "mention_count": 85,
+        "ratio": 0.0425
+      },
+      {
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "mention_count": 81,
+        "ratio": 0.0405
+      },
+      {
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "mention_count": 79,
+        "ratio": 0.0395
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "mention_count": 75,
+        "ratio": 0.0375
+      },
+      {
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "mention_count": 67,
+        "ratio": 0.0335
+      },
+      {
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "mention_count": 62,
+        "ratio": 0.031
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "mention_count": 50,
+        "ratio": 0.025
+      },
+      {
+        "canonical_entity_id": "brand.svr",
+        "mention_count": 43,
+        "ratio": 0.021500000000000002
+      }
+    ],
+    "sov_by_entity_hits": [
+      {
+        "canonical_entity_id": "brand.cetaphil",
+        "len": 234,
+        "ratio": 0.06585983675766957
+      },
+      {
+        "canonical_entity_id": "brand.cerave",
+        "len": 233,
+        "ratio": 0.06557838446383338
+      },
+      {
+        "canonical_entity_id": "brand.hada_labo",
+        "len": 218,
+        "ratio": 0.061356600056290456
+      },
+      {
+        "canonical_entity_id": "brand.simple",
+        "len": 185,
+        "ratio": 0.05206867435969603
+      },
+      {
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "len": 143,
+        "ratio": 0.04024767801857585
+      },
+      {
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "len": 138,
+        "ratio": 0.03884041654939488
+      },
+      {
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "len": 135,
+        "ratio": 0.037996059667886294
+      },
+      {
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "len": 135,
+        "ratio": 0.037996059667886294
+      },
+      {
+        "canonical_entity_id": "brand.bioderma",
+        "len": 130,
+        "ratio": 0.03658879819870532
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "len": 130,
+        "ratio": 0.03658879819870532
+      },
+      {
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "len": 128,
+        "ratio": 0.03602589361103293
+      },
+      {
+        "canonical_entity_id": "brand.la_roche_posay",
+        "len": 127,
+        "ratio": 0.035744441317196736
+      },
+      {
+        "canonical_entity_id": "brand.senka",
+        "len": 125,
+        "ratio": 0.03518153672952434
+      },
+      {
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "len": 123,
+        "ratio": 0.03461863214185196
+      },
+      {
+        "canonical_entity_id": "brand.eucerin",
+        "len": 119,
+        "ratio": 0.03349282296650718
+      },
+      {
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "len": 116,
+        "ratio": 0.03264846608499859
+      },
+      {
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "len": 116,
+        "ratio": 0.03264846608499859
+      },
+      {
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "len": 106,
+        "ratio": 0.029833943146636645
+      },
+      {
+        "canonical_entity_id": "brand.cocoon",
+        "len": 102,
+        "ratio": 0.028708133971291867
+      },
+      {
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "len": 93,
+        "ratio": 0.026175063326766113
+      },
+      {
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "len": 89,
+        "ratio": 0.025049254151421334
+      },
+      {
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "len": 86,
+        "ratio": 0.024204897269912748
+      },
+      {
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "len": 85,
+        "ratio": 0.023923444976076555
+      },
+      {
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "len": 81,
+        "ratio": 0.022797635800731776
+      },
+      {
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "len": 79,
+        "ratio": 0.022234731213059387
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "len": 75,
+        "ratio": 0.021108922037714608
+      },
+      {
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "len": 67,
+        "ratio": 0.01885730368702505
+      },
+      {
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "len": 62,
+        "ratio": 0.017450042217844075
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "len": 50,
+        "ratio": 0.014072614691809739
+      },
+      {
+        "canonical_entity_id": "brand.svr",
+        "len": 43,
+        "ratio": 0.012102448634956374
+      }
+    ],
+    "sov_resolved_mentions_only": [
+      {
+        "canonical_entity_id": "brand.cetaphil",
+        "mention_count": 234,
+        "ratio": 0.12793876435210497
+      },
+      {
+        "canonical_entity_id": "brand.cerave",
+        "mention_count": 233,
+        "ratio": 0.1273920174958994
+      },
+      {
+        "canonical_entity_id": "brand.hada_labo",
+        "mention_count": 218,
+        "ratio": 0.11919081465281574
+      },
+      {
+        "canonical_entity_id": "brand.simple",
+        "mention_count": 185,
+        "ratio": 0.1011481683980317
+      },
+      {
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "mention_count": 143,
+        "ratio": 0.07818480043739748
+      },
+      {
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "mention_count": 138,
+        "ratio": 0.0754510661563696
+      },
+      {
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "mention_count": 135,
+        "ratio": 0.07381082558775287
+      },
+      {
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "mention_count": 135,
+        "ratio": 0.07381082558775287
+      },
+      {
+        "canonical_entity_id": "brand.bioderma",
+        "mention_count": 130,
+        "ratio": 0.07107709130672499
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "mention_count": 130,
+        "ratio": 0.07107709130672499
+      },
+      {
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "mention_count": 128,
+        "ratio": 0.06998359759431383
+      },
+      {
+        "canonical_entity_id": "brand.la_roche_posay",
+        "mention_count": 127,
+        "ratio": 0.06943685073810825
+      },
+      {
+        "canonical_entity_id": "brand.senka",
+        "mention_count": 125,
+        "ratio": 0.0683433570256971
+      },
+      {
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "mention_count": 123,
+        "ratio": 0.06724986331328595
+      },
+      {
+        "canonical_entity_id": "brand.eucerin",
+        "mention_count": 119,
+        "ratio": 0.06506287588846364
+      },
+      {
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "mention_count": 116,
+        "ratio": 0.0634226353198469
+      },
+      {
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "mention_count": 116,
+        "ratio": 0.0634226353198469
+      },
+      {
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "mention_count": 106,
+        "ratio": 0.05795516675779114
+      },
+      {
+        "canonical_entity_id": "brand.cocoon",
+        "mention_count": 102,
+        "ratio": 0.055768179332968834
+      },
+      {
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "mention_count": 93,
+        "ratio": 0.05084745762711864
+      },
+      {
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "mention_count": 89,
+        "ratio": 0.04866047020229634
+      },
+      {
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "mention_count": 86,
+        "ratio": 0.047020229633679606
+      },
+      {
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "mention_count": 85,
+        "ratio": 0.046473482777474026
+      },
+      {
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "mention_count": 81,
+        "ratio": 0.04428649535265172
+      },
+      {
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "mention_count": 79,
+        "ratio": 0.043193001640240564
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "mention_count": 75,
+        "ratio": 0.04100601421541826
+      },
+      {
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "mention_count": 67,
+        "ratio": 0.036632039365773646
+      },
+      {
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "mention_count": 62,
+        "ratio": 0.03389830508474576
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "mention_count": 50,
+        "ratio": 0.027337342810278838
+      },
+      {
+        "canonical_entity_id": "brand.svr",
+        "mention_count": 43,
+        "ratio": 0.023510114816839803
+      }
+    ],
+    "author_concentration": {
+      "count": 2000,
+      "top_share": 0.0005,
+      "hhi_proxy": 0.0005,
+      "leaders": [
+        {
+          "author_id": "commenter_0066_02",
+          "count": 1,
+          "ratio": 0.0005
+        },
+        {
+          "author_id": "commenter_0019_04",
+          "count": 1,
+          "ratio": 0.0005
+        },
+        {
+          "author_id": "commenter_0015_09",
+          "count": 1,
+          "ratio": 0.0005
+        },
+        {
+          "author_id": "replier_0025_04",
+          "count": 1,
+          "ratio": 0.0005
+        },
+        {
+          "author_id": "replier_0063_01",
+          "count": 1,
+          "ratio": 0.0005
+        }
+      ]
+    },
+    "thread_initiator_concentration": {
+      "count": 100,
+      "top_share": 0.01,
+      "hhi_proxy": 0.01,
+      "leaders": [
+        {
+          "author_id": "author_0017",
+          "count": 1,
+          "ratio": 0.01
+        },
+        {
+          "author_id": "author_0035",
+          "count": 1,
+          "ratio": 0.01
+        },
+        {
+          "author_id": "author_0091",
+          "count": 1,
+          "ratio": 0.01
+        },
+        {
+          "author_id": "author_0046",
+          "count": 1,
+          "ratio": 0.01
+        },
+        {
+          "author_id": "author_0086",
+          "count": 1,
+          "ratio": 0.01
+        }
+      ]
+    },
+    "channel_concentration": {
+      "count": 1,
+      "top_share": 1.0,
+      "hhi_proxy": 1.0,
+      "leaders": [
+        {
+          "platform": "tiktok",
+          "count": 2000,
+          "ratio": 1.0
+        }
+      ]
+    }
+  },
+  "perception": {
+    "mention_sentiment_distribution": [
+      {
+        "sentiment": "neutral",
+        "count": 1430,
+        "ratio": 0.715
+      },
+      {
+        "sentiment": "positive",
+        "count": 542,
+        "ratio": 0.271
+      },
+      {
+        "sentiment": "negative",
+        "count": 25,
+        "ratio": 0.0125
+      },
+      {
+        "sentiment": "mixed",
+        "count": 3,
+        "ratio": 0.0015
+      }
+    ],
+    "target_sentiment_distribution_global": [
+      {
+        "sentiment": "positive",
+        "count": 587,
+        "ratio": 0.6443
+      },
+      {
+        "sentiment": "mixed",
+        "count": 297,
+        "ratio": 0.326
+      },
+      {
+        "sentiment": "negative",
+        "count": 25,
+        "ratio": 0.0274
+      },
+      {
+        "sentiment": "neutral",
+        "count": 2,
+        "ratio": 0.0022
+      }
+    ],
+    "target_sentiment_distribution": [
+      {
+        "target_key": "brand.bioderma",
+        "target_text": "Bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 18,
+        "target_total": 32,
+        "ratio": 0.5625
+      },
+      {
+        "target_key": "brand.bioderma",
+        "target_text": "bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 6,
+        "target_total": 32,
+        "ratio": 0.1875
+      },
+      {
+        "target_key": "brand.bioderma",
+        "target_text": "bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 32,
+        "ratio": 0.125
+      },
+      {
+        "target_key": "brand.bioderma",
+        "target_text": "Bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 32,
+        "ratio": 0.0938
+      },
+      {
+        "target_key": "brand.bioderma",
+        "target_text": "Bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "entity_type": "brand",
+        "sentiment": "neutral",
+        "count": 1,
+        "target_total": 32,
+        "ratio": 0.0312
+      },
+      {
+        "target_key": "brand.cerave",
+        "target_text": "CeraVe",
+        "canonical_entity_id": "brand.cerave",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 29,
+        "target_total": 52,
+        "ratio": 0.5577
+      },
+      {
+        "target_key": "brand.cerave",
+        "target_text": "cerave",
+        "canonical_entity_id": "brand.cerave",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 13,
+        "target_total": 52,
+        "ratio": 0.25
+      },
+      {
+        "target_key": "brand.cerave",
+        "target_text": "cerave",
+        "canonical_entity_id": "brand.cerave",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 8,
+        "target_total": 52,
+        "ratio": 0.1538
+      },
+      {
+        "target_key": "brand.cerave",
+        "target_text": "CeraVe",
+        "canonical_entity_id": "brand.cerave",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 52,
+        "ratio": 0.0385
+      },
+      {
+        "target_key": "brand.cetaphil",
+        "target_text": "Cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 26,
+        "target_total": 62,
+        "ratio": 0.4194
+      },
+      {
+        "target_key": "brand.cetaphil",
+        "target_text": "cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 16,
+        "target_total": 62,
+        "ratio": 0.2581
+      },
+      {
+        "target_key": "brand.cetaphil",
+        "target_text": "cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 10,
+        "target_total": 62,
+        "ratio": 0.1613
+      },
+      {
+        "target_key": "brand.cetaphil",
+        "target_text": "Cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 62,
+        "ratio": 0.0806
+      },
+      {
+        "target_key": "brand.cetaphil",
+        "target_text": "ceta",
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 62,
+        "ratio": 0.0484
+      },
+      {
+        "target_key": "brand.cetaphil",
+        "target_text": "ceta",
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 62,
+        "ratio": 0.0161
+      },
+      {
+        "target_key": "brand.cetaphil",
+        "target_text": "thi Cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 62,
+        "ratio": 0.0161
+      },
+      {
+        "target_key": "brand.cocoon",
+        "target_text": "cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 10,
+        "target_total": 27,
+        "ratio": 0.3704
+      },
+      {
+        "target_key": "brand.cocoon",
+        "target_text": "cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 27,
+        "ratio": 0.2963
+      },
+      {
+        "target_key": "brand.cocoon",
+        "target_text": "Cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 7,
+        "target_total": 27,
+        "ratio": 0.2593
+      },
+      {
+        "target_key": "brand.cocoon",
+        "target_text": "Cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 27,
+        "ratio": 0.0741
+      },
+      {
+        "target_key": "brand.eucerin",
+        "target_text": "eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 13,
+        "target_total": 32,
+        "ratio": 0.4062
+      },
+      {
+        "target_key": "brand.eucerin",
+        "target_text": "Eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 10,
+        "target_total": 32,
+        "ratio": 0.3125
+      },
+      {
+        "target_key": "brand.eucerin",
+        "target_text": "eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 6,
+        "target_total": 32,
+        "ratio": 0.1875
+      },
+      {
+        "target_key": "brand.eucerin",
+        "target_text": "Eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 32,
+        "ratio": 0.0938
+      },
+      {
+        "target_key": "brand.hada_labo",
+        "target_text": "hada labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 14,
+        "target_total": 46,
+        "ratio": 0.3043
+      },
+      {
+        "target_key": "brand.hada_labo",
+        "target_text": "Hada Labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 11,
+        "target_total": 46,
+        "ratio": 0.2391
+      },
+      {
+        "target_key": "brand.hada_labo",
+        "target_text": "hada labo advanced",
+        "canonical_entity_id": "brand.hada_labo",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 8,
+        "target_total": 46,
+        "ratio": 0.1739
+      },
+      {
+        "target_key": "brand.hada_labo",
+        "target_text": "hada labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 46,
+        "ratio": 0.1739
+      },
+      {
+        "target_key": "brand.hada_labo",
+        "target_text": "Hada Labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 46,
+        "ratio": 0.087
+      },
+      {
+        "target_key": "brand.hada_labo",
+        "target_text": "hada labo advanced",
+        "canonical_entity_id": "brand.hada_labo",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 46,
+        "ratio": 0.0217
+      },
+      {
+        "target_key": "brand.la_roche_posay",
+        "target_text": "La Roche-Posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 8,
+        "target_total": 26,
+        "ratio": 0.3077
+      },
+      {
+        "target_key": "brand.la_roche_posay",
+        "target_text": "LRP",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 5,
+        "target_total": 26,
+        "ratio": 0.1923
+      },
+      {
+        "target_key": "brand.la_roche_posay",
+        "target_text": "la roche-posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 5,
+        "target_total": 26,
+        "ratio": 0.1923
+      },
+      {
+        "target_key": "brand.la_roche_posay",
+        "target_text": "LRP",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 26,
+        "ratio": 0.1538
+      },
+      {
+        "target_key": "brand.la_roche_posay",
+        "target_text": "lrp",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 3,
+        "target_total": 26,
+        "ratio": 0.1154
+      },
+      {
+        "target_key": "brand.la_roche_posay",
+        "target_text": "LRP",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "entity_type": "brand",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 26,
+        "ratio": 0.0385
+      },
+      {
+        "target_key": "brand.senka",
+        "target_text": "senka",
+        "canonical_entity_id": "brand.senka",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 9,
+        "target_total": 27,
+        "ratio": 0.3333
+      },
+      {
+        "target_key": "brand.senka",
+        "target_text": "senka",
+        "canonical_entity_id": "brand.senka",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 9,
+        "target_total": 27,
+        "ratio": 0.3333
+      },
+      {
+        "target_key": "brand.senka",
+        "target_text": "Senka",
+        "canonical_entity_id": "brand.senka",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 7,
+        "target_total": 27,
+        "ratio": 0.2593
+      },
+      {
+        "target_key": "brand.senka",
+        "target_text": "Senka",
+        "canonical_entity_id": "brand.senka",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 27,
+        "ratio": 0.0741
+      },
+      {
+        "target_key": "brand.simple",
+        "target_text": "Simple",
+        "canonical_entity_id": "brand.simple",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 20,
+        "target_total": 44,
+        "ratio": 0.4545
+      },
+      {
+        "target_key": "brand.simple",
+        "target_text": "simple",
+        "canonical_entity_id": "brand.simple",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 14,
+        "target_total": 44,
+        "ratio": 0.3182
+      },
+      {
+        "target_key": "brand.simple",
+        "target_text": "simple",
+        "canonical_entity_id": "brand.simple",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 9,
+        "target_total": 44,
+        "ratio": 0.2045
+      },
+      {
+        "target_key": "brand.simple",
+        "target_text": "Simple",
+        "canonical_entity_id": "brand.simple",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 44,
+        "ratio": 0.0227
+      },
+      {
+        "target_key": "brand.svr",
+        "target_text": "svr",
+        "canonical_entity_id": "brand.svr",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 3,
+        "target_total": 6,
+        "ratio": 0.5
+      },
+      {
+        "target_key": "brand.svr",
+        "target_text": "SVR",
+        "canonical_entity_id": "brand.svr",
+        "entity_type": "brand",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 6,
+        "ratio": 0.3333
+      },
+      {
+        "target_key": "brand.svr",
+        "target_text": "svr",
+        "canonical_entity_id": "brand.svr",
+        "entity_type": "brand",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 6,
+        "ratio": 0.1667
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "bioderma xanh",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 6,
+        "target_total": 30,
+        "ratio": 0.2
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "Bioderma Sebium Gel Moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 6,
+        "target_total": 30,
+        "ratio": 0.2
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "Bioderma Sebium",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 30,
+        "ratio": 0.1667
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "sebium gel moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 30,
+        "ratio": 0.1333
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "bioderma sebium gel moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 30,
+        "ratio": 0.0667
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "Bioderma Sebium",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "Bioderma Sebium Gel Moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "sebium gel moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "sebium gel moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "bioderma xanh",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "Bioderma Sebium",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "neutral",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "target_text": "nha xin",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "target_text": "Bioderma Sensibio Gel Moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 6,
+        "target_total": 21,
+        "ratio": 0.2857
+      },
+      {
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "target_text": "sensibio gel moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 21,
+        "ratio": 0.2381
+      },
+      {
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "target_text": "Bioderma Sensibio",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 21,
+        "ratio": 0.1905
+      },
+      {
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "target_text": "Bioderma Sensibio Gel Moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 21,
+        "ratio": 0.0952
+      },
+      {
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "target_text": "sensibio gel moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 21,
+        "ratio": 0.0476
+      },
+      {
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "target_text": "bioderma sensibio gel moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 21,
+        "ratio": 0.0476
+      },
+      {
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "target_text": "Bioderma Sensibio Gel Moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 21,
+        "ratio": 0.0476
+      },
+      {
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "target_text": "bioderma hồng",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 21,
+        "ratio": 0.0476
+      },
+      {
+        "target_key": "product.cerave_foaming_cleanser",
+        "target_text": "CeraVe Foam",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 26,
+        "ratio": 0.3077
+      },
+      {
+        "target_key": "product.cerave_foaming_cleanser",
+        "target_text": "cerave xanh lá",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 26,
+        "ratio": 0.1923
+      },
+      {
+        "target_key": "product.cerave_foaming_cleanser",
+        "target_text": "CeraVe Foaming Cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 26,
+        "ratio": 0.1538
+      },
+      {
+        "target_key": "product.cerave_foaming_cleanser",
+        "target_text": "cerave foaming",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 26,
+        "ratio": 0.1538
+      },
+      {
+        "target_key": "product.cerave_foaming_cleanser",
+        "target_text": "cerave foaming cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 26,
+        "ratio": 0.0769
+      },
+      {
+        "target_key": "product.cerave_foaming_cleanser",
+        "target_text": "CeraVe Foaming Cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 26,
+        "ratio": 0.0385
+      },
+      {
+        "target_key": "product.cerave_foaming_cleanser",
+        "target_text": "cerave foaming",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 26,
+        "ratio": 0.0385
+      },
+      {
+        "target_key": "product.cerave_foaming_cleanser",
+        "target_text": "CeraVe Foaming Cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 26,
+        "ratio": 0.0385
+      },
+      {
+        "target_key": "product.cerave_hydrating_cleanser",
+        "target_text": "CeraVe Hydrating Cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 14,
+        "ratio": 0.2857
+      },
+      {
+        "target_key": "product.cerave_hydrating_cleanser",
+        "target_text": "CeraVe Hydrating",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 14,
+        "ratio": 0.2857
+      },
+      {
+        "target_key": "product.cerave_hydrating_cleanser",
+        "target_text": "cerave dưỡng ẩm",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 14,
+        "ratio": 0.2857
+      },
+      {
+        "target_key": "product.cerave_hydrating_cleanser",
+        "target_text": "cerave dưỡng ẩm",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 14,
+        "ratio": 0.0714
+      },
+      {
+        "target_key": "product.cerave_hydrating_cleanser",
+        "target_text": "cerave hydrating",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 14,
+        "ratio": 0.0714
+      },
+      {
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "target_text": "SA Smoothing",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 9,
+        "target_total": 29,
+        "ratio": 0.3103
+      },
+      {
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "target_text": "CeraVe SA Smoothing Cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 9,
+        "target_total": 29,
+        "ratio": 0.3103
+      },
+      {
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "target_text": "cerave sa",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 7,
+        "target_total": 29,
+        "ratio": 0.2414
+      },
+      {
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "target_text": "SA Smoothing",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 29,
+        "ratio": 0.0345
+      },
+      {
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "target_text": "CeraVe SA Smoothing Cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 29,
+        "ratio": 0.0345
+      },
+      {
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "target_text": "CeraVe SA",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 29,
+        "ratio": 0.0345
+      },
+      {
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "target_text": "CeraVe SA",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 29,
+        "ratio": 0.0345
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "Cetaphil Gentle Skin Cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 36,
+        "ratio": 0.2222
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "Cetaphil Gentle",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 36,
+        "ratio": 0.1389
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "cetaphil xanh dương",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 36,
+        "ratio": 0.1389
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "cetaphil gentle",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 36,
+        "ratio": 0.1389
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "skin barrier",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 36,
+        "ratio": 0.0833
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "cetaphil gentle",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 36,
+        "ratio": 0.0556
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "cetaphil xanh dương",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 2,
+        "target_total": 36,
+        "ratio": 0.0556
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "Gentle Skin Cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 36,
+        "ratio": 0.0556
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "Cetaphil Gentle Skin Cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 36,
+        "ratio": 0.0278
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "1",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 36,
+        "ratio": 0.0278
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "gentle skin cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 36,
+        "ratio": 0.0278
+      },
+      {
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "target_text": "Cetaphil Gentle",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 36,
+        "ratio": 0.0278
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "Cetaphil Oily Skin Cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 12,
+        "target_total": 45,
+        "ratio": 0.2667
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "cetaphil oily",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 11,
+        "target_total": 45,
+        "ratio": 0.2444
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "Cetaphil Oily",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 10,
+        "target_total": 45,
+        "ratio": 0.2222
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "ceta oily",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 45,
+        "ratio": 0.1111
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "cetaphil oily",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 45,
+        "ratio": 0.0444
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "Cetaphil Oily Skin Cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "Cetaphil Oily",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "ceta oily",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "oily da",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "target_text": "cetaphil oily skin cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "cocoon bí đao",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 14,
+        "target_total": 46,
+        "ratio": 0.3043
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "winter melon cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 10,
+        "target_total": 46,
+        "ratio": 0.2174
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "Cocoon Winter Melon Cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 9,
+        "target_total": 46,
+        "ratio": 0.1957
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "cocoon winter melon cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 46,
+        "ratio": 0.087
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "Cocoon Bí Đao",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 46,
+        "ratio": 0.0652
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "Cocoon Winter Melon Cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 46,
+        "ratio": 0.0435
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "cocoon bí đao",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 46,
+        "ratio": 0.0217
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "cocoon winter melon cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 46,
+        "ratio": 0.0217
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "winter melon cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 46,
+        "ratio": 0.0217
+      },
+      {
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "target_text": "Cocoon Winter Melon Cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 46,
+        "ratio": 0.0217
+      },
+      {
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "target_text": "ph5 facial cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 13,
+        "ratio": 0.3077
+      },
+      {
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "target_text": "eucerin hồng",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 13,
+        "ratio": 0.2308
+      },
+      {
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "target_text": "Eucerin pH5 Facial Cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 13,
+        "ratio": 0.0769
+      },
+      {
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "target_text": "Eucerin pH5",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 13,
+        "ratio": 0.0769
+      },
+      {
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "target_text": "ph5",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 13,
+        "ratio": 0.0769
+      },
+      {
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "target_text": "Eucerin pH5 Facial Cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 13,
+        "ratio": 0.0769
+      },
+      {
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "target_text": "eucerin ph5",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 13,
+        "ratio": 0.0769
+      },
+      {
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "target_text": "ph5",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 13,
+        "ratio": 0.0769
+      },
+      {
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "target_text": "eucerin xanh",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 25,
+        "ratio": 0.32
+      },
+      {
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "target_text": "Eucerin ProAcne Solution Cleansing Gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 25,
+        "ratio": 0.32
+      },
+      {
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "target_text": "pro acne eucerin",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 25,
+        "ratio": 0.2
+      },
+      {
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "target_text": "Eucerin ProAcne",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 25,
+        "ratio": 0.12
+      },
+      {
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "target_text": "Eucerin ProAcne",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 25,
+        "ratio": 0.04
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "Hada Labo Acne Care",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 11,
+        "target_total": 45,
+        "ratio": 0.2444
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "hada labo xanh lá",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 45,
+        "ratio": 0.1778
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "Hada Labo Acne Care Calming Cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 7,
+        "target_total": 45,
+        "ratio": 0.1556
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "hada labo acne",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 7,
+        "target_total": 45,
+        "ratio": 0.1556
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "Hada Labo Acne Care",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 4,
+        "target_total": 45,
+        "ratio": 0.0889
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "hada labo acne care",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 45,
+        "ratio": 0.0667
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "Hada Labo Acne Care Calming Cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "hada labo acne care calming cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "hada labo xanh lá",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "Hada Labo Acne Care",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "target_text": "skin barrier",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 45,
+        "ratio": 0.0222
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "Hada Labo Advanced Nourish",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 10,
+        "target_total": 39,
+        "ratio": 0.2564
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "hada labo dưỡng ẩm",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 39,
+        "ratio": 0.2051
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "hada labo trắng",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 39,
+        "ratio": 0.1282
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 39,
+        "ratio": 0.1282
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "Hada Labo Advanced Nourish",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 4,
+        "target_total": 39,
+        "ratio": 0.1026
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "hada labo advanced nourish hyaluronic acid cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 39,
+        "ratio": 0.0513
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "skin barrier",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 39,
+        "ratio": 0.0513
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "hada labo advanced nourish hyaluronic acid cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 39,
+        "ratio": 0.0256
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "hada labo advanced nourish",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 39,
+        "ratio": 0.0256
+      },
+      {
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "target_text": "nha xin",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 39,
+        "ratio": 0.0256
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "Effaclar Gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 32,
+        "ratio": 0.25
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "La Roche-Posay Effaclar Purifying Foaming Gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 32,
+        "ratio": 0.125
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "la roche-posay effaclar purifying foaming gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 32,
+        "ratio": 0.125
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "gel rửa mặt LRP",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 32,
+        "ratio": 0.125
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "effaclar",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 32,
+        "ratio": 0.0625
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "effaclar xanh",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 32,
+        "ratio": 0.0625
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "effaclar",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 32,
+        "ratio": 0.0625
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "Effaclar",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 32,
+        "ratio": 0.0625
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "LRP Effaclar",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 32,
+        "ratio": 0.0625
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "Effaclar Gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 32,
+        "ratio": 0.0312
+      },
+      {
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "target_text": "effaclar gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 32,
+        "ratio": 0.0312
+      },
+      {
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "target_text": "La Roche-Posay Toleriane Dermo-Cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 7,
+        "target_total": 29,
+        "ratio": 0.2414
+      },
+      {
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "target_text": "toleriane trắng",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 7,
+        "target_total": 29,
+        "ratio": 0.2414
+      },
+      {
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "target_text": "Toleriane Dermo",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 6,
+        "target_total": 29,
+        "ratio": 0.2069
+      },
+      {
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "target_text": "LRP Toleriane",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 29,
+        "ratio": 0.1034
+      },
+      {
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "target_text": "LRP Toleriane",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 2,
+        "target_total": 29,
+        "ratio": 0.069
+      },
+      {
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "target_text": "toleriane trang",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 29,
+        "ratio": 0.069
+      },
+      {
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "target_text": "lrp toleriane",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 29,
+        "ratio": 0.0345
+      },
+      {
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "target_text": "la roche-posay toleriane dermo-cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 29,
+        "ratio": 0.0345
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "Perfect Whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 8,
+        "target_total": 30,
+        "ratio": 0.2667
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "senka xanh",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 7,
+        "target_total": 30,
+        "ratio": 0.2333
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "perfect whip xanh",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 30,
+        "ratio": 0.1667
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "perfect",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 30,
+        "ratio": 0.0667
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "Perfect Whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 30,
+        "ratio": 0.0667
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "perfect whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 30,
+        "ratio": 0.0667
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "xanh",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "perfect",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "perfect whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.senka_perfect_whip",
+        "target_text": "Senka Perfect Whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 30,
+        "ratio": 0.0333
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "Senka Acne Care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 21,
+        "ratio": 0.1905
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "senka xanh lá",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 21,
+        "ratio": 0.1429
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "acne care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 21,
+        "ratio": 0.1429
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "perfect whip acne",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 21,
+        "ratio": 0.1429
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "senka perfect whip acne care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 21,
+        "ratio": 0.0952
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "Senka Perfect Whip Acne Care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 21,
+        "ratio": 0.0952
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "Senka Acne Care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 21,
+        "ratio": 0.0476
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "Senka Perfect Whip Acne Care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 21,
+        "ratio": 0.0476
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "senka perfect whip acne care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 21,
+        "ratio": 0.0476
+      },
+      {
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "target_text": "perfect whip acne",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 21,
+        "ratio": 0.0476
+      },
+      {
+        "target_key": "product.senka_perfect_white_clay",
+        "target_text": "white clay senka",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 11,
+        "ratio": 0.2727
+      },
+      {
+        "target_key": "product.senka_perfect_white_clay",
+        "target_text": "Senka Perfect White Clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 11,
+        "ratio": 0.1818
+      },
+      {
+        "target_key": "product.senka_perfect_white_clay",
+        "target_text": "senka trắng",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 11,
+        "ratio": 0.1818
+      },
+      {
+        "target_key": "product.senka_perfect_white_clay",
+        "target_text": "White Clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 11,
+        "ratio": 0.1818
+      },
+      {
+        "target_key": "product.senka_perfect_white_clay",
+        "target_text": "senka trắng",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 11,
+        "ratio": 0.0909
+      },
+      {
+        "target_key": "product.senka_perfect_white_clay",
+        "target_text": "white clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 11,
+        "ratio": 0.0909
+      },
+      {
+        "target_key": "product.simple_moisturising_facial_wash",
+        "target_text": "Simple Moisturising",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 6,
+        "target_total": 25,
+        "ratio": 0.24
+      },
+      {
+        "target_key": "product.simple_moisturising_facial_wash",
+        "target_text": "Simple Moisturising Facial Wash",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 6,
+        "target_total": 25,
+        "ratio": 0.24
+      },
+      {
+        "target_key": "product.simple_moisturising_facial_wash",
+        "target_text": "simple xanh dương",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 5,
+        "target_total": 25,
+        "ratio": 0.2
+      },
+      {
+        "target_key": "product.simple_moisturising_facial_wash",
+        "target_text": "simple dịu nhẹ",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 25,
+        "ratio": 0.16
+      },
+      {
+        "target_key": "product.simple_moisturising_facial_wash",
+        "target_text": "simple xanh dương",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 2,
+        "target_total": 25,
+        "ratio": 0.08
+      },
+      {
+        "target_key": "product.simple_moisturising_facial_wash",
+        "target_text": "simple xanh dương",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 25,
+        "ratio": 0.04
+      },
+      {
+        "target_key": "product.simple_moisturising_facial_wash",
+        "target_text": "simple moisturising",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 25,
+        "ratio": 0.04
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "Simple Refreshing Facial Wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 18,
+        "ratio": 0.2222
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "Simple Refreshing",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 4,
+        "target_total": 18,
+        "ratio": 0.2222
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "simple gel",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 3,
+        "target_total": 18,
+        "ratio": 0.1667
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "simple xanh lá",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 18,
+        "ratio": 0.1111
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "Simple Refreshing",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 18,
+        "ratio": 0.0556
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "Simple Refreshing Facial Wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 18,
+        "ratio": 0.0556
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "simple xanh lá",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 18,
+        "ratio": 0.0556
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "simple refreshing facial wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 18,
+        "ratio": 0.0556
+      },
+      {
+        "target_key": "product.simple_refreshing_facial_wash",
+        "target_text": "simple refreshing",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 18,
+        "ratio": 0.0556
+      },
+      {
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "target_text": "sebiaclear gel",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 10,
+        "target_total": 22,
+        "ratio": 0.4545
+      },
+      {
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "target_text": "SVR Sebiaclear Gel Moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 6,
+        "target_total": 22,
+        "ratio": 0.2727
+      },
+      {
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "target_text": "svr xanh",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 2,
+        "target_total": 22,
+        "ratio": 0.0909
+      },
+      {
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "target_text": "sebiaclear",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "mixed",
+        "count": 1,
+        "target_total": 22,
+        "ratio": 0.0455
+      },
+      {
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "target_text": "sebiaclear gel",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "negative",
+        "count": 1,
+        "target_total": 22,
+        "ratio": 0.0455
+      },
+      {
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "target_text": "sebiaclear so",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 22,
+        "ratio": 0.0455
+      },
+      {
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "target_text": "xanh ng",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "entity_type": "product",
+        "sentiment": "positive",
+        "count": 1,
+        "target_total": 22,
+        "ratio": 0.0455
+      }
+    ],
+    "aspect_occurrence_count": [
+      {
+        "aspect": "acne_support",
+        "count": 524
+      },
+      {
+        "aspect": "oil_control",
+        "count": 319
+      },
+      {
+        "aspect": "skin_compatibility",
+        "count": 255
+      },
+      {
+        "aspect": "hydration",
+        "count": 206
+      },
+      {
+        "aspect": "authenticity",
+        "count": 168
+      },
+      {
+        "aspect": "price",
+        "count": 162
+      },
+      {
+        "aspect": "cleansing_power",
+        "count": 160
+      },
+      {
+        "aspect": "foam_texture",
+        "count": 140
+      },
+      {
+        "aspect": "price_value",
+        "count": 32
+      },
+      {
+        "aspect": "availability",
+        "count": 18
+      },
+      {
+        "aspect": "performance",
+        "count": 15
+      },
+      {
+        "aspect": "quality",
+        "count": 14
+      },
+      {
+        "aspect": "fragrance_scent",
+        "count": 9
+      },
+      {
+        "aspect": "battery",
+        "count": 7
+      },
+      {
+        "aspect": "trust",
+        "count": 4
+      },
+      {
+        "aspect": "delivery",
+        "count": 3
+      },
+      {
+        "aspect": "charging",
+        "count": 2
+      },
+      {
+        "aspect": "packaging",
+        "count": 1
+      }
+    ],
+    "aspect_target_pair_count": [
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 35
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 34
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.hada_labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "count": 25
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 25
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 24
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "count": 24
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 23
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 23
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 23
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 21
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 21
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 20
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 19
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 17
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 17
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 16
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 16
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 16
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 16
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "count": 15
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 13
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 12
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.cerave_hydrating_cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "count": 10
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 10
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.simple_moisturising_facial_wash",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "count": 10
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 9
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.senka_perfect_white_clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "count": 9
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "count": 8
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 8
+      },
+      {
+        "aspect": "acne_support",
+        "target_key": "brand.svr",
+        "canonical_entity_id": "brand.svr",
+        "count": 5
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 14
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 10
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 10
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 10
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.simple_moisturising_facial_wash",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "count": 10
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 8
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 8
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 8
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 7
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 6
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 6
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 6
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 6
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.senka_perfect_white_clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "count": 6
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 5
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 5
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 5
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 4
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "count": 4
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 4
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.hada_labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "count": 3
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 3
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 3
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "count": 3
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 2
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "product.cerave_hydrating_cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "authenticity",
+        "target_key": "brand.svr",
+        "canonical_entity_id": "brand.svr",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 3
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 2
+      },
+      {
+        "aspect": "availability",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.cerave_hydrating_cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "availability",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 1
+      },
+      {
+        "aspect": "battery",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "battery",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "battery",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 2
+      },
+      {
+        "aspect": "battery",
+        "target_key": "brand.svr",
+        "canonical_entity_id": "brand.svr",
+        "count": 1
+      },
+      {
+        "aspect": "charging",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 1
+      },
+      {
+        "aspect": "charging",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 15
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 15
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 13
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 11
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 11
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 9
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "count": 8
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 8
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 7
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 7
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 7
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.simple_moisturising_facial_wash",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "count": 6
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 5
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "brand.hada_labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "count": 5
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 5
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 5
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.cerave_hydrating_cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "count": 4
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 3
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 3
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 2
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 1
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 1
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 1
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "count": 1
+      },
+      {
+        "aspect": "cleansing_power",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 1
+      },
+      {
+        "aspect": "delivery",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "delivery",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 1
+      },
+      {
+        "aspect": "delivery",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 20
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 19
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 18
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 15
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 12
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 12
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 11
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 7
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 7
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 4
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 3
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 3
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "brand.svr",
+        "canonical_entity_id": "brand.svr",
+        "count": 2
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.cerave_hydrating_cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "foam_texture",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 1
+      },
+      {
+        "aspect": "fragrance_scent",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 3
+      },
+      {
+        "aspect": "fragrance_scent",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 1
+      },
+      {
+        "aspect": "fragrance_scent",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 1
+      },
+      {
+        "aspect": "fragrance_scent",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "fragrance_scent",
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "fragrance_scent",
+        "target_key": "product.senka_perfect_white_clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "count": 1
+      },
+      {
+        "aspect": "fragrance_scent",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 1
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 28
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 26
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 25
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 11
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.cerave_hydrating_cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "count": 10
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 10
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 9
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 9
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 7
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.hada_labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "count": 6
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 6
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 6
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 6
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 6
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 5
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 4
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "count": 4
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.senka_perfect_white_clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "count": 4
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 4
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 4
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 3
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.simple_moisturising_facial_wash",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "count": 3
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "hydration",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 1
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.hada_labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "count": 25
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 24
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 20
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 17
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 17
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 16
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 16
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 15
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 15
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "count": 14
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 14
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 13
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 12
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 12
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 11
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 10
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 9
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 7
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 7
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.senka_perfect_white_clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "count": 7
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "brand.svr",
+        "canonical_entity_id": "brand.svr",
+        "count": 6
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 6
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 5
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 5
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "count": 4
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.cerave_hydrating_cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.simple_moisturising_facial_wash",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "count": 2
+      },
+      {
+        "aspect": "oil_control",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 2
+      },
+      {
+        "aspect": "packaging",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "performance",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 10
+      },
+      {
+        "aspect": "performance",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 2
+      },
+      {
+        "aspect": "performance",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 2
+      },
+      {
+        "aspect": "performance",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 1
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "count": 20
+      },
+      {
+        "aspect": "price",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 14
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "count": 12
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 11
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.simple_refreshing_facial_wash",
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "count": 11
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 10
+      },
+      {
+        "aspect": "price",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 9
+      },
+      {
+        "aspect": "price",
+        "target_key": "brand.hada_labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "count": 8
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 6
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 6
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 6
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 5
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 5
+      },
+      {
+        "aspect": "price",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 4
+      },
+      {
+        "aspect": "price",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 4
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 4
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 4
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "count": 4
+      },
+      {
+        "aspect": "price",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 3
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 3
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.senka_perfect_white_clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "count": 3
+      },
+      {
+        "aspect": "price",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 2
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 2
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 2
+      },
+      {
+        "aspect": "price",
+        "target_key": "product.simple_moisturising_facial_wash",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 5
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 4
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 3
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 3
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 3
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "brand.svr",
+        "canonical_entity_id": "brand.svr",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "price_value",
+        "target_key": "product.senka_perfect_white_clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "count": 1
+      },
+      {
+        "aspect": "quality",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 2
+      },
+      {
+        "aspect": "quality",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "quality",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "quality",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 1
+      },
+      {
+        "aspect": "quality",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 1
+      },
+      {
+        "aspect": "quality",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 1
+      },
+      {
+        "aspect": "quality",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 1
+      },
+      {
+        "aspect": "quality",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "quality",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "quality",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 1
+      },
+      {
+        "aspect": "quality",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 1
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.cetaphil",
+        "canonical_entity_id": "brand.cetaphil",
+        "count": 33
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.cetaphil_oily_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "count": 20
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.bioderma",
+        "canonical_entity_id": "brand.bioderma",
+        "count": 16
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.cetaphil_gentle_skin_cleanser",
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "count": 16
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.cerave",
+        "canonical_entity_id": "brand.cerave",
+        "count": 14
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.bioderma_sensibio_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sensibio_gel_moussant",
+        "count": 13
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.hada_labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "count": 12
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.lrp_effaclar_purifying_foaming_gel",
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "count": 12
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.la_roche_posay",
+        "canonical_entity_id": "brand.la_roche_posay",
+        "count": 11
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 10
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.bioderma_sebium_gel_moussant",
+        "canonical_entity_id": "product.bioderma_sebium_gel_moussant",
+        "count": 9
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.hada_labo_advanced_nourish_cleanser",
+        "canonical_entity_id": "product.hada_labo_advanced_nourish_cleanser",
+        "count": 9
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.senka_perfect_whip",
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "count": 8
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.simple",
+        "canonical_entity_id": "brand.simple",
+        "count": 7
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.eucerin_proacne_cleansing_gel",
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "count": 7
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.lrp_toleriane_dermo_cleanser",
+        "canonical_entity_id": "product.lrp_toleriane_dermo_cleanser",
+        "count": 7
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.simple_moisturising_facial_wash",
+        "canonical_entity_id": "product.simple_moisturising_facial_wash",
+        "count": 7
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 5
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.hada_labo_acne_care_calming_cleanser",
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "count": 5
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.svr_sebiaclear_gel_moussant",
+        "canonical_entity_id": "product.svr_sebiaclear_gel_moussant",
+        "count": 5
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.cerave_hydrating_cleanser",
+        "canonical_entity_id": "product.cerave_hydrating_cleanser",
+        "count": 4
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.cerave_sa_smoothing_cleanser",
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "count": 4
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.cocoon_winter_melon_cleanser",
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "count": 4
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.senka_perfect_whip_acne_care",
+        "canonical_entity_id": "product.senka_perfect_whip_acne_care",
+        "count": 4
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.cocoon",
+        "canonical_entity_id": "brand.cocoon",
+        "count": 3
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.cerave_foaming_cleanser",
+        "canonical_entity_id": "product.cerave_foaming_cleanser",
+        "count": 3
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.senka_perfect_white_clay",
+        "canonical_entity_id": "product.senka_perfect_white_clay",
+        "count": 3
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "brand.svr",
+        "canonical_entity_id": "brand.svr",
+        "count": 2
+      },
+      {
+        "aspect": "skin_compatibility",
+        "target_key": "product.eucerin_ph5_facial_cleanser",
+        "canonical_entity_id": "product.eucerin_ph5_facial_cleanser",
+        "count": 2
+      },
+      {
+        "aspect": "trust",
+        "target_key": "brand.hada_labo",
+        "canonical_entity_id": "brand.hada_labo",
+        "count": 2
+      },
+      {
+        "aspect": "trust",
+        "target_key": "brand.eucerin",
+        "canonical_entity_id": "brand.eucerin",
+        "count": 1
+      },
+      {
+        "aspect": "trust",
+        "target_key": "brand.senka",
+        "canonical_entity_id": "brand.senka",
+        "count": 1
+      }
+    ],
+    "aspect_sentiment_distribution": [
+      {
+        "aspect": "acne_support",
+        "sentiment": "positive",
+        "count": 320,
+        "aspect_total": 524,
+        "ratio": 0.6107
+      },
+      {
+        "aspect": "acne_support",
+        "sentiment": "mixed",
+        "count": 188,
+        "aspect_total": 524,
+        "ratio": 0.3588
+      },
+      {
+        "aspect": "acne_support",
+        "sentiment": "negative",
+        "count": 16,
+        "aspect_total": 524,
+        "ratio": 0.0305
+      },
+      {
+        "aspect": "authenticity",
+        "sentiment": "mixed",
+        "count": 130,
+        "aspect_total": 168,
+        "ratio": 0.7738
+      },
+      {
+        "aspect": "authenticity",
+        "sentiment": "positive",
+        "count": 36,
+        "aspect_total": 168,
+        "ratio": 0.2143
+      },
+      {
+        "aspect": "authenticity",
+        "sentiment": "negative",
+        "count": 2,
+        "aspect_total": 168,
+        "ratio": 0.0119
+      },
+      {
+        "aspect": "availability",
+        "sentiment": "positive",
+        "count": 15,
+        "aspect_total": 18,
+        "ratio": 0.8333
+      },
+      {
+        "aspect": "availability",
+        "sentiment": "mixed",
+        "count": 3,
+        "aspect_total": 18,
+        "ratio": 0.1667
+      },
+      {
+        "aspect": "battery",
+        "sentiment": "mixed",
+        "count": 5,
+        "aspect_total": 7,
+        "ratio": 0.7143
+      },
+      {
+        "aspect": "battery",
+        "sentiment": "positive",
+        "count": 2,
+        "aspect_total": 7,
+        "ratio": 0.2857
+      },
+      {
+        "aspect": "charging",
+        "sentiment": "positive",
+        "count": 2,
+        "aspect_total": 2,
+        "ratio": 1.0
+      },
+      {
+        "aspect": "cleansing_power",
+        "sentiment": "positive",
+        "count": 88,
+        "aspect_total": 160,
+        "ratio": 0.55
+      },
+      {
+        "aspect": "cleansing_power",
+        "sentiment": "mixed",
+        "count": 67,
+        "aspect_total": 160,
+        "ratio": 0.4188
+      },
+      {
+        "aspect": "cleansing_power",
+        "sentiment": "negative",
+        "count": 5,
+        "aspect_total": 160,
+        "ratio": 0.0312
+      },
+      {
+        "aspect": "delivery",
+        "sentiment": "positive",
+        "count": 3,
+        "aspect_total": 3,
+        "ratio": 1.0
+      },
+      {
+        "aspect": "foam_texture",
+        "sentiment": "positive",
+        "count": 81,
+        "aspect_total": 140,
+        "ratio": 0.5786
+      },
+      {
+        "aspect": "foam_texture",
+        "sentiment": "mixed",
+        "count": 56,
+        "aspect_total": 140,
+        "ratio": 0.4
+      },
+      {
+        "aspect": "foam_texture",
+        "sentiment": "negative",
+        "count": 3,
+        "aspect_total": 140,
+        "ratio": 0.0214
+      },
+      {
+        "aspect": "fragrance_scent",
+        "sentiment": "mixed",
+        "count": 6,
+        "aspect_total": 9,
+        "ratio": 0.6667
+      },
+      {
+        "aspect": "fragrance_scent",
+        "sentiment": "positive",
+        "count": 3,
+        "aspect_total": 9,
+        "ratio": 0.3333
+      },
+      {
+        "aspect": "hydration",
+        "sentiment": "mixed",
+        "count": 97,
+        "aspect_total": 206,
+        "ratio": 0.4709
+      },
+      {
+        "aspect": "hydration",
+        "sentiment": "positive",
+        "count": 97,
+        "aspect_total": 206,
+        "ratio": 0.4709
+      },
+      {
+        "aspect": "hydration",
+        "sentiment": "negative",
+        "count": 12,
+        "aspect_total": 206,
+        "ratio": 0.0583
+      },
+      {
+        "aspect": "oil_control",
+        "sentiment": "positive",
+        "count": 197,
+        "aspect_total": 319,
+        "ratio": 0.6176
+      },
+      {
+        "aspect": "oil_control",
+        "sentiment": "mixed",
+        "count": 115,
+        "aspect_total": 319,
+        "ratio": 0.3605
+      },
+      {
+        "aspect": "oil_control",
+        "sentiment": "negative",
+        "count": 7,
+        "aspect_total": 319,
+        "ratio": 0.0219
+      },
+      {
+        "aspect": "packaging",
+        "sentiment": "positive",
+        "count": 1,
+        "aspect_total": 1,
+        "ratio": 1.0
+      },
+      {
+        "aspect": "performance",
+        "sentiment": "positive",
+        "count": 11,
+        "aspect_total": 15,
+        "ratio": 0.7333
+      },
+      {
+        "aspect": "performance",
+        "sentiment": "mixed",
+        "count": 4,
+        "aspect_total": 15,
+        "ratio": 0.2667
+      },
+      {
+        "aspect": "price",
+        "sentiment": "positive",
+        "count": 94,
+        "aspect_total": 162,
+        "ratio": 0.5802
+      },
+      {
+        "aspect": "price",
+        "sentiment": "mixed",
+        "count": 57,
+        "aspect_total": 162,
+        "ratio": 0.3519
+      },
+      {
+        "aspect": "price",
+        "sentiment": "negative",
+        "count": 11,
+        "aspect_total": 162,
+        "ratio": 0.0679
+      },
+      {
+        "aspect": "price_value",
+        "sentiment": "positive",
+        "count": 30,
+        "aspect_total": 32,
+        "ratio": 0.9375
+      },
+      {
+        "aspect": "price_value",
+        "sentiment": "mixed",
+        "count": 2,
+        "aspect_total": 32,
+        "ratio": 0.0625
+      },
+      {
+        "aspect": "quality",
+        "sentiment": "positive",
+        "count": 10,
+        "aspect_total": 14,
+        "ratio": 0.7143
+      },
+      {
+        "aspect": "quality",
+        "sentiment": "mixed",
+        "count": 4,
+        "aspect_total": 14,
+        "ratio": 0.2857
+      },
+      {
+        "aspect": "skin_compatibility",
+        "sentiment": "positive",
+        "count": 144,
+        "aspect_total": 255,
+        "ratio": 0.5647
+      },
+      {
+        "aspect": "skin_compatibility",
+        "sentiment": "mixed",
+        "count": 107,
+        "aspect_total": 255,
+        "ratio": 0.4196
+      },
+      {
+        "aspect": "skin_compatibility",
+        "sentiment": "negative",
+        "count": 4,
+        "aspect_total": 255,
+        "ratio": 0.0157
+      },
+      {
+        "aspect": "trust",
+        "sentiment": "positive",
+        "count": 3,
+        "aspect_total": 4,
+        "ratio": 0.75
+      },
+      {
+        "aspect": "trust",
+        "sentiment": "negative",
+        "count": 1,
+        "aspect_total": 4,
+        "ratio": 0.25
+      }
+    ],
+    "aspect_sentiment_resolved_only": [
+      {
+        "aspect": "acne_support",
+        "sentiment": "positive",
+        "count": 320,
+        "aspect_total": 524,
+        "ratio": 0.6107
+      },
+      {
+        "aspect": "acne_support",
+        "sentiment": "mixed",
+        "count": 188,
+        "aspect_total": 524,
+        "ratio": 0.3588
+      },
+      {
+        "aspect": "acne_support",
+        "sentiment": "negative",
+        "count": 16,
+        "aspect_total": 524,
+        "ratio": 0.0305
+      },
+      {
+        "aspect": "authenticity",
+        "sentiment": "mixed",
+        "count": 130,
+        "aspect_total": 168,
+        "ratio": 0.7738
+      },
+      {
+        "aspect": "authenticity",
+        "sentiment": "positive",
+        "count": 36,
+        "aspect_total": 168,
+        "ratio": 0.2143
+      },
+      {
+        "aspect": "authenticity",
+        "sentiment": "negative",
+        "count": 2,
+        "aspect_total": 168,
+        "ratio": 0.0119
+      },
+      {
+        "aspect": "availability",
+        "sentiment": "positive",
+        "count": 15,
+        "aspect_total": 18,
+        "ratio": 0.8333
+      },
+      {
+        "aspect": "availability",
+        "sentiment": "mixed",
+        "count": 3,
+        "aspect_total": 18,
+        "ratio": 0.1667
+      },
+      {
+        "aspect": "battery",
+        "sentiment": "mixed",
+        "count": 5,
+        "aspect_total": 7,
+        "ratio": 0.7143
+      },
+      {
+        "aspect": "battery",
+        "sentiment": "positive",
+        "count": 2,
+        "aspect_total": 7,
+        "ratio": 0.2857
+      },
+      {
+        "aspect": "charging",
+        "sentiment": "positive",
+        "count": 2,
+        "aspect_total": 2,
+        "ratio": 1.0
+      },
+      {
+        "aspect": "cleansing_power",
+        "sentiment": "positive",
+        "count": 88,
+        "aspect_total": 160,
+        "ratio": 0.55
+      },
+      {
+        "aspect": "cleansing_power",
+        "sentiment": "mixed",
+        "count": 67,
+        "aspect_total": 160,
+        "ratio": 0.4188
+      },
+      {
+        "aspect": "cleansing_power",
+        "sentiment": "negative",
+        "count": 5,
+        "aspect_total": 160,
+        "ratio": 0.0312
+      },
+      {
+        "aspect": "delivery",
+        "sentiment": "positive",
+        "count": 3,
+        "aspect_total": 3,
+        "ratio": 1.0
+      },
+      {
+        "aspect": "foam_texture",
+        "sentiment": "positive",
+        "count": 81,
+        "aspect_total": 140,
+        "ratio": 0.5786
+      },
+      {
+        "aspect": "foam_texture",
+        "sentiment": "mixed",
+        "count": 56,
+        "aspect_total": 140,
+        "ratio": 0.4
+      },
+      {
+        "aspect": "foam_texture",
+        "sentiment": "negative",
+        "count": 3,
+        "aspect_total": 140,
+        "ratio": 0.0214
+      },
+      {
+        "aspect": "fragrance_scent",
+        "sentiment": "mixed",
+        "count": 6,
+        "aspect_total": 9,
+        "ratio": 0.6667
+      },
+      {
+        "aspect": "fragrance_scent",
+        "sentiment": "positive",
+        "count": 3,
+        "aspect_total": 9,
+        "ratio": 0.3333
+      },
+      {
+        "aspect": "hydration",
+        "sentiment": "mixed",
+        "count": 97,
+        "aspect_total": 206,
+        "ratio": 0.4709
+      },
+      {
+        "aspect": "hydration",
+        "sentiment": "positive",
+        "count": 97,
+        "aspect_total": 206,
+        "ratio": 0.4709
+      },
+      {
+        "aspect": "hydration",
+        "sentiment": "negative",
+        "count": 12,
+        "aspect_total": 206,
+        "ratio": 0.0583
+      },
+      {
+        "aspect": "oil_control",
+        "sentiment": "positive",
+        "count": 197,
+        "aspect_total": 319,
+        "ratio": 0.6176
+      },
+      {
+        "aspect": "oil_control",
+        "sentiment": "mixed",
+        "count": 115,
+        "aspect_total": 319,
+        "ratio": 0.3605
+      },
+      {
+        "aspect": "oil_control",
+        "sentiment": "negative",
+        "count": 7,
+        "aspect_total": 319,
+        "ratio": 0.0219
+      },
+      {
+        "aspect": "packaging",
+        "sentiment": "positive",
+        "count": 1,
+        "aspect_total": 1,
+        "ratio": 1.0
+      },
+      {
+        "aspect": "performance",
+        "sentiment": "positive",
+        "count": 11,
+        "aspect_total": 15,
+        "ratio": 0.7333
+      },
+      {
+        "aspect": "performance",
+        "sentiment": "mixed",
+        "count": 4,
+        "aspect_total": 15,
+        "ratio": 0.2667
+      },
+      {
+        "aspect": "price",
+        "sentiment": "positive",
+        "count": 94,
+        "aspect_total": 162,
+        "ratio": 0.5802
+      },
+      {
+        "aspect": "price",
+        "sentiment": "mixed",
+        "count": 57,
+        "aspect_total": 162,
+        "ratio": 0.3519
+      },
+      {
+        "aspect": "price",
+        "sentiment": "negative",
+        "count": 11,
+        "aspect_total": 162,
+        "ratio": 0.0679
+      },
+      {
+        "aspect": "price_value",
+        "sentiment": "positive",
+        "count": 30,
+        "aspect_total": 32,
+        "ratio": 0.9375
+      },
+      {
+        "aspect": "price_value",
+        "sentiment": "mixed",
+        "count": 2,
+        "aspect_total": 32,
+        "ratio": 0.0625
+      },
+      {
+        "aspect": "quality",
+        "sentiment": "positive",
+        "count": 10,
+        "aspect_total": 14,
+        "ratio": 0.7143
+      },
+      {
+        "aspect": "quality",
+        "sentiment": "mixed",
+        "count": 4,
+        "aspect_total": 14,
+        "ratio": 0.2857
+      },
+      {
+        "aspect": "skin_compatibility",
+        "sentiment": "positive",
+        "count": 144,
+        "aspect_total": 255,
+        "ratio": 0.5647
+      },
+      {
+        "aspect": "skin_compatibility",
+        "sentiment": "mixed",
+        "count": 107,
+        "aspect_total": 255,
+        "ratio": 0.4196
+      },
+      {
+        "aspect": "skin_compatibility",
+        "sentiment": "negative",
+        "count": 4,
+        "aspect_total": 255,
+        "ratio": 0.0157
+      },
+      {
+        "aspect": "trust",
+        "sentiment": "positive",
+        "count": 3,
+        "aspect_total": 4,
+        "ratio": 0.75
+      },
+      {
+        "aspect": "trust",
+        "sentiment": "negative",
+        "count": 1,
+        "aspect_total": 4,
+        "ratio": 0.25
+      }
+    ],
+    "issue_signal_rate_global": 0.5525,
+    "issue_signal_rate": [
+      {
+        "issue_category": "fake_authenticity_concern",
+        "count": 284,
+        "mention_total": 2000,
+        "ratio": 0.142
+      },
+      {
+        "issue_category": "breakout_after_use",
+        "count": 233,
+        "mention_total": 2000,
+        "ratio": 0.1165
+      },
+      {
+        "issue_category": "irritation_redness",
+        "count": 203,
+        "mention_total": 2000,
+        "ratio": 0.1015
+      },
+      {
+        "issue_category": "dryness_tightness_problem",
+        "count": 183,
+        "mention_total": 2000,
+        "ratio": 0.0915
+      },
+      {
+        "issue_category": "overpriced_concern",
+        "count": 63,
+        "mention_total": 2000,
+        "ratio": 0.0315
+      },
+      {
+        "issue_category": "overdrying_after_oil_control",
+        "count": 41,
+        "mention_total": 2000,
+        "ratio": 0.0205
+      },
+      {
+        "issue_category": "strong_fragrance_complaint",
+        "count": 26,
+        "mention_total": 2000,
+        "ratio": 0.013
+      },
+      {
+        "issue_category": "trust_concern",
+        "count": 25,
+        "mention_total": 2000,
+        "ratio": 0.0125
+      },
+      {
+        "issue_category": "residue_rinse_problem",
+        "count": 20,
+        "mention_total": 2000,
+        "ratio": 0.01
+      },
+      {
+        "issue_category": "packaging_leak_problem",
+        "count": 12,
+        "mention_total": 2000,
+        "ratio": 0.006
+      },
+      {
+        "issue_category": "usability_problem",
+        "count": 8,
+        "mention_total": 2000,
+        "ratio": 0.004
+      },
+      {
+        "issue_category": "performance_problem",
+        "count": 5,
+        "mention_total": 2000,
+        "ratio": 0.0025
+      },
+      {
+        "issue_category": "formula_change_concern",
+        "count": 2,
+        "mention_total": 2000,
+        "ratio": 0.001
+      }
+    ],
+    "issue_confirmed_rate": [
+      {
+        "issue_category": "breakout_after_use",
+        "issue_total": 233,
+        "count": 221,
+        "ratio": 0.9485
+      },
+      {
+        "issue_category": "dryness_tightness_problem",
+        "issue_total": 183,
+        "count": 182,
+        "ratio": 0.9945
+      },
+      {
+        "issue_category": "fake_authenticity_concern",
+        "issue_total": 284,
+        "count": 281,
+        "ratio": 0.9894
+      },
+      {
+        "issue_category": "formula_change_concern",
+        "issue_total": 2,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "irritation_redness",
+        "issue_total": 203,
+        "count": 203,
+        "ratio": 1.0
+      },
+      {
+        "issue_category": "overdrying_after_oil_control",
+        "issue_total": 41,
+        "count": 40,
+        "ratio": 0.9756
+      },
+      {
+        "issue_category": "overpriced_concern",
+        "issue_total": 63,
+        "count": 62,
+        "ratio": 0.9841
+      },
+      {
+        "issue_category": "packaging_leak_problem",
+        "issue_total": 12,
+        "count": 12,
+        "ratio": 1.0
+      },
+      {
+        "issue_category": "performance_problem",
+        "issue_total": 5,
+        "count": 5,
+        "ratio": 1.0
+      },
+      {
+        "issue_category": "residue_rinse_problem",
+        "issue_total": 20,
+        "count": 19,
+        "ratio": 0.95
+      },
+      {
+        "issue_category": "strong_fragrance_complaint",
+        "issue_total": 26,
+        "count": 26,
+        "ratio": 1.0
+      },
+      {
+        "issue_category": "trust_concern",
+        "issue_total": 25,
+        "count": 22,
+        "ratio": 0.88
+      },
+      {
+        "issue_category": "usability_problem",
+        "issue_total": 8,
+        "count": 8,
+        "ratio": 1.0
+      }
+    ],
+    "issue_direct_complaint_rate": [
+      {
+        "issue_category": "breakout_after_use",
+        "issue_total": 233,
+        "count": 3,
+        "ratio": 0.0129
+      },
+      {
+        "issue_category": "dryness_tightness_problem",
+        "issue_total": 183,
+        "count": 3,
+        "ratio": 0.0164
+      },
+      {
+        "issue_category": "fake_authenticity_concern",
+        "issue_total": 284,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "formula_change_concern",
+        "issue_total": 2,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "irritation_redness",
+        "issue_total": 203,
+        "count": 2,
+        "ratio": 0.0099
+      },
+      {
+        "issue_category": "overdrying_after_oil_control",
+        "issue_total": 41,
+        "count": 4,
+        "ratio": 0.0976
+      },
+      {
+        "issue_category": "overpriced_concern",
+        "issue_total": 63,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "packaging_leak_problem",
+        "issue_total": 12,
+        "count": 2,
+        "ratio": 0.1667
+      },
+      {
+        "issue_category": "performance_problem",
+        "issue_total": 5,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "residue_rinse_problem",
+        "issue_total": 20,
+        "count": 1,
+        "ratio": 0.05
+      },
+      {
+        "issue_category": "strong_fragrance_complaint",
+        "issue_total": 26,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "trust_concern",
+        "issue_total": 25,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "usability_problem",
+        "issue_total": 8,
+        "count": 0,
+        "ratio": 0.0
+      }
+    ],
+    "issue_uncertain_rate": [
+      {
+        "issue_category": "breakout_after_use",
+        "issue_total": 233,
+        "count": 11,
+        "ratio": 0.0472
+      },
+      {
+        "issue_category": "dryness_tightness_problem",
+        "issue_total": 183,
+        "count": 1,
+        "ratio": 0.0055
+      },
+      {
+        "issue_category": "fake_authenticity_concern",
+        "issue_total": 284,
+        "count": 3,
+        "ratio": 0.0106
+      },
+      {
+        "issue_category": "formula_change_concern",
+        "issue_total": 2,
+        "count": 2,
+        "ratio": 1.0
+      },
+      {
+        "issue_category": "irritation_redness",
+        "issue_total": 203,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "overdrying_after_oil_control",
+        "issue_total": 41,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "overpriced_concern",
+        "issue_total": 63,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "packaging_leak_problem",
+        "issue_total": 12,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "performance_problem",
+        "issue_total": 5,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "residue_rinse_problem",
+        "issue_total": 20,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "strong_fragrance_complaint",
+        "issue_total": 26,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "trust_concern",
+        "issue_total": 25,
+        "count": 3,
+        "ratio": 0.12
+      },
+      {
+        "issue_category": "usability_problem",
+        "issue_total": 8,
+        "count": 0,
+        "ratio": 0.0
+      }
+    ],
+    "severe_issue_rate": [
+      {
+        "issue_category": "breakout_after_use",
+        "issue_total": 233,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "dryness_tightness_problem",
+        "issue_total": 183,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "fake_authenticity_concern",
+        "issue_total": 284,
+        "count": 3,
+        "ratio": 0.0106
+      },
+      {
+        "issue_category": "formula_change_concern",
+        "issue_total": 2,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "irritation_redness",
+        "issue_total": 203,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "overdrying_after_oil_control",
+        "issue_total": 41,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "overpriced_concern",
+        "issue_total": 63,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "packaging_leak_problem",
+        "issue_total": 12,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "performance_problem",
+        "issue_total": 5,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "residue_rinse_problem",
+        "issue_total": 20,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "strong_fragrance_complaint",
+        "issue_total": 26,
+        "count": 0,
+        "ratio": 0.0
+      },
+      {
+        "issue_category": "trust_concern",
+        "issue_total": 25,
+        "count": 1,
+        "ratio": 0.04
+      },
+      {
+        "issue_category": "usability_problem",
+        "issue_total": 8,
+        "count": 0,
+        "ratio": 0.0
+      }
+    ]
+  },
+  "interaction_structure": {
+    "reply_to_comment_ratio_proxy": 0.4615,
+    "interaction_recursion_proxy": 0.1
+  }
+}

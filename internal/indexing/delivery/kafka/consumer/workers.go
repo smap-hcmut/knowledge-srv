@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"knowledge-srv/internal/indexing/delivery/kafka"
-	"knowledge-srv/internal/model"
-	"knowledge-srv/internal/notebook"
-	"knowledge-srv/internal/transform"
 
 	"github.com/IBM/sarama"
 	"github.com/smap-hcmut/shared-libs/go/auth"
@@ -159,33 +156,6 @@ func (c *consumer) handleReportDigestMessage(msg *sarama.ConsumerMessage) error 
 
 	c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleReportDigestMessage: Indexed digest run %s (point: %s, duration: %s)",
 		message.RunID, output.PointID, output.Duration)
-
-	if c.notebookUC != nil && c.transformUC != nil && message.CampaignID != "" {
-		go func() {
-			bgCtx := context.Background()
-			parts, err := c.transformUC.BuildParts(bgCtx, transform.TransformInput{
-				ProjectID:   message.ProjectID,
-				CampaignID:  message.CampaignID,
-				RunID:       message.RunID,
-				WindowStart: message.AnalysisWindowStart,
-			})
-			if err != nil {
-				c.l.Errorf(bgCtx, "indexing.delivery.kafka.consumer.handleReportDigestMessage: transform.BuildParts failed: %v", err)
-				return
-			}
-			if len(parts) == 0 {
-				c.l.Infof(bgCtx, "indexing.delivery.kafka.consumer.handleReportDigestMessage: no notebook parts for run %s", message.RunID)
-				return
-			}
-			sc := model.Scope{UserID: "system", Role: "system"}
-			if err := c.notebookUC.SyncPart(bgCtx, sc, notebook.SyncPartInput{
-				CampaignID: message.CampaignID,
-				Parts:      parts,
-			}); err != nil {
-				c.l.Errorf(bgCtx, "indexing.delivery.kafka.consumer.handleReportDigestMessage: notebook.SyncPart failed: %v", err)
-			}
-		}()
-	}
 
 	return nil
 }

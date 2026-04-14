@@ -31,13 +31,18 @@ func (uc *implUseCase) Reconcile(
 	var fixed, requeued int
 	for _, doc := range docs {
 		// For now, mark as FAILED to trigger retry
-		_, _ = uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
+		_, err := uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
 			ID:     doc.ID,
 			Status: indexing.STATUS_FAILED,
 			Metrics: repo.DocumentStatusMetrics{
 				ErrorMessage: "Reconciliation: PENDING timeout",
 			},
 		})
+		if err != nil {
+			uc.l.Errorf(ctx, "indexing.usecase.Reconcile: failed to update doc %s: %v", doc.ID, err)
+			continue
+		}
+		fixed++
 		requeued++
 	}
 
