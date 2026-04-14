@@ -29,4 +29,5 @@ secrets/
 .idea/
 
 documents/refactor-input/uap-batches
-documents/refactor-input/outputSRMserver
+documents/refactor-input/outputSRM
+server

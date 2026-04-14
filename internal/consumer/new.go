@@ -49,9 +49,7 @@ func (srv *ConsumerServer) validate() error {
 	if srv.minioClient == nil {
 		return fmt.Errorf("minio client is required")
 	}
-	if srv.kafkaProducer == nil {
-		return fmt.Errorf("kafka producer is required")
-	}
+	// kafkaProducer is OPTIONAL — event publishing only
 
 	// AI/ML clients
 	if srv.voyageClient == nil {

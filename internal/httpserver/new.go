@@ -174,8 +174,7 @@ func (srv HTTPServer) validate() error {
 	if srv.encrypter == nil {
 		return errors.New("encrypter is required")
 	}
-	if srv.discord == nil {
-		return errors.New("discord is required")
-	}
+	// discord is OPTIONAL — monitoring only
+	// kafkaProducer is OPTIONAL — event publishing only
 	return nil
 }

@@ -168,15 +168,15 @@ func main() {
 		return
 	}
 
+	consumerErr := make(chan error, 1)
 	go func() {
 		logger.Info(ctx, "Consumer server starting...")
 		if err := consumerSrv.Run(ctx); err != nil {
-			logger.Errorf(ctx, "Consumer server error: %v", err)
+			consumerErr <- err
 		}
 	}()
 
 	// ── HTTP Server ─────────────────────────────────────────────────────────
-	// HTTP server
 	httpServer, err := httpserver.New(logger, httpserver.Config{
 		Logger:      logger,
 		Port:        cfg.HTTPServer.Port,
@@ -204,10 +204,26 @@ func main() {
 		return
 	}
 
-	if err := httpServer.Run(); err != nil {
-		logger.Error(ctx, "Failed to run server: ", err)
-		return
+	httpErr := make(chan error, 1)
+	go func() {
+		if err := httpServer.Run(ctx); err != nil {
+			httpErr <- err
+		}
+	}()
+
+	logger.Info(ctx, "Knowledge Service started")
+
+	// ── Wait for shutdown signal or fatal error ─────────────────────────────
+	select {
+	case <-ctx.Done():
+		logger.Info(ctx, "Shutdown signal received")
+	case err := <-consumerErr:
+		logger.Errorf(ctx, "Consumer fatal error, shutting down: %v", err)
+		stop()
+	case err := <-httpErr:
+		logger.Errorf(ctx, "HTTP server fatal error, shutting down: %v", err)
+		stop()
 	}
 
-	logger.Info(ctx, "API server stopped gracefully")
+	logger.Info(ctx, "Knowledge Service stopped gracefully")
 }
