@@ -27,6 +27,26 @@ import (
 	_ "github.com/smap-hcmut/shared-libs/go/response" // For swagger type definitions
 )
 
+// rateLimitedLLM wraps llm.LLM with a concurrency semaphore to protect API quotas.
+type rateLimitedLLM struct {
+	inner llm.LLM
+	sem   chan struct{}
+}
+
+func (r *rateLimitedLLM) Generate(ctx context.Context, prompt string) (string, error) {
+	select {
+	case r.sem <- struct{}{}:
+		defer func() { <-r.sem }()
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
+	return r.inner.Generate(ctx, prompt)
+}
+
+func (r *rateLimitedLLM) Name() string {
+	return r.inner.Name()
+}
+
 // @title       SMAP Knowledge Service API
 // @description SMAP Knowledge Service API documentation.
 // @version     1
@@ -93,12 +113,15 @@ func main() {
 			Model:  pc.Model,
 		})
 	}
-	llmClient, err := llm.NewFromConfig(llm.MultiConfig{Providers: llmProviderConfigs})
+	llmBase, err := llm.NewFromConfig(llm.MultiConfig{Providers: llmProviderConfigs})
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize LLM client: ", err)
 		return
 	}
-	logger.Infof(ctx, "LLM client initialized: %s", llmClient.Name())
+	logger.Infof(ctx, "LLM client initialized: %s", llmBase.Name())
+
+	// Wrap LLM with concurrency limiter (max 5 concurrent calls across chat + report)
+	var llmClient llm.LLM = &rateLimitedLLM{inner: llmBase, sem: make(chan struct{}, 5)}
 
 	// PostgreSQL - Metadata, conversation history
 	postgresDB, err := postgre.Connect(ctx, cfg.Postgres)

@@ -297,8 +297,9 @@ func (c *qdrantImpl) Search(ctx context.Context, collectionName string, vector [
 	return c.searchResultsFromHits(resp.Result), nil
 }
 
-// SearchWithFilter performs a vector similarity search with payload filter.
-func (c *qdrantImpl) SearchWithFilter(ctx context.Context, collectionName string, vector []float32, limit uint64, filter *pb.Filter) ([]SearchResult, error) {
+// SearchWithFilter performs a vector similarity search with payload filter and optional score threshold.
+// If scoreThreshold > 0, Qdrant will only return results with score >= threshold (server-side filtering).
+func (c *qdrantImpl) SearchWithFilter(ctx context.Context, collectionName string, vector []float32, limit uint64, filter *pb.Filter, scoreThreshold float32) ([]SearchResult, error) {
 	if collectionName == "" {
 		return nil, ErrEmptyCollection
 	}
@@ -308,13 +309,17 @@ func (c *qdrantImpl) SearchWithFilter(ctx context.Context, collectionName string
 	if limit == 0 {
 		limit = DefaultSearchLimit
 	}
-	resp, err := c.pointsClient.Search(ctx, &pb.SearchPoints{
+	req := &pb.SearchPoints{
 		CollectionName: collectionName,
 		Vector:         vector,
 		Limit:          limit,
 		Filter:         filter,
 		WithPayload:    &pb.WithPayloadSelector{SelectorOptions: &pb.WithPayloadSelector_Enable{Enable: true}},
-	})
+	}
+	if scoreThreshold > 0 {
+		req.ScoreThreshold = &scoreThreshold
+	}
+	resp, err := c.pointsClient.Search(ctx, req)
 	if err != nil {
 		return nil, WrapError(err, "failed to search with filter")
 	}

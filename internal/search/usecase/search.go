@@ -78,23 +78,20 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	// Step 4: Build Qdrant filter (without project_id — implicit by collection)
 	filter := uc.buildSearchFilter(nil, input.Filters)
 
-	// Step 5: Search per-project Qdrant collections in parallel
-	pointResults, err := uc.searchMultipleCollections(ctx, projectIDs, vector, filter, uint64(limit))
+	// Step 5: Search per-project Qdrant collections in parallel (server-side score filtering)
+	pointResults, err := uc.searchMultipleCollections(ctx, projectIDs, vector, filter, uint64(limit), float32(minScore))
 	if err != nil {
 		uc.l.Errorf(ctx, "search.usecase.Search: Multi-collection search failed: %v", err)
 		return search.SearchOutput{}, fmt.Errorf("%w: %v", search.ErrSearchFailed, err)
 	}
 
-	// Step 6: Sort by score descending, filter by min score, apply limit
+	// Step 6: Sort by score descending and apply limit (Qdrant already filtered by minScore server-side)
 	sort.Slice(pointResults, func(i, j int) bool {
 		return pointResults[i].Score > pointResults[j].Score
 	})
 
 	var results []search.SearchResult
 	for _, r := range pointResults {
-		if float64(r.Score) < minScore {
-			continue
-		}
 		results = append(results, uc.mapQdrantResult(r))
 		if len(results) >= limit {
 			break
@@ -138,6 +135,7 @@ func (uc *implUseCase) searchMultipleCollections(
 	vector []float32,
 	filter *point.Filter,
 	limit uint64,
+	scoreThreshold float32,
 ) ([]point.SearchOutput, error) {
 	var (
 		allResults []point.SearchOutput
@@ -155,7 +153,7 @@ func (uc *implUseCase) searchMultipleCollections(
 				Filter:         filter,
 				Limit:          limit,
 				WithPayload:    true,
-				ScoreThreshold: 0,
+				ScoreThreshold: scoreThreshold,
 			})
 			if err != nil {
 				// Skip non-existent collections (project may not have data yet)

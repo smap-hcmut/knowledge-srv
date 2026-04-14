@@ -62,12 +62,23 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		history = msgs
 	}
 
-	// Build search input
+	// Build search input — tune params based on query intent
+	var searchLimit int
+	var searchMinScore float64
+	switch intent {
+	case IntentNarrative:
+		searchLimit = 15
+		searchMinScore = 0.55 // Broader coverage for analysis/trends
+	default: // IntentStructured
+		searchLimit = chat.MaxSearchDocs
+		searchMinScore = 0.70 // Precise, fewer docs
+	}
+
 	searchInput := search.SearchInput{
 		CampaignID: input.CampaignID,
 		Query:      input.Message,
-		Limit:      chat.MaxSearchDocs,
-		MinScore:   0.65,
+		Limit:      searchLimit,
+		MinScore:   searchMinScore,
 	}
 	if len(input.Filters.Sentiments) > 0 || len(input.Filters.Aspects) > 0 ||
 		len(input.Filters.Platforms) > 0 || len(input.Filters.RiskLevels) > 0 ||

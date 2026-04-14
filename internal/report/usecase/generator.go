@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/smap-hcmut/shared-libs/go/minio"
+	"golang.org/x/sync/errgroup"
 )
 
 // generateInBackground runs the full Map-Reduce report generation pipeline.
@@ -59,37 +60,46 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 	// Phase 2: Sample - Select representative documents
 	samples := uc.sampleDocs(searchOutput.Results)
 
-	// Phase 3: Generate - LLM generation per section
+	// Phase 3: Generate - Parallel LLM generation per section (up to 3 concurrent)
 	templates := getTemplates(input.ReportType)
-	sections := make([]generatedSection, 0, len(templates))
+	sections := make([]generatedSection, len(templates))
 
-	for _, tmpl := range templates {
-		prompt := buildSectionPrompt(tmpl, promptData{
-			CampaignID:  input.CampaignID,
-			ReportType:  input.ReportType,
-			Samples:     formatSamples(samples),
-			TotalDocs:   totalDocs,
-			Aggregation: formatAggregation(searchOutput.Aggregations),
-		})
+	g, gCtx := errgroup.WithContext(ctx)
+	g.SetLimit(3) // Max 3 concurrent LLM calls
 
-		content, err := func() (string, error) {
-			llmCtx, cancel := context.WithTimeout(ctx, 3*time.Minute)
-			defer cancel()
-			return uc.llm.Generate(llmCtx, prompt)
-		}()
-		if err != nil {
-			uc.l.Errorf(ctx, "report.usecase.generateInBackground: LLM generation failed for section '%s': %v", tmpl.Title, err)
-			_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
-				ReportID:     reportID,
-				ErrorMessage: fmt.Sprintf("LLM generation failed for section '%s': %v", tmpl.Title, err),
+	for i, tmpl := range templates {
+		i, tmpl := i, tmpl
+		g.Go(func() error {
+			prompt := buildSectionPrompt(tmpl, promptData{
+				CampaignID:  input.CampaignID,
+				ReportType:  input.ReportType,
+				Samples:     formatSamples(samples),
+				TotalDocs:   totalDocs,
+				Aggregation: formatAggregation(searchOutput.Aggregations),
 			})
-			return
-		}
 
-		sections = append(sections, generatedSection{
-			Title:   tmpl.Title,
-			Content: content,
+			llmCtx, cancel := context.WithTimeout(gCtx, 3*time.Minute)
+			defer cancel()
+			content, err := uc.llm.Generate(llmCtx, prompt)
+			if err != nil {
+				return fmt.Errorf("section '%s': %w", tmpl.Title, err)
+			}
+
+			sections[i] = generatedSection{
+				Title:   tmpl.Title,
+				Content: content,
+			}
+			return nil
 		})
+	}
+
+	if err := g.Wait(); err != nil {
+		uc.l.Errorf(ctx, "report.usecase.generateInBackground: LLM generation failed: %v", err)
+		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
+			ReportID:     reportID,
+			ErrorMessage: fmt.Sprintf("LLM generation failed: %v", err),
+		})
+		return
 	}
 
 	uc.l.Infof(ctx, "report.usecase.generateInBackground: Generated %d sections for report %s", len(sections), reportID)

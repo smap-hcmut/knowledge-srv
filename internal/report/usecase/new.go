@@ -12,7 +12,7 @@ import (
 
 const (
 	defaultReportBucket = "smap-reports"
-	defaultMaxDocs      = 500
+	defaultMaxDocs      = 50
 	defaultSampleSize   = 50
 )
 
