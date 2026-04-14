@@ -14,6 +14,8 @@ var (
 	ErrEmptyCollection    = errors.New("collection name cannot be empty")
 	ErrInvalidVectorSize  = errors.New("invalid vector size")
 	ErrConnectionFailed   = errors.New("connection failed")
+	ErrEmptyKey           = errors.New("facet key cannot be empty")
+	ErrMissingGroupField  = errors.New("groupBy field is required")
 )
 
 // WrapError wraps an error with additional context.

@@ -8,9 +8,14 @@ import (
 	"time"
 
 	pb "github.com/qdrant/go-client/qdrant"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // ... (rest of the code remains the same)
+
+// reUUID is a pre-compiled regex for UUID validation.
+var reUUID = regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
 
 // Ping checks if Qdrant is reachable.
 func (c *qdrantImpl) Ping(ctx context.Context) error {
@@ -80,7 +85,10 @@ func (c *qdrantImpl) CollectionExists(ctx context.Context, name string) (bool, e
 	}
 	resp, err := c.collectionsClient.Get(ctx, &pb.GetCollectionInfoRequest{CollectionName: name})
 	if err != nil {
-		return false, nil
+		if status.Code(err) == codes.NotFound {
+			return false, nil
+		}
+		return false, fmt.Errorf("check collection: %w", err)
 	}
 	return resp != nil, nil
 }
@@ -423,10 +431,9 @@ func (c *qdrantImpl) searchResultsFromHits(hits []*pb.ScoredPoint) []SearchResul
 	return results
 }
 
-// isValidUUID checks if the string is a valid UUID
+// isValidUUID checks if the string is a valid UUID using the pre-compiled reUUID regex.
 func isValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
+	return reUUID.MatchString(uuid)
 }
 
 // generateHashNumber generates a numeric hash from string ID

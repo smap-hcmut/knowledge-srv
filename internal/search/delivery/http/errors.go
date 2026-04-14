@@ -48,6 +48,6 @@ func (h *handler) mapError(err error) error {
 	case errors.Is(err, search.ErrInvalidFilters):
 		return errInvalidFilters
 	default:
-		panic(err)
+		return pkgErrors.NewHTTPError(500, "Internal server error")
 	}
 }

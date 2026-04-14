@@ -90,7 +90,9 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 
 	prompt := uc.buildPrompt(input.Message, searchOutput.Results, history)
 
-	answer, err := uc.llm.Generate(ctx, prompt)
+	llmCtx, llmCancel := context.WithTimeout(ctx, 60*time.Second)
+	defer llmCancel()
+	answer, err := uc.llm.Generate(llmCtx, prompt)
 	if err != nil {
 		uc.l.Errorf(ctx, "chat.usecase.Chat: LLM failed: %v", err)
 		return chat.ChatOutput{}, fmt.Errorf("%w: %v", chat.ErrLLMFailed, err)
@@ -116,7 +118,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		TotalDocsSearched: searchOutput.TotalFound,
 		DocsUsed:          len(citations),
 		ProcessingTimeMs:  time.Since(startTime).Milliseconds(),
-		ModelUsed:         chat.ModelUsed,
+		ModelUsed:         uc.llm.Name(),
 	}
 	citationsJSON, _ := json.Marshal(citations)
 	suggestionsJSON, _ := json.Marshal(suggestions)

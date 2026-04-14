@@ -24,12 +24,13 @@ type Config struct {
 }
 
 type implUseCase struct {
-	repo     repository.PostgresRepository
-	searchUC search.UseCase
-	llm      llm.LLM
-	minio    minio.MinIO
-	l        log.Logger
-	config   Config
+	repo      repository.PostgresRepository
+	searchUC  search.UseCase
+	llm       llm.LLM
+	minio     minio.MinIO
+	l         log.Logger
+	config    Config
+	reportSem chan struct{}
 }
 
 // New creates a new report UseCase implementation.
@@ -52,11 +53,12 @@ func New(
 	}
 
 	return &implUseCase{
-		repo:     repo,
-		searchUC: searchUC,
-		llm:      llmClient,
-		minio:    minioClient,
-		l:        l,
-		config:   cfg,
+		repo:      repo,
+		searchUC:  searchUC,
+		llm:       llmClient,
+		minio:     minioClient,
+		l:         l,
+		config:    cfg,
+		reportSem: make(chan struct{}, 5),
 	}
 }

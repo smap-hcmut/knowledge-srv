@@ -18,8 +18,7 @@ import (
 // This is called in a goroutine and must handle its own errors.
 //
 // Pipeline: Aggregate → Sample → Generate (LLM per section) → Compile → Upload
-func (uc *implUseCase) generateInBackground(reportID string, input report.GenerateInput) {
-	ctx := context.Background()
+func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string, input report.GenerateInput) {
 	startTime := time.Now()
 
 	// Panic recovery
@@ -73,7 +72,11 @@ func (uc *implUseCase) generateInBackground(reportID string, input report.Genera
 			Aggregation: formatAggregation(searchOutput.Aggregations),
 		})
 
-		content, err := uc.llm.Generate(ctx, prompt)
+		content, err := func() (string, error) {
+			llmCtx, cancel := context.WithTimeout(ctx, 3*time.Minute)
+			defer cancel()
+			return uc.llm.Generate(llmCtx, prompt)
+		}()
 		if err != nil {
 			uc.l.Errorf(ctx, "report.usecase.generateInBackground: LLM generation failed for section '%s': %v", tmpl.Title, err)
 			_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{

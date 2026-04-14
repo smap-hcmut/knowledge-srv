@@ -90,8 +90,14 @@ func (uc *implUseCase) Generate(ctx context.Context, sc model.Scope, input repor
 		return report.GenerateOutput{}, report.ErrGenerationFailed
 	}
 
-	// Launch background generation
-	go uc.generateInBackground(rpt.ID, input)
+	// Launch background generation with semaphore + timeout
+	go func() {
+		uc.reportSem <- struct{}{}
+		defer func() { <-uc.reportSem }()
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		defer cancel()
+		uc.generateInBackground(ctx, rpt.ID, input)
+	}()
 
 	return report.GenerateOutput{
 		ReportID: rpt.ID,

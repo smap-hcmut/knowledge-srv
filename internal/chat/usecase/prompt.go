@@ -3,6 +3,7 @@ package usecase
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"knowledge-srv/internal/chat"
 	"knowledge-srv/internal/model"
@@ -38,7 +39,7 @@ func (uc *implUseCase) buildPrompt(question string, docs []search.SearchResult, 
 
 	// Token window management
 	prompt := b.String()
-	estimatedTokens := len(prompt) / 4 // ~4 chars ≈ 1 token
+	estimatedTokens := utf8.RuneCountInString(prompt) / 2 // Vietnamese ~2 runes per token
 	if estimatedTokens > chat.MaxTokenWindow {
 		return uc.buildReducedPrompt(question, docs, history)
 	}
@@ -66,8 +67,9 @@ func (uc *implUseCase) buildContextBlock(docs []search.SearchResult) string {
 	return b.String()
 }
 
-// buildHistoryBlock - Format conversation history
+// buildHistoryBlock - Format conversation history with per-message truncation
 func (uc *implUseCase) buildHistoryBlock(msgs []model.Message) string {
+	const maxMsgLen = 500
 	var b strings.Builder
 	b.WriteString("Conversation History:\n")
 	for _, msg := range msgs {
@@ -75,7 +77,19 @@ func (uc *implUseCase) buildHistoryBlock(msgs []model.Message) string {
 		if len(role) > 0 {
 			role = strings.ToUpper(role[:1]) + role[1:]
 		}
-		b.WriteString(fmt.Sprintf("%s: %s\n", role, msg.Content))
+		content := msg.Content
+		if utf8.RuneCountInString(content) > maxMsgLen {
+			// Truncate to maxMsgLen runes
+			runeCount := 0
+			for i := range content {
+				runeCount++
+				if runeCount == maxMsgLen {
+					content = content[:i] + "..."
+					break
+				}
+			}
+		}
+		b.WriteString(fmt.Sprintf("%s: %s\n", role, content))
 	}
 	b.WriteString("\n")
 	return b.String()

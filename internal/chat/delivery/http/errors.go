@@ -35,6 +35,6 @@ func (h *handler) mapError(err error) error {
 	case errors.Is(err, chat.ErrConversationArchived):
 		return errConversationArchived
 	default:
-		return err
+		return pkgErrors.NewHTTPError(500, "Internal server error")
 	}
 }

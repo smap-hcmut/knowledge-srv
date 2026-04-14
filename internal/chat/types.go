@@ -9,7 +9,6 @@ const (
 	MinMessageLength   = 3
 	MaxMessageLength   = 2000
 	MaxTokenWindow     = 28000
-	ModelUsed          = "gemini-2.0-flash"
 )
 
 type ChatInput struct {

@@ -244,7 +244,7 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 	// Step 8: Update status = INDEXED
 	totalTime := int(time.Since(startTime).Milliseconds())
 	now := time.Now()
-	_, _ = uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
+	if _, err := uc.postgreRepo.UpdateDocumentStatus(ctx, repo.UpdateDocumentStatusOptions{
 		ID:     trackingDoc.ID,
 		Status: indexing.STATUS_INDEXED,
 		Metrics: repo.DocumentStatusMetrics{
@@ -253,7 +253,9 @@ func (uc *implUseCase) indexSingleRecord(ctx context.Context, ip indexing.IndexI
 			UpsertTimeMs:    upsertTime,
 			TotalTimeMs:     totalTime,
 		},
-	})
+	}); err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.indexSingleRecord: failed to update status to INDEXED: %v", err)
+	}
 
 	return indexing.IndexRecordResult{Status: indexing.STATUS_INDEXED}
 }

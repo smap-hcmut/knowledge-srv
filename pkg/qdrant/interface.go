@@ -2,10 +2,12 @@ package qdrant
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 
 	pb "github.com/qdrant/go-client/qdrant"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -65,7 +67,7 @@ func NewQdrant(cfg QdrantConfig) (IQdrant, error) {
 
 	var opts []grpc.DialOption
 	if cfg.UseTLS {
-		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	} else {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}

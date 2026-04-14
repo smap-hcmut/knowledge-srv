@@ -34,6 +34,6 @@ func (h *handler) mapError(err error) error {
 	case errors.Is(err, report.ErrDownloadURLFailed):
 		return errDownloadURLFailed
 	default:
-		panic(err)
+		return pkgErrors.NewHTTPError(500, "Internal server error")
 	}
 }
