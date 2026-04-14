@@ -13,14 +13,7 @@ import (
 func (srv *HTTPServer) setupChatDomain(ctx context.Context, r *gin.RouterGroup, mw *middleware.Middleware) error {
 	repo := chatPostgre.New(srv.postgresDB, srv.l)
 
-	// Inject actual notebook.UseCase once it is fully implemented and wired.
-	chatCfg := chatUsecase.Config{
-		NotebookEnabled:         srv.config.Notebook.Enabled,
-		NotebookFallbackEnabled: srv.config.Router.NotebookFallbackEnabled,
-		ChatTimeoutSec:          srv.config.Notebook.ChatTimeoutSec,
-	}
-
-	uc := chatUsecase.New(repo, srv.searchUC, srv.notebookUC, srv.llmClient, chatCfg, srv.l)
+	uc := chatUsecase.New(repo, srv.searchUC, srv.llmClient, srv.l)
 
 	handler := chatHTTP.New(srv.l, uc, srv.discord)
 	handler.RegisterRoutes(r, mw)

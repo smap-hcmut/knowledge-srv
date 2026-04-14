@@ -1,0 +1,11 @@
+buzz_score_proxy,canonical_entity_id,delta_count,effective_mention_count,effective_mention_share,entity_name,entity_type,evidence_references,growth_ratio_proxy,mention_count,mention_share
+320.9808,brand.cerave,37,233.0,0.1165,CeraVe,brand,"['tt_p_fc_0003', 'tt_c_fc_0003_02', 'tt_c_fc_0003_06', 'tt_c_fc_0003_07', 'tt_c_fc_0003_08']",0.3776,233,0.1165
+316.387,product.eucerin_proacne_cleansing_gel,49,85.0,0.0425,Eucerin ProAcne Solution Cleansing Gel,product,"['tt_c_fc_0003_03', 'tt_r_fc_0003_03', 'tt_c_fc_0010_05', 'tt_c_fc_0010_09', 'tt_c_fc_0010_10']",2.7222,85,0.0425
+310.1259,brand.eucerin,53,119.0,0.0595,Eucerin,brand,"['tt_c_fc_0003_03', 'tt_r_fc_0005_06', 'tt_c_fc_0010_05', 'tt_c_fc_0010_09', 'tt_c_fc_0010_10']",1.6061,119,0.0595
+287.5638,brand.hada_labo,30,218.0,0.109,Hada Labo,brand,"['tt_c_fc_0004_12', 'tt_c_fc_0008_01', 'tt_c_fc_0008_11', 'tt_c_fc_0008_12', 'tt_r_fc_0009_05']",0.3191,218,0.109
+257.7752,product.lrp_effaclar_purifying_foaming_gel,44,116.0,0.058,La Roche-Posay Effaclar Purifying Foaming Gel,product,"['tt_c_fc_0001_01', 'tt_c_fc_0001_04', 'tt_c_fc_0001_05', 'tt_c_fc_0001_06', 'tt_c_fc_0001_07']",1.2222,116,0.058
+248.233,brand.simple,27,185.0,0.0925,Simple,brand,"['tt_r_fc_0001_05', 'tt_c_fc_0008_08', 'tt_r_fc_0008_06', 'tt_c_fc_0010_07', 'tt_c_fc_0018_10']",0.3418,185,0.0925
+234.0,brand.cetaphil,-22,234.0,0.117,Cetaphil,brand,"['tt_p_fc_0001', 'tt_c_fc_0001_02', 'tt_c_fc_0001_03', 'tt_c_fc_0001_06', 'tt_c_fc_0001_09']",-0.1719,234,0.117
+212.1988,product.cerave_sa_smoothing_cleanser,34,116.0,0.058,CeraVe SA Smoothing Cleanser,product,"['tt_c_fc_0004_13', 'tt_c_fc_0008_03', 'tt_c_fc_0009_08', 'tt_c_fc_0015_05', 'tt_c_fc_0017_03']",0.8293,116,0.058
+195.3,product.simple_refreshing_facial_wash,33,93.0,0.0465,Simple Refreshing Facial Wash,product,"['tt_r_fc_0008_06', 'tt_c_fc_0010_07', 'tt_c_fc_0032_01', 'tt_c_fc_0033_01', 'tt_r_fc_0033_01']",1.1,93,0.0465
+186.8295,product.hada_labo_acne_care_calming_cleanser,19,143.0,0.0715,Hada Labo Acne Care Calming Cleanser,product,"['tt_c_fc_0004_12', 'tt_c_fc_0005_05', 'tt_r_fc_0009_05', 'tt_c_fc_0012_03', 'tt_c_fc_0013_02']",0.3065,143,0.0715

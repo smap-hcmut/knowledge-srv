@@ -17,8 +17,6 @@ func New(cfg Config) (*ConsumerServer, error) {
 		llmClient:     cfg.LLMClient,
 		discord:       cfg.Discord,
 		kafkaProducer: cfg.KafkaProducer,
-		maestroClient: cfg.MaestroClient,
-		appConfig:     cfg.AppConfig,
 	}
 
 	if err := srv.validate(); err != nil {

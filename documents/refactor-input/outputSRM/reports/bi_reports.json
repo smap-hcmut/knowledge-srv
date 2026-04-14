@@ -1,0 +1,2533 @@
+{
+  "bi_schema_version": "2026.03.20-analysis-r1",
+  "sov_report": {
+    "contract": {
+      "report_name": "sov_report",
+      "report_family": "share_of_voice",
+      "report_version": "1.2.0",
+      "grain": "canonical entity row",
+      "time_window_semantics": "report summarizes the full analysis slice; delta fields compare the later chronological half of the slice against the earlier half when posted_at is available",
+      "ranking_semantics": "rows ranked by effective mention-share descending when weighting_mode!=raw; raw mention share remains available alongside effective fields",
+      "delta_semantics": "delta_kind=intra_window_delta in v1.1; delta_share and delta_count are later-half minus earlier-half mention-share and mention-count deltas within the same analysis slice",
+      "unresolved_handling": "unresolved mentions are excluded from entity rows and reported separately in unresolved_summary; dedup/spam weighting does not remove rows and only affects effective fields when enabled",
+      "measurement_kind": "gold_like_direct_aggregate",
+      "intended_use": "business-facing entity attention and share comparisons",
+      "anti_use": "not reach, audience size, or sentiment quality"
+    },
+    "window": {
+      "analysis_start": "2026-02-01T10:17:00Z",
+      "analysis_end": "2026-02-10T21:24:00Z",
+      "delta_current_start": "2026-02-06T04:27:00Z",
+      "delta_current_end": "2026-02-10T21:24:00Z",
+      "delta_previous_start": "2026-02-01T10:17:00Z",
+      "delta_previous_end": "2026-02-06T03:11:00Z",
+      "delta_kind": "intra_window_delta",
+      "delta_comparison_mode": "chronological_half_split"
+    },
+    "weighting_mode": "raw",
+    "effective_mention_volume": 2000.0,
+    "filters_used": {
+      "weighting_mode": "raw"
+    },
+    "entities": [
+      {
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_name": "Cetaphil",
+        "entity_type": "brand",
+        "mention_count": 234,
+        "mention_share": 0.117,
+        "effective_mention_count": 234.0,
+        "effective_mention_share": 0.117,
+        "entity_hit_count": 234,
+        "entity_hit_share": 0.0659,
+        "resolved_mention_count": 234,
+        "resolved_mention_share": 0.1279,
+        "delta_mention_count": -22,
+        "delta_mention_share": -0.0112,
+        "delta_entity_hit_count": -22,
+        "delta_entity_hit_share": -0.0112,
+        "evidence_references": [
+          "tt_p_fc_0001",
+          "tt_c_fc_0001_02",
+          "tt_c_fc_0001_03",
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0001_09"
+        ]
+      },
+      {
+        "canonical_entity_id": "brand.cerave",
+        "entity_name": "CeraVe",
+        "entity_type": "brand",
+        "mention_count": 233,
+        "mention_share": 0.1165,
+        "effective_mention_count": 233.0,
+        "effective_mention_share": 0.1165,
+        "entity_hit_count": 233,
+        "entity_hit_share": 0.0656,
+        "resolved_mention_count": 233,
+        "resolved_mention_share": 0.1274,
+        "delta_mention_count": 37,
+        "delta_mention_share": 0.022,
+        "delta_entity_hit_count": 37,
+        "delta_entity_hit_share": 0.022,
+        "evidence_references": [
+          "tt_p_fc_0003",
+          "tt_c_fc_0003_02",
+          "tt_c_fc_0003_06",
+          "tt_c_fc_0003_07",
+          "tt_c_fc_0003_08"
+        ]
+      },
+      {
+        "canonical_entity_id": "brand.hada_labo",
+        "entity_name": "Hada Labo",
+        "entity_type": "brand",
+        "mention_count": 218,
+        "mention_share": 0.109,
+        "effective_mention_count": 218.0,
+        "effective_mention_share": 0.109,
+        "entity_hit_count": 218,
+        "entity_hit_share": 0.0614,
+        "resolved_mention_count": 218,
+        "resolved_mention_share": 0.1192,
+        "delta_mention_count": 30,
+        "delta_mention_share": 0.0181,
+        "delta_entity_hit_count": 30,
+        "delta_entity_hit_share": 0.0181,
+        "evidence_references": [
+          "tt_c_fc_0004_12",
+          "tt_c_fc_0008_01",
+          "tt_c_fc_0008_11",
+          "tt_c_fc_0008_12",
+          "tt_r_fc_0009_05"
+        ]
+      },
+      {
+        "canonical_entity_id": "brand.simple",
+        "entity_name": "Simple",
+        "entity_type": "brand",
+        "mention_count": 185,
+        "mention_share": 0.0925,
+        "effective_mention_count": 185.0,
+        "effective_mention_share": 0.0925,
+        "entity_hit_count": 185,
+        "entity_hit_share": 0.0521,
+        "resolved_mention_count": 185,
+        "resolved_mention_share": 0.1011,
+        "delta_mention_count": 27,
+        "delta_mention_share": 0.0161,
+        "delta_entity_hit_count": 27,
+        "delta_entity_hit_share": 0.0161,
+        "evidence_references": [
+          "tt_r_fc_0001_05",
+          "tt_c_fc_0008_08",
+          "tt_r_fc_0008_06",
+          "tt_c_fc_0010_07",
+          "tt_c_fc_0018_10"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_name": "Hada Labo Acne Care Calming Cleanser",
+        "entity_type": "product",
+        "mention_count": 143,
+        "mention_share": 0.0715,
+        "effective_mention_count": 143.0,
+        "effective_mention_share": 0.0715,
+        "entity_hit_count": 143,
+        "entity_hit_share": 0.0402,
+        "resolved_mention_count": 143,
+        "resolved_mention_share": 0.0782,
+        "delta_mention_count": 19,
+        "delta_mention_share": 0.0114,
+        "delta_entity_hit_count": 19,
+        "delta_entity_hit_share": 0.0114,
+        "evidence_references": [
+          "tt_c_fc_0004_12",
+          "tt_c_fc_0005_05",
+          "tt_r_fc_0009_05",
+          "tt_c_fc_0012_03",
+          "tt_c_fc_0013_02"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.cetaphil_oily_skin_cleanser",
+        "entity_name": "Cetaphil Oily Skin Cleanser",
+        "entity_type": "product",
+        "mention_count": 138,
+        "mention_share": 0.069,
+        "effective_mention_count": 138.0,
+        "effective_mention_share": 0.069,
+        "entity_hit_count": 138,
+        "entity_hit_share": 0.0388,
+        "resolved_mention_count": 138,
+        "resolved_mention_share": 0.0755,
+        "delta_mention_count": -14,
+        "delta_mention_share": -0.0072,
+        "delta_entity_hit_count": -14,
+        "delta_entity_hit_share": -0.0072,
+        "evidence_references": [
+          "tt_p_fc_0001",
+          "tt_c_fc_0001_02",
+          "tt_c_fc_0001_03",
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0001_09"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.cetaphil_gentle_skin_cleanser",
+        "entity_name": "Cetaphil Gentle Skin Cleanser",
+        "entity_type": "product",
+        "mention_count": 135,
+        "mention_share": 0.0675,
+        "effective_mention_count": 135.0,
+        "effective_mention_share": 0.0675,
+        "entity_hit_count": 135,
+        "entity_hit_share": 0.038,
+        "resolved_mention_count": 135,
+        "resolved_mention_share": 0.0738,
+        "delta_mention_count": -3,
+        "delta_mention_share": -0.001,
+        "delta_entity_hit_count": -3,
+        "delta_entity_hit_share": -0.001,
+        "evidence_references": [
+          "tt_c_fc_0006_03",
+          "tt_p_fc_0009",
+          "tt_c_fc_0009_02",
+          "tt_c_fc_0009_04",
+          "tt_c_fc_0009_05"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.cocoon_winter_melon_cleanser",
+        "entity_name": "Cocoon Winter Melon Cleanser",
+        "entity_type": "product",
+        "mention_count": 135,
+        "mention_share": 0.0675,
+        "effective_mention_count": 135.0,
+        "effective_mention_share": 0.0675,
+        "entity_hit_count": 135,
+        "entity_hit_share": 0.038,
+        "resolved_mention_count": 135,
+        "resolved_mention_share": 0.0738,
+        "delta_mention_count": -25,
+        "delta_mention_share": -0.0134,
+        "delta_entity_hit_count": -25,
+        "delta_entity_hit_share": -0.0134,
+        "evidence_references": [
+          "tt_r_fc_0002_04",
+          "tt_r_fc_0003_06",
+          "tt_p_fc_0005",
+          "tt_c_fc_0005_02",
+          "tt_c_fc_0005_03"
+        ]
+      },
+      {
+        "canonical_entity_id": "brand.bioderma",
+        "entity_name": "Bioderma",
+        "entity_type": "brand",
+        "mention_count": 130,
+        "mention_share": 0.065,
+        "effective_mention_count": 130.0,
+        "effective_mention_share": 0.065,
+        "entity_hit_count": 130,
+        "entity_hit_share": 0.0366,
+        "resolved_mention_count": 130,
+        "resolved_mention_share": 0.0711,
+        "delta_mention_count": -62,
+        "delta_mention_share": -0.0342,
+        "delta_entity_hit_count": -62,
+        "delta_entity_hit_share": -0.0342,
+        "evidence_references": [
+          "tt_c_fc_0002_07",
+          "tt_c_fc_0004_02",
+          "tt_c_fc_0004_04",
+          "tt_c_fc_0004_12",
+          "tt_c_fc_0004_13"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.senka_perfect_whip",
+        "entity_name": "Senka Perfect Whip",
+        "entity_type": "product",
+        "mention_count": 130,
+        "mention_share": 0.065,
+        "effective_mention_count": 130.0,
+        "effective_mention_share": 0.065,
+        "entity_hit_count": 130,
+        "entity_hit_share": 0.0366,
+        "resolved_mention_count": 130,
+        "resolved_mention_share": 0.0711,
+        "delta_mention_count": -34,
+        "delta_mention_share": -0.0184,
+        "delta_entity_hit_count": -34,
+        "delta_entity_hit_share": -0.0184,
+        "evidence_references": [
+          "tt_r_fc_0001_02",
+          "tt_c_fc_0002_06",
+          "tt_c_fc_0002_08",
+          "tt_c_fc_0002_11",
+          "tt_r_fc_0002_03"
+        ]
+      }
+    ],
+    "unresolved_summary": {
+      "count": 171,
+      "ratio": 0.0855,
+      "notes": "unresolved mentions remain in the slice denominator and are excluded from entity rows",
+      "reason_breakdown": {
+        "candidate_found_but_low_confidence": 75,
+        "no_candidate_found": 24
+      }
+    }
+  },
+  "buzz_report": {
+    "contract": {
+      "report_name": "buzz_report",
+      "report_family": "buzz",
+      "report_version": "1.2.0",
+      "grain": "entity row and reporting topic row",
+      "time_window_semantics": "report summarizes the full analysis slice; growth components compare later vs earlier chronological half-window when available",
+      "ranking_semantics": "rows ranked by buzz_score_proxy descending; buzz_score_proxy uses effective mention volume when weighting_mode!=raw while preserving raw mention counts alongside effective fields",
+      "delta_semantics": "delta_kind=intra_window_delta in v1.1; delta fields compare later-half counts against earlier-half counts within the same analysis slice",
+      "unresolved_handling": "entity buzz excludes unresolved entities from ranked rows; topic buzz suppresses weak/noisy topics from primary ranking unless no stable topics exist",
+      "measurement_kind": "hybrid",
+      "intended_use": "attention and momentum tracking for entities and topics",
+      "anti_use": "not a direct measure of market share, sales, or unique reach"
+    },
+    "window": {
+      "analysis_start": "2026-02-01T10:17:00Z",
+      "analysis_end": "2026-02-10T21:24:00Z",
+      "delta_current_start": "2026-02-06T04:27:00Z",
+      "delta_current_end": "2026-02-10T21:24:00Z",
+      "delta_previous_start": "2026-02-01T10:17:00Z",
+      "delta_previous_end": "2026-02-06T03:11:00Z",
+      "delta_kind": "intra_window_delta",
+      "delta_comparison_mode": "chronological_half_split"
+    },
+    "weighting_mode": "raw",
+    "effective_mention_volume": 2000.0,
+    "filters_used": {
+      "weighting_mode": "raw"
+    },
+    "suppressed_weak_noisy_topics": 0,
+    "entity_buzz": [
+      {
+        "canonical_entity_id": "brand.cerave",
+        "entity_name": "CeraVe",
+        "entity_type": "brand",
+        "mention_count": 233,
+        "mention_share": 0.1165,
+        "effective_mention_count": 233.0,
+        "effective_mention_share": 0.1165,
+        "delta_count": 37,
+        "growth_ratio_proxy": 0.3776,
+        "buzz_score_proxy": 320.9808,
+        "evidence_references": [
+          "tt_p_fc_0003",
+          "tt_c_fc_0003_02",
+          "tt_c_fc_0003_06",
+          "tt_c_fc_0003_07",
+          "tt_c_fc_0003_08"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.eucerin_proacne_cleansing_gel",
+        "entity_name": "Eucerin ProAcne Solution Cleansing Gel",
+        "entity_type": "product",
+        "mention_count": 85,
+        "mention_share": 0.0425,
+        "effective_mention_count": 85.0,
+        "effective_mention_share": 0.0425,
+        "delta_count": 49,
+        "growth_ratio_proxy": 2.7222,
+        "buzz_score_proxy": 316.387,
+        "evidence_references": [
+          "tt_c_fc_0003_03",
+          "tt_r_fc_0003_03",
+          "tt_c_fc_0010_05",
+          "tt_c_fc_0010_09",
+          "tt_c_fc_0010_10"
+        ]
+      },
+      {
+        "canonical_entity_id": "brand.eucerin",
+        "entity_name": "Eucerin",
+        "entity_type": "brand",
+        "mention_count": 119,
+        "mention_share": 0.0595,
+        "effective_mention_count": 119.0,
+        "effective_mention_share": 0.0595,
+        "delta_count": 53,
+        "growth_ratio_proxy": 1.6061,
+        "buzz_score_proxy": 310.1259,
+        "evidence_references": [
+          "tt_c_fc_0003_03",
+          "tt_r_fc_0005_06",
+          "tt_c_fc_0010_05",
+          "tt_c_fc_0010_09",
+          "tt_c_fc_0010_10"
+        ]
+      },
+      {
+        "canonical_entity_id": "brand.hada_labo",
+        "entity_name": "Hada Labo",
+        "entity_type": "brand",
+        "mention_count": 218,
+        "mention_share": 0.109,
+        "effective_mention_count": 218.0,
+        "effective_mention_share": 0.109,
+        "delta_count": 30,
+        "growth_ratio_proxy": 0.3191,
+        "buzz_score_proxy": 287.5638,
+        "evidence_references": [
+          "tt_c_fc_0004_12",
+          "tt_c_fc_0008_01",
+          "tt_c_fc_0008_11",
+          "tt_c_fc_0008_12",
+          "tt_r_fc_0009_05"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.lrp_effaclar_purifying_foaming_gel",
+        "entity_name": "La Roche-Posay Effaclar Purifying Foaming Gel",
+        "entity_type": "product",
+        "mention_count": 116,
+        "mention_share": 0.058,
+        "effective_mention_count": 116.0,
+        "effective_mention_share": 0.058,
+        "delta_count": 44,
+        "growth_ratio_proxy": 1.2222,
+        "buzz_score_proxy": 257.7752,
+        "evidence_references": [
+          "tt_c_fc_0001_01",
+          "tt_c_fc_0001_04",
+          "tt_c_fc_0001_05",
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0001_07"
+        ]
+      },
+      {
+        "canonical_entity_id": "brand.simple",
+        "entity_name": "Simple",
+        "entity_type": "brand",
+        "mention_count": 185,
+        "mention_share": 0.0925,
+        "effective_mention_count": 185.0,
+        "effective_mention_share": 0.0925,
+        "delta_count": 27,
+        "growth_ratio_proxy": 0.3418,
+        "buzz_score_proxy": 248.233,
+        "evidence_references": [
+          "tt_r_fc_0001_05",
+          "tt_c_fc_0008_08",
+          "tt_r_fc_0008_06",
+          "tt_c_fc_0010_07",
+          "tt_c_fc_0018_10"
+        ]
+      },
+      {
+        "canonical_entity_id": "brand.cetaphil",
+        "entity_name": "Cetaphil",
+        "entity_type": "brand",
+        "mention_count": 234,
+        "mention_share": 0.117,
+        "effective_mention_count": 234.0,
+        "effective_mention_share": 0.117,
+        "delta_count": -22,
+        "growth_ratio_proxy": -0.1719,
+        "buzz_score_proxy": 234.0,
+        "evidence_references": [
+          "tt_p_fc_0001",
+          "tt_c_fc_0001_02",
+          "tt_c_fc_0001_03",
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0001_09"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.cerave_sa_smoothing_cleanser",
+        "entity_name": "CeraVe SA Smoothing Cleanser",
+        "entity_type": "product",
+        "mention_count": 116,
+        "mention_share": 0.058,
+        "effective_mention_count": 116.0,
+        "effective_mention_share": 0.058,
+        "delta_count": 34,
+        "growth_ratio_proxy": 0.8293,
+        "buzz_score_proxy": 212.1988,
+        "evidence_references": [
+          "tt_c_fc_0004_13",
+          "tt_c_fc_0008_03",
+          "tt_c_fc_0009_08",
+          "tt_c_fc_0015_05",
+          "tt_c_fc_0017_03"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.simple_refreshing_facial_wash",
+        "entity_name": "Simple Refreshing Facial Wash",
+        "entity_type": "product",
+        "mention_count": 93,
+        "mention_share": 0.0465,
+        "effective_mention_count": 93.0,
+        "effective_mention_share": 0.0465,
+        "delta_count": 33,
+        "growth_ratio_proxy": 1.1,
+        "buzz_score_proxy": 195.3,
+        "evidence_references": [
+          "tt_r_fc_0008_06",
+          "tt_c_fc_0010_07",
+          "tt_c_fc_0032_01",
+          "tt_c_fc_0033_01",
+          "tt_r_fc_0033_01"
+        ]
+      },
+      {
+        "canonical_entity_id": "product.hada_labo_acne_care_calming_cleanser",
+        "entity_name": "Hada Labo Acne Care Calming Cleanser",
+        "entity_type": "product",
+        "mention_count": 143,
+        "mention_share": 0.0715,
+        "effective_mention_count": 143.0,
+        "effective_mention_share": 0.0715,
+        "delta_count": 19,
+        "growth_ratio_proxy": 0.3065,
+        "buzz_score_proxy": 186.8295,
+        "evidence_references": [
+          "tt_c_fc_0004_12",
+          "tt_c_fc_0005_05",
+          "tt_r_fc_0009_05",
+          "tt_c_fc_0012_03",
+          "tt_c_fc_0013_02"
+        ]
+      }
+    ],
+    "topic_buzz": [
+      {
+        "reporting_topic_key": "cleanser_brand_comparison",
+        "reporting_topic_label": "Cleanser Brand and Product Comparison",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "cleanser_brand_comparison"
+        ],
+        "canonical_evidence_phrases": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Hada Labo"
+        ],
+        "salient_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Hada Labo"
+        ],
+        "supporting_phrases": [
+          "Senka Perfect Whip",
+          "CeraVe SA Smoothing Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Senka Perfect White Clay",
+          "Senka Perfect Whip Acne Care"
+        ],
+        "mention_count": 364,
+        "mention_share": 0.182,
+        "effective_mention_count": 364.0,
+        "effective_mention_share": 0.182,
+        "delta_count": 30,
+        "growth_ratio_proxy": 0.1796,
+        "buzz_score_proxy": 429.3744,
+        "quality_score": 0.9936,
+        "usefulness_score": 0.9936,
+        "reportability_score": 0.9773,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_c_fc_0001_10",
+          "tt_c_fc_0001_12",
+          "tt_c_fc_0002_11",
+          "tt_r_fc_0002_01",
+          "tt_c_fc_0003_05"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_recommendation_by_skin_type",
+        "reporting_topic_label": "Cleanser Recommendation by Skin Type",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "cleanser_recommendation_by_skin_type"
+        ],
+        "canonical_evidence_phrases": [
+          "Eucerin pH5 Facial Cleanser",
+          "Cetaphil Oily Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Hada Labo Acne Care Calming Cleanser"
+        ],
+        "salient_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Cetaphil Oily Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Hada Labo Acne Care Calming Cleanser"
+        ],
+        "supporting_phrases": [
+          "Simple Moisturising Facial Wash",
+          "CeraVe Foaming Cleanser",
+          "Cetaphil Gentle Skin Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Simple Refreshing Facial Wash"
+        ],
+        "mention_count": 375,
+        "mention_share": 0.1875,
+        "effective_mention_count": 375.0,
+        "effective_mention_share": 0.1875,
+        "delta_count": 5,
+        "growth_ratio_proxy": 0.027,
+        "buzz_score_proxy": 385.125,
+        "quality_score": 0.9752,
+        "usefulness_score": 0.9752,
+        "reportability_score": 0.9413,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_p_fc_0001",
+          "tt_c_fc_0001_01",
+          "tt_c_fc_0001_11",
+          "tt_r_fc_0001_01",
+          "tt_r_fc_0001_04"
+        ]
+      },
+      {
+        "reporting_topic_key": "oily_acne_cleansers",
+        "reporting_topic_label": "Oily and Acne-Prone Skin Cleansers",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "oily_acne_cleansers"
+        ],
+        "canonical_evidence_phrases": [
+          "oil control",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Eucerin ProAcne Solution Cleansing Gel",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "salient_terms": [
+          "oil control",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Eucerin ProAcne Solution Cleansing Gel",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "supporting_phrases": [
+          "Senka Perfect Whip Acne Care",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Bioderma Sebium Gel Moussant",
+          "Senka Perfect Whip",
+          "SVR Sebiaclear Gel Moussant"
+        ],
+        "mention_count": 371,
+        "mention_share": 0.1855,
+        "effective_mention_count": 371.0,
+        "effective_mention_share": 0.1855,
+        "delta_count": -33,
+        "growth_ratio_proxy": -0.1634,
+        "buzz_score_proxy": 371.0,
+        "quality_score": 0.9841,
+        "usefulness_score": 0.9841,
+        "reportability_score": 0.9591,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_c_fc_0001_01",
+          "tt_c_fc_0001_03",
+          "tt_c_fc_0001_05",
+          "tt_c_fc_0001_08",
+          "tt_c_fc_0001_12"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_authenticity_and_fake_goods",
+        "reporting_topic_label": "Cleanser Authenticity and Fake Goods",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "cleanser_authenticity_and_fake_goods"
+        ],
+        "canonical_evidence_phrases": [
+          "fake authenticity concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "salient_terms": [
+          "fake authenticity concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "supporting_phrases": [
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Senka Perfect Whip Acne Care",
+          "Senka Perfect Whip",
+          "Senka Perfect White Clay"
+        ],
+        "mention_count": 307,
+        "mention_share": 0.1535,
+        "effective_mention_count": 307.0,
+        "effective_mention_share": 0.1535,
+        "delta_count": 9,
+        "growth_ratio_proxy": 0.0604,
+        "buzz_score_proxy": 325.5428,
+        "quality_score": 1.0,
+        "usefulness_score": 1.0,
+        "reportability_score": 0.9909,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0001_07",
+          "tt_c_fc_0002_04",
+          "tt_p_fc_0003",
+          "tt_c_fc_0003_01"
+        ]
+      },
+      {
+        "reporting_topic_key": "pricing_and_value",
+        "reporting_topic_label": "Pricing and Value",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "pricing_and_value"
+        ],
+        "canonical_evidence_phrases": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Simple Refreshing Facial Wash",
+          "Hada Labo"
+        ],
+        "salient_terms": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Simple Refreshing Facial Wash",
+          "Hada Labo"
+        ],
+        "supporting_phrases": [
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Senka Perfect White Clay",
+          "Senka Perfect Whip Acne Care",
+          "price"
+        ],
+        "mention_count": 280,
+        "mention_share": 0.14,
+        "effective_mention_count": 280.0,
+        "effective_mention_share": 0.14,
+        "delta_count": 4,
+        "growth_ratio_proxy": 0.029,
+        "buzz_score_proxy": 288.12,
+        "quality_score": 0.986,
+        "usefulness_score": 0.986,
+        "reportability_score": 0.9621,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_p_fc_0001",
+          "tt_c_fc_0001_07",
+          "tt_c_fc_0001_09",
+          "tt_r_fc_0001_01",
+          "tt_r_fc_0001_03"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_texture_foam_scent",
+        "reporting_topic_label": "Cleanser Texture, Foam, and Scent",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "cleanser_texture_foam_scent"
+        ],
+        "canonical_evidence_phrases": [
+          "CeraVe Foaming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Simple Refreshing Facial Wash",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "salient_terms": [
+          "CeraVe Foaming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Simple Refreshing Facial Wash",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "supporting_phrases": [
+          "SVR Sebiaclear Gel Moussant",
+          "Senka Perfect Whip",
+          "CeraVe SA Smoothing Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "CeraVe Hydrating Cleanser"
+        ],
+        "mention_count": 235,
+        "mention_share": 0.1175,
+        "effective_mention_count": 235.0,
+        "effective_mention_share": 0.1175,
+        "delta_count": 3,
+        "growth_ratio_proxy": 0.0259,
+        "buzz_score_proxy": 241.0865,
+        "quality_score": 0.9911,
+        "usefulness_score": 0.9911,
+        "reportability_score": 0.973,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_c_fc_0001_13",
+          "tt_p_fc_0002",
+          "tt_c_fc_0002_02",
+          "tt_c_fc_0002_07",
+          "tt_c_fc_0004_03"
+        ]
+      },
+      {
+        "reporting_topic_key": "gentle_hydrating_cleansers",
+        "reporting_topic_label": "Gentle and Hydrating Cleansers",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "gentle_hydrating_cleansers"
+        ],
+        "canonical_evidence_phrases": [
+          "Cetaphil Gentle Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo"
+        ],
+        "salient_terms": [
+          "Cetaphil Gentle Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo"
+        ],
+        "supporting_phrases": [
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Simple Moisturising Facial Wash",
+          "Cetaphil",
+          "Simple Refreshing Facial Wash"
+        ],
+        "mention_count": 218,
+        "mention_share": 0.109,
+        "effective_mention_count": 218.0,
+        "effective_mention_share": 0.109,
+        "delta_count": 4,
+        "growth_ratio_proxy": 0.0374,
+        "buzz_score_proxy": 226.1532,
+        "quality_score": 0.9832,
+        "usefulness_score": 0.9832,
+        "reportability_score": 0.9564,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_c_fc_0001_02",
+          "tt_c_fc_0003_08",
+          "tt_c_fc_0004_03",
+          "tt_p_fc_0006",
+          "tt_c_fc_0006_06"
+        ]
+      },
+      {
+        "reporting_topic_key": "performance_and_battery",
+        "reporting_topic_label": "Performance, Battery, and Charging",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "performance_and_battery"
+        ],
+        "canonical_evidence_phrases": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Hada Labo"
+        ],
+        "salient_terms": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Hada Labo"
+        ],
+        "supporting_phrases": [
+          "Simple Refreshing Facial Wash",
+          "CeraVe SA Smoothing Cleanser",
+          "Senka Perfect Whip Acne Care",
+          "Senka Perfect White Clay",
+          "CeraVe Hydrating Cleanser"
+        ],
+        "mention_count": 107,
+        "mention_share": 0.0535,
+        "effective_mention_count": 107.0,
+        "effective_mention_share": 0.0535,
+        "delta_count": -11,
+        "growth_ratio_proxy": -0.1864,
+        "buzz_score_proxy": 107.0,
+        "quality_score": 0.9945,
+        "usefulness_score": 0.9945,
+        "reportability_score": 0.9791,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_p_fc_0001",
+          "tt_c_fc_0001_09",
+          "tt_p_fc_0002",
+          "tt_c_fc_0002_12",
+          "tt_c_fc_0003_08"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_price_value_and_promo",
+        "reporting_topic_label": "Cleanser Price, Value, and Promotions",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "cleanser_price_value_and_promo"
+        ],
+        "canonical_evidence_phrases": [
+          "overpriced concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser"
+        ],
+        "salient_terms": [
+          "overpriced concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser"
+        ],
+        "supporting_phrases": [
+          "Cocoon Winter Melon Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Hada Labo",
+          "Senka Perfect Whip",
+          "Senka Perfect Whip Acne Care"
+        ],
+        "mention_count": 88,
+        "mention_share": 0.044,
+        "effective_mention_count": 88.0,
+        "effective_mention_share": 0.044,
+        "delta_count": -6,
+        "growth_ratio_proxy": -0.1277,
+        "buzz_score_proxy": 88.0,
+        "quality_score": 0.9833,
+        "usefulness_score": 0.9833,
+        "reportability_score": 0.9575,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_p_fc_0003",
+          "tt_c_fc_0004_09",
+          "tt_c_fc_0006_06",
+          "tt_r_fc_0007_01",
+          "tt_c_fc_0008_12"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_formula_and_packaging",
+        "reporting_topic_label": "Cleanser Formula and Packaging Changes",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "reporting_status": "reportable",
+        "raw_topic_keys": [
+          "cleanser_formula_and_packaging"
+        ],
+        "canonical_evidence_phrases": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Simple Refreshing Facial Wash"
+        ],
+        "salient_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Simple Refreshing Facial Wash"
+        ],
+        "supporting_phrases": [
+          "CeraVe SA Smoothing Cleanser",
+          "Senka Perfect Whip",
+          "Senka Perfect Whip Acne Care",
+          "CeraVe Hydrating Cleanser",
+          "Bioderma Sebium Gel Moussant"
+        ],
+        "mention_count": 73,
+        "mention_share": 0.0365,
+        "effective_mention_count": 73.0,
+        "effective_mention_share": 0.0365,
+        "delta_count": -7,
+        "growth_ratio_proxy": -0.175,
+        "buzz_score_proxy": 73.0,
+        "quality_score": 1.0,
+        "usefulness_score": 1.0,
+        "reportability_score": 0.9909,
+        "weak_topic": false,
+        "noisy_topic": false,
+        "evidence_references": [
+          "tt_r_fc_0001_06",
+          "tt_r_fc_0003_02",
+          "tt_r_fc_0004_03",
+          "tt_r_fc_0008_04",
+          "tt_r_fc_0012_05"
+        ]
+      }
+    ]
+  },
+  "emerging_topics_report": {
+    "contract": {
+      "report_name": "emerging_topics_report",
+      "report_family": "emerging_topics",
+      "report_version": "1.1.0",
+      "grain": "reporting topic row",
+      "time_window_semantics": "report summarizes the current analysis slice and compares topic artifacts to the latest available prior artifact snapshot",
+      "ranking_semantics": "rows ranked by growth_delta descending, then quality_score descending",
+      "delta_semantics": "growth_delta is current topic_size minus matched prior artifact topic_size; rows require quality and noise gating",
+      "unresolved_handling": "topics without stable reviewed/effective identity fall back to raw topic identity and remain explicitly labeled",
+      "measurement_kind": "hybrid",
+      "intended_use": "surfacing quality-gated emerging discussion themes",
+      "anti_use": "not every first appearance is an emerging topic and weak/noisy clusters are not business signals"
+    },
+    "window": {
+      "analysis_start": "2026-02-01T10:17:00Z",
+      "analysis_end": "2026-02-10T21:24:00Z",
+      "delta_current_start": "2026-02-06T04:27:00Z",
+      "delta_current_end": "2026-02-10T21:24:00Z",
+      "delta_previous_start": "2026-02-01T10:17:00Z",
+      "delta_previous_end": "2026-02-06T03:11:00Z",
+      "delta_kind": "intra_window_delta",
+      "delta_comparison_mode": "chronological_half_split"
+    },
+    "filters_used": {},
+    "topics": [
+      {
+        "reporting_topic_key": "cleanser_recommendation_by_skin_type",
+        "reporting_topic_label": "Cleanser Recommendation by Skin Type",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "cleanser_recommendation_by_skin_type",
+        "effective_topic_label": "Cleanser Recommendation by Skin Type",
+        "raw_topic_key": "cleanser_recommendation_by_skin_type",
+        "raw_topic_label": "Cleanser Recommendation by Skin Type",
+        "topic_size": 428,
+        "growth_delta": 428.0,
+        "stability_score": 0.0,
+        "quality_score": 0.9752,
+        "usefulness_score": 0.9752,
+        "reportability_score": 0.9413,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Cetaphil Oily Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Hada Labo Acne Care Calming Cleanser"
+        ],
+        "canonical_evidence_phrases": [
+          "Eucerin pH5 Facial Cleanser",
+          "Cetaphil Oily Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Hada Labo Acne Care Calming Cleanser"
+        ],
+        "salient_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Cetaphil Oily Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Hada Labo Acne Care Calming Cleanser"
+        ],
+        "supporting_phrases": [
+          "Simple Moisturising Facial Wash",
+          "CeraVe Foaming Cleanser",
+          "Cetaphil Gentle Skin Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Simple Refreshing Facial Wash"
+        ],
+        "representative_document_ids": [
+          "tt_p_fc_0001:seg-0",
+          "tt_p_fc_0001:seg-2",
+          "tt_c_fc_0001_01:seg-0"
+        ],
+        "representative_texts": [
+          "cetaphil oily dùng da nhạy cảm thấy ổn áp ghê",
+          "không bị không kích ứng",
+          "nếu đang treatment thì thử La Roche-Posay Effaclar Purifying Foaming Gel đi"
+        ]
+      },
+      {
+        "reporting_topic_key": "oily_acne_cleansers",
+        "reporting_topic_label": "Oily and Acne-Prone Skin Cleansers",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "oily_acne_cleansers",
+        "effective_topic_label": "Oily and Acne-Prone Skin Cleansers",
+        "raw_topic_key": "oily_acne_cleansers",
+        "raw_topic_label": "Oily and Acne-Prone Skin Cleansers",
+        "topic_size": 403,
+        "growth_delta": 403.0,
+        "stability_score": 0.0,
+        "quality_score": 0.9841,
+        "usefulness_score": 0.9841,
+        "reportability_score": 0.9591,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "oil control",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Eucerin ProAcne Solution Cleansing Gel",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "canonical_evidence_phrases": [
+          "oil control",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Eucerin ProAcne Solution Cleansing Gel",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "salient_terms": [
+          "oil control",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Eucerin ProAcne Solution Cleansing Gel",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "supporting_phrases": [
+          "Senka Perfect Whip Acne Care",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Bioderma Sebium Gel Moussant",
+          "Senka Perfect Whip",
+          "SVR Sebiaclear Gel Moussant"
+        ],
+        "representative_document_ids": [
+          "tt_c_fc_0001_01:seg-1",
+          "tt_c_fc_0001_03:seg-0",
+          "tt_c_fc_0001_05:seg-0"
+        ],
+        "representative_texts": [
+          "đỡ bí da 🥹 not bad",
+          "Cetaphil Oily Skin Cleanser trên da mình bị lên mụn ẩn luôn 🙏",
+          "La Roche-Posay Effaclar Purifying Foaming Gel trên da mình bị lên mụn ẩn luôn 🤣"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_brand_comparison",
+        "reporting_topic_label": "Cleanser Brand and Product Comparison",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "cleanser_brand_comparison",
+        "effective_topic_label": "Cleanser Brand and Product Comparison",
+        "raw_topic_key": "cleanser_brand_comparison",
+        "raw_topic_label": "Cleanser Brand and Product Comparison",
+        "topic_size": 376,
+        "growth_delta": 376.0,
+        "stability_score": 0.0,
+        "quality_score": 0.9936,
+        "usefulness_score": 0.9936,
+        "reportability_score": 0.9773,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Hada Labo"
+        ],
+        "canonical_evidence_phrases": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Hada Labo"
+        ],
+        "salient_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Hada Labo"
+        ],
+        "supporting_phrases": [
+          "Senka Perfect Whip",
+          "CeraVe SA Smoothing Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Senka Perfect White Clay",
+          "Senka Perfect Whip Acne Care"
+        ],
+        "representative_document_ids": [
+          "tt_c_fc_0001_10:seg-0",
+          "tt_c_fc_0001_12:seg-1",
+          "tt_c_fc_0002_11:seg-0"
+        ],
+        "representative_texts": [
+          "mình thấy ceta oily hợp da da hỗn hợp thiên dầu hơn nha thật luôn",
+          "xài mùa hè thích hơn 🥹",
+          "mình thấy senka xanh lá hợp da da hỗn hợp thiên khô hơn nha"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_authenticity_and_fake_goods",
+        "reporting_topic_label": "Cleanser Authenticity and Fake Goods",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "cleanser_authenticity_and_fake_goods",
+        "effective_topic_label": "Cleanser Authenticity and Fake Goods",
+        "raw_topic_key": "cleanser_authenticity_and_fake_goods",
+        "raw_topic_label": "Cleanser Authenticity and Fake Goods",
+        "topic_size": 307,
+        "growth_delta": 307.0,
+        "stability_score": 0.0,
+        "quality_score": 1.0,
+        "usefulness_score": 1.0,
+        "reportability_score": 0.9909,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "fake authenticity concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "canonical_evidence_phrases": [
+          "fake authenticity concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "salient_terms": [
+          "fake authenticity concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "supporting_phrases": [
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Senka Perfect Whip Acne Care",
+          "Senka Perfect Whip",
+          "Senka Perfect White Clay"
+        ],
+        "representative_document_ids": [
+          "tt_c_fc_0001_06:seg-0",
+          "tt_c_fc_0001_07:seg-1",
+          "tt_c_fc_0002_04:seg-0"
+        ],
+        "representative_texts": [
+          "mình vote Cetaphil Oily hơn Effaclar Gel vì đỡ mụn đầu đen fake alert",
+          "fake nhiều lắm",
+          "mua đúng auth thì Senka Acne Care khá ổn đó"
+        ]
+      },
+      {
+        "reporting_topic_key": "pricing_and_value",
+        "reporting_topic_label": "Pricing and Value",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "pricing_and_value",
+        "effective_topic_label": "Pricing and Value",
+        "raw_topic_key": "pricing_and_value",
+        "raw_topic_label": "Pricing and Value",
+        "topic_size": 301,
+        "growth_delta": 301.0,
+        "stability_score": 0.0,
+        "quality_score": 0.986,
+        "usefulness_score": 0.986,
+        "reportability_score": 0.9621,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Simple Refreshing Facial Wash",
+          "Hada Labo"
+        ],
+        "canonical_evidence_phrases": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Simple Refreshing Facial Wash",
+          "Hada Labo"
+        ],
+        "salient_terms": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Simple Refreshing Facial Wash",
+          "Hada Labo"
+        ],
+        "supporting_phrases": [
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Senka Perfect White Clay",
+          "Senka Perfect Whip Acne Care",
+          "price"
+        ],
+        "representative_document_ids": [
+          "tt_p_fc_0001:seg-3",
+          "tt_c_fc_0001_07:seg-0",
+          "tt_c_fc_0001_09:seg-1"
+        ],
+        "representative_texts": [
+          "ai đã dùng lâu dài rồi cho mình xin review real",
+          "đừng ham rẻ với LRP Effaclar",
+          "không cay mắt kind of drying xin rv real"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_texture_foam_scent",
+        "reporting_topic_label": "Cleanser Texture, Foam, and Scent",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "cleanser_texture_foam_scent",
+        "effective_topic_label": "Cleanser Texture, Foam, and Scent",
+        "raw_topic_key": "cleanser_texture_foam_scent",
+        "raw_topic_label": "Cleanser Texture, Foam, and Scent",
+        "topic_size": 246,
+        "growth_delta": 246.0,
+        "stability_score": 0.0,
+        "quality_score": 0.9911,
+        "usefulness_score": 0.9911,
+        "reportability_score": 0.973,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "CeraVe Foaming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Simple Refreshing Facial Wash",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "canonical_evidence_phrases": [
+          "CeraVe Foaming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Simple Refreshing Facial Wash",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "salient_terms": [
+          "CeraVe Foaming Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Simple Refreshing Facial Wash",
+          "Bioderma Sebium Gel Moussant",
+          "Cocoon Winter Melon Cleanser"
+        ],
+        "supporting_phrases": [
+          "SVR Sebiaclear Gel Moussant",
+          "Senka Perfect Whip",
+          "CeraVe SA Smoothing Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "CeraVe Hydrating Cleanser"
+        ],
+        "representative_document_ids": [
+          "tt_c_fc_0001_13:seg-0",
+          "tt_p_fc_0002:seg-2",
+          "tt_c_fc_0002_02:seg-1"
+        ],
+        "representative_texts": [
+          "mua đúng auth thì la roche-posay effaclar purifying foaming gel khá ổn đó",
+          "không bị mùi hơi nồng",
+          "bọt vừa phải"
+        ]
+      },
+      {
+        "reporting_topic_key": "gentle_hydrating_cleansers",
+        "reporting_topic_label": "Gentle and Hydrating Cleansers",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "gentle_hydrating_cleansers",
+        "effective_topic_label": "Gentle and Hydrating Cleansers",
+        "raw_topic_key": "gentle_hydrating_cleansers",
+        "raw_topic_label": "Gentle and Hydrating Cleansers",
+        "topic_size": 238,
+        "growth_delta": 238.0,
+        "stability_score": 0.0,
+        "quality_score": 0.9832,
+        "usefulness_score": 0.9832,
+        "reportability_score": 0.9564,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "Cetaphil Gentle Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo"
+        ],
+        "canonical_evidence_phrases": [
+          "Cetaphil Gentle Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo"
+        ],
+        "salient_terms": [
+          "Cetaphil Gentle Skin Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo"
+        ],
+        "supporting_phrases": [
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser",
+          "Simple Moisturising Facial Wash",
+          "Cetaphil",
+          "Simple Refreshing Facial Wash"
+        ],
+        "representative_document_ids": [
+          "tt_c_fc_0001_02:seg-0",
+          "tt_c_fc_0003_08:seg-0",
+          "tt_c_fc_0004_03:seg-1"
+        ],
+        "representative_texts": [
+          "ceta oily trên da mình bị rít da luôn 😩 super gentle",
+          "cerave hydrating sạch",
+          "không bị khô căng 🤣 super gentle pass hay mua đây"
+        ]
+      },
+      {
+        "reporting_topic_key": "performance_and_battery",
+        "reporting_topic_label": "Performance, Battery, and Charging",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "performance_and_battery",
+        "effective_topic_label": "Performance, Battery, and Charging",
+        "raw_topic_key": "performance_and_battery",
+        "raw_topic_label": "Performance, Battery, and Charging",
+        "topic_size": 110,
+        "growth_delta": 110.0,
+        "stability_score": 0.0,
+        "quality_score": 0.9945,
+        "usefulness_score": 0.9945,
+        "reportability_score": 0.9791,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Hada Labo"
+        ],
+        "canonical_evidence_phrases": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Hada Labo"
+        ],
+        "salient_terms": [
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Eucerin pH5 Facial Cleanser",
+          "Senka Perfect Whip",
+          "Hada Labo"
+        ],
+        "supporting_phrases": [
+          "Simple Refreshing Facial Wash",
+          "CeraVe SA Smoothing Cleanser",
+          "Senka Perfect Whip Acne Care",
+          "Senka Perfect White Clay",
+          "CeraVe Hydrating Cleanser"
+        ],
+        "representative_document_ids": [
+          "tt_p_fc_0001:seg-1",
+          "tt_c_fc_0001_09:seg-0",
+          "tt_p_fc_0002:seg-1"
+        ],
+        "representative_texts": [
+          "rửa sạch",
+          "Cetaphil Oily sạch",
+          "rửa sạch"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_price_value_and_promo",
+        "reporting_topic_label": "Cleanser Price, Value, and Promotions",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "cleanser_price_value_and_promo",
+        "effective_topic_label": "Cleanser Price, Value, and Promotions",
+        "raw_topic_key": "cleanser_price_value_and_promo",
+        "raw_topic_label": "Cleanser Price, Value, and Promotions",
+        "topic_size": 96,
+        "growth_delta": 96.0,
+        "stability_score": 0.0,
+        "quality_score": 0.9833,
+        "usefulness_score": 0.9833,
+        "reportability_score": 0.9575,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "overpriced concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser"
+        ],
+        "canonical_evidence_phrases": [
+          "overpriced concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser"
+        ],
+        "salient_terms": [
+          "overpriced concern",
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "CeraVe SA Smoothing Cleanser"
+        ],
+        "supporting_phrases": [
+          "Cocoon Winter Melon Cleanser",
+          "CeraVe Hydrating Cleanser",
+          "Hada Labo",
+          "Senka Perfect Whip",
+          "Senka Perfect Whip Acne Care"
+        ],
+        "representative_document_ids": [
+          "tt_p_fc_0003:seg-0",
+          "tt_c_fc_0004_09:seg-0",
+          "tt_c_fc_0006_06:seg-1"
+        ],
+        "representative_texts": [
+          "ceta oily hôm nay deal ổn phết",
+          "ceta oily trên da mình bị khô căng luôn worth the money pass hay mua đây",
+          "giá hơi cao"
+        ]
+      },
+      {
+        "reporting_topic_key": "cleanser_formula_and_packaging",
+        "reporting_topic_label": "Cleanser Formula and Packaging Changes",
+        "label_source": "effective_topic_label",
+        "label_health_score": 0.93,
+        "effective_topic_key": "cleanser_formula_and_packaging",
+        "effective_topic_label": "Cleanser Formula and Packaging Changes",
+        "raw_topic_key": "cleanser_formula_and_packaging",
+        "raw_topic_label": "Cleanser Formula and Packaging Changes",
+        "topic_size": 73,
+        "growth_delta": 73.0,
+        "stability_score": 0.0,
+        "quality_score": 1.0,
+        "usefulness_score": 1.0,
+        "reportability_score": 0.9909,
+        "reporting_status": "reportable",
+        "weak_topic": false,
+        "noisy_topic": false,
+        "quality_reason_flags": [],
+        "top_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Simple Refreshing Facial Wash"
+        ],
+        "canonical_evidence_phrases": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Simple Refreshing Facial Wash"
+        ],
+        "salient_terms": [
+          "Eucerin pH5 Facial Cleanser",
+          "Hada Labo Advanced Nourish Hyaluronic Acid Cleanser",
+          "Hada Labo Acne Care Calming Cleanser",
+          "Cocoon Winter Melon Cleanser",
+          "Simple Refreshing Facial Wash"
+        ],
+        "supporting_phrases": [
+          "CeraVe SA Smoothing Cleanser",
+          "Senka Perfect Whip",
+          "Senka Perfect Whip Acne Care",
+          "CeraVe Hydrating Cleanser",
+          "Bioderma Sebium Gel Moussant"
+        ],
+        "representative_document_ids": [
+          "tt_r_fc_0001_06:seg-0",
+          "tt_r_fc_0003_02:seg-0",
+          "tt_r_fc_0004_03:seg-0"
+        ],
+        "representative_texts": [
+          "mình dùng bản mới thấy khác bản cũ thật ✨ works fine pass hay mua đây",
+          "mình dùng bản mới thấy khác bản cũ thật",
+          "mk dùng bản mới thấy khác bản cũ thật 😭"
+        ]
+      }
+    ]
+  },
+  "top_issues_report": {
+    "contract": {
+      "report_name": "top_issues_report",
+      "report_family": "top_issues",
+      "report_version": "1.1.0",
+      "grain": "issue class row",
+      "time_window_semantics": "report summarizes the full analysis slice; growth components compare later vs earlier chronological half-window when available",
+      "ranking_semantics": "rows ranked by issue_pressure_proxy descending; issue_pressure_proxy sums severity-weighted and evidence-weighted issue facts",
+      "delta_semantics": "delta_kind=intra_window_delta in v1.1; growth_delta_mentions is later-half minus earlier-half distinct mention count for the issue class",
+      "unresolved_handling": "target unresolved state does not suppress issue inclusion; null issue classes are excluded",
+      "measurement_kind": "hybrid",
+      "intended_use": "ranking issue pressure with severity and evidence context",
+      "anti_use": "not a verified incident rate or a causal root-cause diagnosis"
+    },
+    "window": {
+      "analysis_start": "2026-02-01T10:17:00Z",
+      "analysis_end": "2026-02-10T21:24:00Z",
+      "delta_current_start": "2026-02-06T04:27:00Z",
+      "delta_current_end": "2026-02-10T21:24:00Z",
+      "delta_previous_start": "2026-02-01T10:17:00Z",
+      "delta_previous_end": "2026-02-06T03:11:00Z",
+      "delta_kind": "intra_window_delta",
+      "delta_comparison_mode": "chronological_half_split"
+    },
+    "filters_used": {},
+    "issues": [
+      {
+        "issue_category": "fake_authenticity_concern",
+        "issue_fact_count": 284,
+        "mention_count": 200,
+        "mention_prevalence_ratio": 0.1,
+        "issue_pressure_proxy": 149.477,
+        "growth_delta_mentions": 0,
+        "severity_mix": {
+          "high": 0.0106,
+          "low": 0.5563,
+          "medium": 0.4331
+        },
+        "evidence_mode_mix": {
+          "direct_observation": 0.9894,
+          "question_or_uncertainty": 0.0106
+        },
+        "evidence_references": [
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0001_07",
+          "tt_c_fc_0002_04",
+          "tt_c_fc_0003_01",
+          "tt_c_fc_0004_04"
+        ]
+      },
+      {
+        "issue_category": "breakout_after_use",
+        "issue_fact_count": 233,
+        "mention_count": 146,
+        "mention_prevalence_ratio": 0.073,
+        "issue_pressure_proxy": 98.9887,
+        "growth_delta_mentions": -10,
+        "severity_mix": {
+          "low": 0.8884,
+          "medium": 0.1116
+        },
+        "evidence_mode_mix": {
+          "comparison_based_critique": 0.0043,
+          "direct_complaint": 0.0129,
+          "direct_observation": 0.9356,
+          "question_or_uncertainty": 0.0472
+        },
+        "evidence_references": [
+          "tt_c_fc_0001_01",
+          "tt_c_fc_0001_03",
+          "tt_c_fc_0001_05",
+          "tt_c_fc_0001_08",
+          "tt_c_fc_0001_11"
+        ]
+      },
+      {
+        "issue_category": "irritation_redness",
+        "issue_fact_count": 203,
+        "mention_count": 135,
+        "mention_prevalence_ratio": 0.0675,
+        "issue_pressure_proxy": 88.1357,
+        "growth_delta_mentions": 21,
+        "severity_mix": {
+          "low": 0.8571,
+          "medium": 0.1429
+        },
+        "evidence_mode_mix": {
+          "direct_complaint": 0.0099,
+          "direct_observation": 0.9901
+        },
+        "evidence_references": [
+          "tt_p_fc_0001",
+          "tt_c_fc_0001_04",
+          "tt_c_fc_0001_09",
+          "tt_r_fc_0001_04",
+          "tt_r_fc_0001_05"
+        ]
+      },
+      {
+        "issue_category": "dryness_tightness_problem",
+        "issue_fact_count": 183,
+        "mention_count": 128,
+        "mention_prevalence_ratio": 0.064,
+        "issue_pressure_proxy": 84.3307,
+        "growth_delta_mentions": 2,
+        "severity_mix": {
+          "low": 0.7705,
+          "medium": 0.2295
+        },
+        "evidence_mode_mix": {
+          "direct_complaint": 0.0164,
+          "direct_observation": 0.9781,
+          "question_or_uncertainty": 0.0055
+        },
+        "evidence_references": [
+          "tt_c_fc_0001_02",
+          "tt_c_fc_0002_10",
+          "tt_r_fc_0003_01",
+          "tt_p_fc_0004",
+          "tt_c_fc_0004_03"
+        ]
+      },
+      {
+        "issue_category": "overpriced_concern",
+        "issue_fact_count": 63,
+        "mention_count": 36,
+        "mention_prevalence_ratio": 0.018,
+        "issue_pressure_proxy": 26.0188,
+        "growth_delta_mentions": 0,
+        "severity_mix": {
+          "low": 0.873,
+          "medium": 0.127
+        },
+        "evidence_mode_mix": {
+          "comparison_based_critique": 0.0159,
+          "direct_observation": 0.9841
+        },
+        "evidence_references": [
+          "tt_r_fc_0007_01",
+          "tt_r_fc_0012_06",
+          "tt_r_fc_0015_05",
+          "tt_r_fc_0019_02",
+          "tt_r_fc_0019_06"
+        ]
+      },
+      {
+        "issue_category": "overdrying_after_oil_control",
+        "issue_fact_count": 41,
+        "mention_count": 24,
+        "mention_prevalence_ratio": 0.012,
+        "issue_pressure_proxy": 17.0869,
+        "growth_delta_mentions": -2,
+        "severity_mix": {
+          "low": 0.9756,
+          "medium": 0.0244
+        },
+        "evidence_mode_mix": {
+          "comparison_based_critique": 0.0244,
+          "direct_complaint": 0.0976,
+          "direct_observation": 0.878
+        },
+        "evidence_references": [
+          "tt_c_fc_0004_08",
+          "tt_c_fc_0012_06",
+          "tt_c_fc_0014_06",
+          "tt_c_fc_0014_13",
+          "tt_c_fc_0017_05"
+        ]
+      },
+      {
+        "issue_category": "strong_fragrance_complaint",
+        "issue_fact_count": 26,
+        "mention_count": 16,
+        "mention_prevalence_ratio": 0.008,
+        "issue_pressure_proxy": 11.1762,
+        "growth_delta_mentions": -4,
+        "severity_mix": {
+          "low": 0.9231,
+          "medium": 0.0769
+        },
+        "evidence_mode_mix": {
+          "direct_observation": 1.0
+        },
+        "evidence_references": [
+          "tt_c_fc_0004_08",
+          "tt_c_fc_0014_13",
+          "tt_p_fc_0017",
+          "tt_c_fc_0024_04",
+          "tt_c_fc_0026_03"
+        ]
+      },
+      {
+        "issue_category": "trust_concern",
+        "issue_fact_count": 25,
+        "mention_count": 24,
+        "mention_prevalence_ratio": 0.012,
+        "issue_pressure_proxy": 10.5038,
+        "growth_delta_mentions": 2,
+        "severity_mix": {
+          "high": 0.04,
+          "low": 0.88,
+          "medium": 0.08
+        },
+        "evidence_mode_mix": {
+          "direct_observation": 0.88,
+          "question_or_uncertainty": 0.12
+        },
+        "evidence_references": [
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0003_01",
+          "tt_c_fc_0004_05",
+          "tt_c_fc_0008_10",
+          "tt_r_fc_0017_06"
+        ]
+      },
+      {
+        "issue_category": "residue_rinse_problem",
+        "issue_fact_count": 20,
+        "mention_count": 12,
+        "mention_prevalence_ratio": 0.006,
+        "issue_pressure_proxy": 8.1308,
+        "growth_delta_mentions": -4,
+        "severity_mix": {
+          "low": 1.0
+        },
+        "evidence_mode_mix": {
+          "comparison_based_critique": 0.05,
+          "direct_complaint": 0.05,
+          "direct_observation": 0.9
+        },
+        "evidence_references": [
+          "tt_c_fc_0012_06",
+          "tt_c_fc_0014_06",
+          "tt_c_fc_0014_13",
+          "tt_c_fc_0017_05",
+          "tt_c_fc_0030_05"
+        ]
+      },
+      {
+        "issue_category": "packaging_leak_problem",
+        "issue_fact_count": 12,
+        "mention_count": 7,
+        "mention_prevalence_ratio": 0.0035,
+        "issue_pressure_proxy": 4.9715,
+        "growth_delta_mentions": -3,
+        "severity_mix": {
+          "low": 1.0
+        },
+        "evidence_mode_mix": {
+          "direct_complaint": 0.1667,
+          "direct_observation": 0.8333
+        },
+        "evidence_references": [
+          "tt_c_fc_0014_06",
+          "tt_c_fc_0025_02",
+          "tt_c_fc_0026_03",
+          "tt_c_fc_0033_04",
+          "tt_c_fc_0035_06"
+        ]
+      }
+    ]
+  },
+  "thread_controversy_report": {
+    "contract": {
+      "report_name": "thread_controversy_report",
+      "report_family": "thread_controversy",
+      "report_version": "1.0.0",
+      "grain": "thread row",
+      "time_window_semantics": "report summarizes the current analysis slice at root thread grain",
+      "ranking_semantics": "rows ranked by controversy_score_proxy descending",
+      "delta_semantics": "no cross-window delta; component values are same-slice structural and polarity-conflict proxies",
+      "unresolved_handling": "entity or topic unresolved states do not affect controversy scoring",
+      "measurement_kind": "proxy",
+      "intended_use": "surfacing threads that may merit analyst review for conflict-heavy conversational structure",
+      "anti_use": "not a validated misinformation, harm, or public-safety metric"
+    },
+    "window": {
+      "analysis_start": "2026-02-01T10:17:00Z",
+      "analysis_end": "2026-02-10T21:24:00Z",
+      "delta_current_start": "2026-02-06T04:27:00Z",
+      "delta_current_end": "2026-02-10T21:24:00Z",
+      "delta_previous_start": "2026-02-01T10:17:00Z",
+      "delta_previous_end": "2026-02-06T03:11:00Z",
+      "delta_kind": "intra_window_delta",
+      "delta_comparison_mode": "chronological_half_split"
+    },
+    "filters_used": {},
+    "threads": [
+      {
+        "root_id": "tt_p_fc_0014",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.421,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.4,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 0.3182,
+        "evidence_references": [
+          "tt_p_fc_0014",
+          "tt_c_fc_0014_08",
+          "tt_c_fc_0014_04",
+          "tt_c_fc_0014_11",
+          "tt_c_fc_0014_10",
+          "tt_c_fc_0014_02"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0033",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.3994,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.25,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 0.4615,
+        "evidence_references": [
+          "tt_p_fc_0033",
+          "tt_c_fc_0033_13",
+          "tt_c_fc_0033_07",
+          "tt_c_fc_0033_08",
+          "tt_c_fc_0033_10",
+          "tt_c_fc_0033_12"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0094",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.3961,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.25,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 0.4286,
+        "evidence_references": [
+          "tt_p_fc_0094",
+          "tt_c_fc_0094_07",
+          "tt_c_fc_0094_13",
+          "tt_c_fc_0094_10",
+          "tt_c_fc_0094_06",
+          "tt_c_fc_0094_09"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0024",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.3949,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.25,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 0.4167,
+        "evidence_references": [
+          "tt_p_fc_0024",
+          "tt_c_fc_0024_06",
+          "tt_c_fc_0024_03",
+          "tt_c_fc_0024_04",
+          "tt_c_fc_0024_08",
+          "tt_c_fc_0024_07"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0013",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.3932,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.0,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 1.0,
+        "evidence_references": [
+          "tt_p_fc_0013",
+          "tt_c_fc_0013_09",
+          "tt_c_fc_0013_05",
+          "tt_c_fc_0013_07",
+          "tt_c_fc_0013_08",
+          "tt_c_fc_0013_02"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0039",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.3932,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.0,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 1.0,
+        "evidence_references": [
+          "tt_p_fc_0039",
+          "tt_c_fc_0039_08",
+          "tt_c_fc_0039_05",
+          "tt_c_fc_0039_03",
+          "tt_c_fc_0039_02",
+          "tt_c_fc_0039_11"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0041",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.3932,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.0,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 1.0,
+        "evidence_references": [
+          "tt_p_fc_0041",
+          "tt_c_fc_0041_07",
+          "tt_c_fc_0041_02",
+          "tt_c_fc_0041_03",
+          "tt_c_fc_0041_11",
+          "tt_c_fc_0041_05"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0081",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.3932,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.0,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 1.0,
+        "evidence_references": [
+          "tt_p_fc_0081",
+          "tt_c_fc_0081_07",
+          "tt_c_fc_0081_03",
+          "tt_c_fc_0081_06",
+          "tt_c_fc_0081_13",
+          "tt_c_fc_0081_05"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0070",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.3866,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.25,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 0.3333,
+        "evidence_references": [
+          "tt_p_fc_0070",
+          "tt_c_fc_0070_06",
+          "tt_c_fc_0070_05",
+          "tt_c_fc_0070_13",
+          "tt_c_fc_0070_02",
+          "tt_c_fc_0070_12"
+        ]
+      },
+      {
+        "root_id": "tt_p_fc_0098",
+        "total_mentions": 20,
+        "controversy_score_proxy": 0.385,
+        "reply_density_proxy": 0.4615,
+        "recursion_proxy": 0.1,
+        "mixed_sentiment_proxy": 0.25,
+        "author_diversity_proxy": 1.0,
+        "issue_diversity_proxy": 0.3182,
+        "evidence_references": [
+          "tt_p_fc_0098",
+          "tt_c_fc_0098_10",
+          "tt_c_fc_0098_03",
+          "tt_c_fc_0098_02",
+          "tt_c_fc_0098_12",
+          "tt_c_fc_0098_11"
+        ]
+      }
+    ]
+  },
+  "creator_source_breakdown_report": {
+    "contract": {
+      "report_name": "creator_source_breakdown_report",
+      "report_family": "creator_source_breakdown",
+      "report_version": "1.0.0",
+      "grain": "creator(author_id), thread initiator(author_id), and source platform rows",
+      "time_window_semantics": "report summarizes the full analysis slice",
+      "ranking_semantics": "rows ranked by volume descending within each grouping family",
+      "delta_semantics": "no delta in v1; report focuses on current-slice contribution shares and associations",
+      "unresolved_handling": "entity or topic unresolved states do not suppress creator or source inclusion; association fields skip null labels",
+      "measurement_kind": "gold_like_direct_aggregate",
+      "intended_use": "understanding who is contributing conversation volume and on which channels",
+      "anti_use": "not influence, audience reach, or creator quality"
+    },
+    "window": {
+      "analysis_start": "2026-02-01T10:17:00Z",
+      "analysis_end": "2026-02-10T21:24:00Z",
+      "delta_current_start": "2026-02-06T04:27:00Z",
+      "delta_current_end": "2026-02-10T21:24:00Z",
+      "delta_previous_start": "2026-02-01T10:17:00Z",
+      "delta_previous_end": "2026-02-06T03:11:00Z",
+      "delta_kind": "intra_window_delta",
+      "delta_comparison_mode": "chronological_half_split"
+    },
+    "filters_used": {},
+    "creators": [
+      {
+        "creator_id": "author_0001",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "cleanser_recommendation_by_skin_type",
+          "performance_and_battery",
+          "pricing_and_value"
+        ],
+        "top_issue_categories": [
+          "irritation_redness"
+        ],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0001"
+        ]
+      },
+      {
+        "creator_id": "author_0002",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "cleanser_texture_foam_scent",
+          "oily_acne_cleansers",
+          "performance_and_battery"
+        ],
+        "top_issue_categories": [],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0002"
+        ]
+      },
+      {
+        "creator_id": "author_0003",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "cleanser_authenticity_and_fake_goods",
+          "cleanser_price_value_and_promo"
+        ],
+        "top_issue_categories": [],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0003"
+        ]
+      },
+      {
+        "creator_id": "author_0004",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "oily_acne_cleansers",
+          "performance_and_battery"
+        ],
+        "top_issue_categories": [
+          "dryness_tightness_problem",
+          "performance_problem",
+          "usability_problem"
+        ],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0004"
+        ]
+      },
+      {
+        "creator_id": "author_0005",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "cleanser_texture_foam_scent",
+          "pricing_and_value"
+        ],
+        "top_issue_categories": [],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0005"
+        ]
+      },
+      {
+        "creator_id": "author_0006",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "pricing_and_value",
+          "gentle_hydrating_cleansers"
+        ],
+        "top_issue_categories": [],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0006"
+        ]
+      },
+      {
+        "creator_id": "author_0007",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "cleanser_brand_comparison",
+          "cleanser_recommendation_by_skin_type",
+          "cleanser_texture_foam_scent"
+        ],
+        "top_issue_categories": [],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0007"
+        ]
+      },
+      {
+        "creator_id": "author_0008",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "cleanser_texture_foam_scent"
+        ],
+        "top_issue_categories": [],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0008"
+        ]
+      },
+      {
+        "creator_id": "author_0009",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "cleanser_brand_comparison",
+          "pricing_and_value"
+        ],
+        "top_issue_categories": [],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0009"
+        ]
+      },
+      {
+        "creator_id": "author_0010",
+        "mention_count": 1,
+        "conversation_share": 0.0005,
+        "top_topic_keys": [
+          "cleanser_brand_comparison"
+        ],
+        "top_issue_categories": [],
+        "controversy_thread_count": 0,
+        "evidence_references": [
+          "tt_p_fc_0010"
+        ]
+      }
+    ],
+    "thread_initiators": [
+      {
+        "initiator_id": "author_0001",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0002",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0003",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0004",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0005",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0006",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0007",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0008",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0009",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      },
+      {
+        "initiator_id": "author_0010",
+        "thread_count": 1,
+        "share_of_threads": 0.01
+      }
+    ],
+    "sources": [
+      {
+        "source_platform": "tiktok",
+        "mention_count": 2000,
+        "conversation_share": 1.0,
+        "top_topic_keys": [
+          "cleanser_recommendation_by_skin_type",
+          "oily_acne_cleansers",
+          "cleanser_brand_comparison"
+        ],
+        "top_issue_categories": [
+          "fake_authenticity_concern",
+          "breakout_after_use",
+          "irritation_redness"
+        ]
+      }
+    ]
+  },
+  "insight_card_bundle": {
+    "contract": {
+      "report_name": "insight_card_bundle",
+      "report_family": "insight_cards",
+      "report_version": "2.0.0",
+      "grain": "card row",
+      "time_window_semantics": "cards inherit the analysis slice and report filters from their source BI reports",
+      "ranking_semantics": "cards are generated from report-level priority conditions, not raw-mart top-k alone",
+      "delta_semantics": "cards reuse the delta semantics of the source reports they summarize",
+      "unresolved_handling": "cards preserve unresolved handling from the source reports and do not reinterpret it independently",
+      "measurement_kind": "hybrid",
+      "intended_use": "business-facing narrative summaries with evidence and confidence",
+      "anti_use": "not a substitute for inspecting underlying report rows or raw evidence"
+    },
+    "window": {
+      "analysis_start": "2026-02-01T10:17:00Z",
+      "analysis_end": "2026-02-10T21:24:00Z",
+      "delta_current_start": "2026-02-06T04:27:00Z",
+      "delta_current_end": "2026-02-10T21:24:00Z",
+      "delta_previous_start": "2026-02-01T10:17:00Z",
+      "delta_previous_end": "2026-02-06T03:11:00Z",
+      "delta_kind": "intra_window_delta",
+      "delta_comparison_mode": "chronological_half_split"
+    },
+    "filters_used": {},
+    "cards": [
+      {
+        "insight_type": "share_of_voice_shift",
+        "title": "Share of voice shift detected for Cetaphil",
+        "summary": "Cetaphil lost 22 mention(s) in the later half of the window.",
+        "supporting_metrics": {
+          "mention_share": 0.117,
+          "delta_mention_share": -0.0112,
+          "delta_mention_count": -22
+        },
+        "evidence_references": [
+          "tt_p_fc_0001",
+          "tt_c_fc_0001_02",
+          "tt_c_fc_0001_03",
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0001_09"
+        ],
+        "confidence": 0.5612,
+        "time_window": "2026-02-01T10:17:00Z to 2026-02-10T21:24:00Z",
+        "filters_used": {
+          "canonical_entity_id": "brand.cetaphil"
+        },
+        "source_reports": [
+          "sov_report",
+          "buzz_report"
+        ]
+      },
+      {
+        "insight_type": "trending_topic",
+        "title": "Topic gaining volume: Cleanser Brand and Product Comparison",
+        "summary": "Cleanser Brand and Product Comparison is reportable in 364 raw mentions and 364.00 effective mentions.",
+        "supporting_metrics": {
+          "mention_count": 364,
+          "effective_mention_count": 364.0,
+          "buzz_score_proxy": 429.3744,
+          "reportability_score": 0.9773
+        },
+        "evidence_references": [
+          "tt_c_fc_0001_10",
+          "tt_c_fc_0001_12",
+          "tt_c_fc_0002_11",
+          "tt_r_fc_0002_01",
+          "tt_c_fc_0003_05"
+        ],
+        "confidence": 0.693874,
+        "time_window": "2026-02-01T10:17:00Z to 2026-02-10T21:24:00Z",
+        "filters_used": {
+          "effective_topic_key": "cleanser_brand_comparison"
+        },
+        "source_reports": [
+          "buzz_report"
+        ]
+      },
+      {
+        "insight_type": "conversation_hotspot",
+        "title": "Topic buzz concentrating around Cleanser Brand and Product Comparison",
+        "summary": "Cleanser Brand and Product Comparison appears in 364 mentions with buzz score 429.3744.",
+        "supporting_metrics": {
+          "mention_count": 364,
+          "effective_mention_count": 364.0,
+          "buzz_score_proxy": 429.3744,
+          "growth_ratio_proxy": 0.1796
+        },
+        "evidence_references": [
+          "tt_c_fc_0001_10",
+          "tt_c_fc_0001_12",
+          "tt_c_fc_0002_11",
+          "tt_r_fc_0002_01",
+          "tt_c_fc_0003_05"
+        ],
+        "confidence": 0.6979200000000001,
+        "time_window": "2026-02-01T10:17:00Z to 2026-02-10T21:24:00Z",
+        "filters_used": {
+          "reporting_topic_key": "cleanser_brand_comparison"
+        },
+        "source_reports": [
+          "buzz_report"
+        ]
+      },
+      {
+        "insight_type": "emerging_topic",
+        "title": "Emerging topic: Cleanser Recommendation by Skin Type",
+        "summary": "Cleanser Recommendation by Skin Type passed quality gates with growth delta 428.0 and reportability score 0.94.",
+        "supporting_metrics": {
+          "growth_delta": 428.0,
+          "quality_score": 0.9752,
+          "usefulness_score": 0.9752,
+          "reportability_score": 0.9413
+        },
+        "evidence_references": [
+          "tt_p_fc_0001:seg-0",
+          "tt_p_fc_0001:seg-2",
+          "tt_c_fc_0001_01:seg-0"
+        ],
+        "confidence": 0.845962,
+        "time_window": "2026-02-01T10:17:00Z to 2026-02-10T21:24:00Z",
+        "filters_used": {
+          "reporting_topic_key": "cleanser_recommendation_by_skin_type"
+        },
+        "source_reports": [
+          "emerging_topics_report"
+        ]
+      },
+      {
+        "insight_type": "issue_warning",
+        "title": "Issue pressure around fake_authenticity_concern",
+        "summary": "fake_authenticity_concern leads the issue report with pressure score 149.477 across 200 mentions.",
+        "supporting_metrics": {
+          "issue_pressure_proxy": 149.477,
+          "mention_prevalence_ratio": 0.1,
+          "growth_delta_mentions": 0
+        },
+        "evidence_references": [
+          "tt_c_fc_0001_06",
+          "tt_c_fc_0001_07",
+          "tt_c_fc_0002_04",
+          "tt_c_fc_0003_01",
+          "tt_c_fc_0004_04"
+        ],
+        "confidence": 0.76,
+        "time_window": "2026-02-01T10:17:00Z to 2026-02-10T21:24:00Z",
+        "filters_used": {
+          "issue_category": "fake_authenticity_concern"
+        },
+        "source_reports": [
+          "top_issues_report"
+        ]
+      },
+      {
+        "insight_type": "controversy_alert",
+        "title": "Controversy proxy elevated for thread tt_p_fc_0014",
+        "summary": "Thread tt_p_fc_0014 scored 0.421 on the controversy proxy from reply density, recursion, polarity conflict, and diversity signals.",
+        "supporting_metrics": {
+          "controversy_score_proxy": 0.421,
+          "reply_density_proxy": 0.4615,
+          "mixed_sentiment_proxy": 0.4
+        },
+        "evidence_references": [
+          "tt_p_fc_0014",
+          "tt_c_fc_0014_08",
+          "tt_c_fc_0014_04",
+          "tt_c_fc_0014_11",
+          "tt_c_fc_0014_10",
+          "tt_c_fc_0014_02"
+        ],
+        "confidence": 0.62525,
+        "time_window": "2026-02-01T10:17:00Z to 2026-02-10T21:24:00Z",
+        "filters_used": {
+          "root_id": "tt_p_fc_0014"
+        },
+        "source_reports": [
+          "thread_controversy_report"
+        ]
+      },
+      {
+        "insight_type": "creator_concentration",
+        "title": "Creator concentration around author_0001",
+        "summary": "author_0001 contributed 1 mentions, or 0.05% of the slice.",
+        "supporting_metrics": {
+          "mention_count": 1,
+          "conversation_share": 0.0005,
+          "controversy_thread_count": 0
+        },
+        "evidence_references": [
+          "tt_p_fc_0001"
+        ],
+        "confidence": 0.50025,
+        "time_window": "2026-02-01T10:17:00Z to 2026-02-10T21:24:00Z",
+        "filters_used": {
+          "creator_id": "author_0001"
+        },
+        "source_reports": [
+          "creator_source_breakdown_report"
+        ]
+      }
+    ]
+  }
+}

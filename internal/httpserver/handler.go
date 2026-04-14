@@ -82,12 +82,6 @@ func (srv HTTPServer) registerDomainRoutes(mw *middleware.Middleware) error {
 		return err
 	}
 
-	// Setup notebook domain for webhooks
-	internalAPI := srv.gin.Group("/internal")
-	if err := srv.setupNotebookDomain(ctx, internalAPI); err != nil {
-		return err
-	}
-
 	// Setup chat domain (depends on searchUC from search domain)
 	if err := srv.setupChatDomain(ctx, api, mw); err != nil {
 		return err

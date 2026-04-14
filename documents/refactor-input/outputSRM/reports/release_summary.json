@@ -1,0 +1,273 @@
+{
+  "release_name": "R1",
+  "run_id": "run-20260323T165146Z",
+  "generated_at": "2026-03-23T19:06:56.123731+00:00",
+  "input_path": "uap-batches-cleanser-vn.zip",
+  "sample_input_selection": null,
+  "requested_mode": "default_intelligence",
+  "effective_mode": "default_intelligence",
+  "outputs_generated": [
+    {
+      "artifact_name": "bi_reports",
+      "path": "var\\data\\reports\\bi_reports.json"
+    },
+    {
+      "artifact_name": "bronze_raw_jsonl",
+      "path": "var\\data\\bronze\\uap_records.jsonl"
+    },
+    {
+      "artifact_name": "dim_entities",
+      "path": "var\\data\\gold\\marts\\dim_entities.parquet"
+    },
+    {
+      "artifact_name": "dim_projects",
+      "path": "var\\data\\gold\\marts\\dim_projects.parquet"
+    },
+    {
+      "artifact_name": "dim_sources",
+      "path": "var\\data\\gold\\marts\\dim_sources.parquet"
+    },
+    {
+      "artifact_name": "dim_taxonomy",
+      "path": "var\\data\\gold\\marts\\dim_taxonomy.parquet"
+    },
+    {
+      "artifact_name": "dim_time",
+      "path": "var\\data\\gold\\marts\\dim_time.parquet"
+    },
+    {
+      "artifact_name": "fact_aspects",
+      "path": "var\\data\\gold\\marts\\fact_aspects.parquet"
+    },
+    {
+      "artifact_name": "fact_author_quality",
+      "path": "var\\data\\gold\\marts\\fact_author_quality.parquet"
+    },
+    {
+      "artifact_name": "fact_dedup_clusters",
+      "path": "var\\data\\gold\\marts\\fact_dedup_clusters.parquet"
+    },
+    {
+      "artifact_name": "fact_entity_candidate_clusters",
+      "path": "var\\data\\gold\\marts\\fact_entity_candidate_clusters.parquet"
+    },
+    {
+      "artifact_name": "fact_entity_mentions",
+      "path": "var\\data\\gold\\marts\\fact_entity_mentions.parquet"
+    },
+    {
+      "artifact_name": "fact_intents",
+      "path": "var\\data\\gold\\marts\\fact_intents.parquet"
+    },
+    {
+      "artifact_name": "fact_issue_signals",
+      "path": "var\\data\\gold\\marts\\fact_issue_signals.parquet"
+    },
+    {
+      "artifact_name": "fact_mentions",
+      "path": "var\\data\\gold\\marts\\fact_mentions.parquet"
+    },
+    {
+      "artifact_name": "fact_sentiment",
+      "path": "var\\data\\gold\\marts\\fact_sentiment.parquet"
+    },
+    {
+      "artifact_name": "fact_target_sentiment",
+      "path": "var\\data\\gold\\marts\\fact_target_sentiment.parquet"
+    },
+    {
+      "artifact_name": "fact_threads",
+      "path": "var\\data\\gold\\marts\\fact_threads.parquet"
+    },
+    {
+      "artifact_name": "fact_topic_artifacts",
+      "path": "var\\data\\gold\\marts\\fact_topic_artifacts.parquet"
+    },
+    {
+      "artifact_name": "fact_topics",
+      "path": "var\\data\\gold\\marts\\fact_topics.parquet"
+    },
+    {
+      "artifact_name": "gold_aspects",
+      "path": "var\\data\\gold\\aspect_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_entities",
+      "path": "var\\data\\gold\\entity_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_entity_candidate_clusters",
+      "path": "var\\data\\gold\\entity_candidate_clusters.parquet"
+    },
+    {
+      "artifact_name": "gold_intents",
+      "path": "var\\data\\gold\\intent_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_issues",
+      "path": "var\\data\\gold\\issue_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_keywords",
+      "path": "var\\data\\gold\\keyword_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_sentiment",
+      "path": "var\\data\\gold\\sentiment_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_sources",
+      "path": "var\\data\\gold\\source_influence_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_stance",
+      "path": "var\\data\\gold\\stance_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_target_sentiment",
+      "path": "var\\data\\gold\\target_sentiment_facts.parquet"
+    },
+    {
+      "artifact_name": "gold_topic_artifacts",
+      "path": "var\\data\\gold\\topic_artifacts.parquet"
+    },
+    {
+      "artifact_name": "gold_topics",
+      "path": "var\\data\\gold\\topic_facts.parquet"
+    },
+    {
+      "artifact_name": "insights",
+      "path": "var\\data\\insights\\insights.jsonl"
+    },
+    {
+      "artifact_name": "metrics",
+      "path": "var\\data\\reports\\metrics.json"
+    },
+    {
+      "artifact_name": "run_manifest",
+      "path": "var\\data\\reports\\run_manifest.json"
+    },
+    {
+      "artifact_name": "semantic_benchmark_gold_store",
+      "path": "var\\data\\intelligence\\feedback\\semantic_benchmark_gold.jsonl"
+    },
+    {
+      "artifact_name": "semantic_feedback_store",
+      "path": "var\\data\\intelligence\\feedback\\approved_semantic_annotations.jsonl"
+    },
+    {
+      "artifact_name": "semantic_promoted_store",
+      "path": "var\\data\\intelligence\\feedback\\promoted_semantic_knowledge.jsonl"
+    },
+    {
+      "artifact_name": "silver_author_quality",
+      "path": "var\\data\\silver\\author_quality.parquet"
+    },
+    {
+      "artifact_name": "silver_dedup_clusters",
+      "path": "var\\data\\silver\\dedup_clusters.parquet"
+    },
+    {
+      "artifact_name": "silver_mentions",
+      "path": "var\\data\\silver\\mentions.parquet"
+    },
+    {
+      "artifact_name": "silver_thread_contexts",
+      "path": "var\\data\\silver\\mention_contexts.parquet"
+    },
+    {
+      "artifact_name": "silver_thread_edges",
+      "path": "var\\data\\silver\\thread_edges.parquet"
+    },
+    {
+      "artifact_name": "silver_thread_summaries",
+      "path": "var\\data\\silver\\thread_summaries.parquet"
+    },
+    {
+      "artifact_name": "topic_artifact_snapshot",
+      "path": "var\\data\\intelligence\\topics\\latest_topic_artifacts.jsonl"
+    },
+    {
+      "artifact_name": "topic_feedback_store",
+      "path": "var\\data\\intelligence\\feedback\\approved_topic_reviews.jsonl"
+    },
+    {
+      "artifact_name": "topic_lineage_store",
+      "path": "var\\data\\intelligence\\feedback\\promoted_topic_lineage.jsonl"
+    },
+    {
+      "artifact_name": "vector_index_dir",
+      "path": "var\\data\\intelligence\\vector_index"
+    },
+    {
+      "artifact_name": "qa_reports",
+      "path": "var\\data\\reports\\qa_reports.json"
+    },
+    {
+      "artifact_name": "qa_summary",
+      "path": "var\\data\\reports\\qa_summary.json"
+    },
+    {
+      "artifact_name": "sov_report_csv",
+      "path": "var\\data\\reports\\exports\\sov_report.csv"
+    },
+    {
+      "artifact_name": "buzz_entities_csv",
+      "path": "var\\data\\reports\\exports\\buzz_entities.csv"
+    },
+    {
+      "artifact_name": "buzz_topics_csv",
+      "path": "var\\data\\reports\\exports\\buzz_topics.csv"
+    },
+    {
+      "artifact_name": "emerging_topics_csv",
+      "path": "var\\data\\reports\\exports\\emerging_topics.csv"
+    },
+    {
+      "artifact_name": "top_issues_csv",
+      "path": "var\\data\\reports\\exports\\top_issues.csv"
+    },
+    {
+      "artifact_name": "thread_controversy_csv",
+      "path": "var\\data\\reports\\exports\\thread_controversy.csv"
+    },
+    {
+      "artifact_name": "creators_csv",
+      "path": "var\\data\\reports\\exports\\creators.csv"
+    },
+    {
+      "artifact_name": "sources_csv",
+      "path": "var\\data\\reports\\exports\\sources.csv"
+    },
+    {
+      "artifact_name": "insight_cards_csv",
+      "path": "var\\data\\reports\\exports\\insight_cards.csv"
+    },
+    {
+      "artifact_name": "overview_html",
+      "path": "var\\data\\reports\\viewer\\index.html"
+    },
+    {
+      "artifact_name": "release_summary",
+      "path": "var\\data\\reports\\release_summary.json"
+    }
+  ],
+  "qa_artifacts": [
+    {
+      "artifact_name": "qa_reports",
+      "path": "var\\data\\reports\\qa_reports.json"
+    },
+    {
+      "artifact_name": "qa_summary",
+      "path": "var\\data\\reports\\qa_summary.json"
+    }
+  ],
+  "warnings": [
+    "Default intelligence was requested but some components degraded to fallback: language_id"
+  ],
+  "skipped": [
+    "cross_domain_smoke",
+    "regression_suite",
+    "analysis_quality_smoke"
+  ]
+}

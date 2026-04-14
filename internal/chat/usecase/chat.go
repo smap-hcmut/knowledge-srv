@@ -3,20 +3,16 @@ package usecase
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"knowledge-srv/internal/chat"
 	"knowledge-srv/internal/chat/repository"
 	"knowledge-srv/internal/model"
-	"knowledge-srv/internal/notebook"
-	nbrepo "knowledge-srv/internal/notebook/repository"
 	"knowledge-srv/internal/search"
 )
 
-// Chat is the main RAG / NotebookLM routing entrypoint.
+// Chat is the main synchronous RAG entrypoint.
 func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.ChatInput) (chat.ChatOutput, error) {
 	startTime := time.Now()
 
@@ -66,51 +62,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		history = msgs
 	}
 
-	notebookEnabled := uc.cfg.NotebookEnabled && uc.notebookUC != nil
-	notebookAvailable := false
-	if notebookEnabled {
-		ok, err := uc.notebookUC.HasSyncedForCampaign(ctx, input.CampaignID)
-		if err != nil {
-			uc.l.Warnf(ctx, "chat.usecase.Chat: HasSyncedForCampaign: %v", err)
-		} else {
-			notebookAvailable = ok
-		}
-	}
-
-	route := RouteQuery(input.Message, notebookEnabled, notebookAvailable)
-
-	if route.UseNotebook {
-		filtersJSON, _ := json.Marshal(input.Filters)
-		_, err := uc.repo.CreateMessage(ctx, repository.CreateMessageOptions{
-			ConversationID: conversation.ID,
-			Role:           "user",
-			Content:        input.Message,
-			FiltersUsed:    filtersJSON,
-		})
-		if err != nil {
-			uc.l.Warnf(ctx, "chat.usecase.Chat: CreateMessage (user, async) failed: %v", err)
-		}
-
-		jobID, err := uc.notebookUC.SubmitChatJob(ctx, sc, conversation.ID, input.CampaignID, input.Message)
-		if err != nil {
-			uc.l.Errorf(ctx, "chat.usecase.Chat: SubmitChatJob failed: %v", err)
-			return chat.ChatOutput{}, fmt.Errorf("notebook chat submission failed: %w", err)
-		}
-
-		_ = uc.repo.UpdateConversationLastMessage(ctx, repository.UpdateLastMessageOptions{
-			ConversationID: conversation.ID,
-			MessageCount:   conversation.MessageCount + 1,
-		})
-
-		return chat.ChatOutput{
-			ConversationID: conversation.ID,
-			ChatJobID:      jobID,
-			IsAsync:        true,
-			QueryIntent:    string(intent),
-			Backend:        "NotebookLM",
-		}, nil
-	}
-
+	// Build search input
 	searchInput := search.SearchInput{
 		CampaignID: input.CampaignID,
 		Query:      input.Message,
@@ -147,6 +99,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 	citations := uc.extractCitations(searchOutput.Results)
 	suggestions := uc.generateSuggestions(input.Message, searchOutput)
 
+	// Persist user message
 	filtersJSON, _ := json.Marshal(input.Filters)
 	_, err = uc.repo.CreateMessage(ctx, repository.CreateMessageOptions{
 		ConversationID: conversation.ID,
@@ -158,6 +111,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		uc.l.Warnf(ctx, "chat.usecase.Chat: CreateMessage failed: %v", err)
 	}
 
+	// Persist assistant message
 	searchMeta := chat.SearchMeta{
 		TotalDocsSearched: searchOutput.TotalFound,
 		DocsUsed:          len(citations),
@@ -194,7 +148,6 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		SearchMetadata: searchMeta,
 		QueryIntent:    string(intent),
 		Backend:        "Qdrant",
-		IsAsync:        false,
 	}, nil
 }
 
@@ -209,75 +162,4 @@ func (uc *implUseCase) validateChatInput(input chat.ChatInput) error {
 		return chat.ErrMessageTooLong
 	}
 	return nil
-}
-
-func (uc *implUseCase) GetChatJobStatus(ctx context.Context, sc model.Scope, jobID string) (chat.JobStatusOutput, error) {
-	if uc.notebookUC == nil {
-		return chat.JobStatusOutput{}, fmt.Errorf("notebook integration is disabled")
-	}
-
-	job, err := uc.notebookUC.GetChatJobStatus(ctx, sc, jobID)
-	if err != nil {
-		if errors.Is(err, nbrepo.ErrChatJobNotFound) {
-			return chat.JobStatusOutput{}, chat.ErrChatJobNotFound
-		}
-		return chat.JobStatusOutput{}, fmt.Errorf("failed to retrieve chat job status: %w", err)
-	}
-
-	timeout := uc.cfg.ChatTimeoutSec
-	if timeout <= 0 {
-		timeout = 45
-	}
-
-	if uc.cfg.NotebookFallbackEnabled && strings.EqualFold(job.Status, "PROCESSING") {
-		if created, perr := time.Parse(time.RFC3339, job.CreatedAt); perr == nil {
-			if time.Since(created) > time.Duration(timeout)*time.Second {
-				answer, ferr := uc.runQdrantFallbackAnswer(ctx, sc, job.CampaignID, job.UserMessage)
-				if ferr == nil && answer != "" {
-					_ = uc.notebookUC.ApplyChatFallback(ctx, jobID, answer)
-					job, _ = uc.notebookUC.GetChatJobStatus(ctx, sc, jobID)
-				}
-			}
-		}
-	}
-
-	return mapNotebookJobToStatus(job), nil
-}
-
-func (uc *implUseCase) runQdrantFallbackAnswer(ctx context.Context, sc model.Scope, campaignID, message string) (string, error) {
-	searchInput := search.SearchInput{
-		CampaignID: campaignID,
-		Query:      message,
-		Limit:      chat.MaxSearchDocs,
-		MinScore:   0.65,
-	}
-	searchOutput, err := uc.searchUC.Search(ctx, sc, searchInput)
-	if err != nil {
-		return "", err
-	}
-	prompt := uc.buildPrompt(message, searchOutput.Results, nil)
-	return uc.llm.Generate(ctx, prompt)
-}
-
-func mapNotebookJobToStatus(job notebook.ChatJob) chat.JobStatusOutput {
-	backend := "NotebookLM"
-	if job.FallbackUsed {
-		backend = "Qdrant"
-	}
-
-	st := strings.ToUpper(strings.TrimSpace(job.Status))
-	switch st {
-	case "COMPLETED":
-		return chat.JobStatusOutput{State: chat.JobCompleted, Answer: job.NotebookAnswer, Backend: backend}
-	case "FAILED":
-		return chat.JobStatusOutput{State: chat.JobFailed, Backend: backend}
-	case "EXPIRED":
-		return chat.JobStatusOutput{State: chat.JobExpired, Backend: backend}
-	case "PENDING":
-		return chat.JobStatusOutput{State: chat.JobPending, Backend: backend}
-	case "PROCESSING":
-		return chat.JobStatusOutput{State: chat.JobProcessing, Backend: backend}
-	default:
-		return chat.JobStatusOutput{State: chat.JobProcessing, Backend: backend}
-	}
 }

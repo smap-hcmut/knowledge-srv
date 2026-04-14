@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"knowledge-srv/config"
-	"knowledge-srv/pkg/maestro"
 	"knowledge-srv/pkg/qdrant"
 	"knowledge-srv/pkg/voyage"
 
@@ -33,10 +32,6 @@ type ConsumerServer struct {
 	voyageClient voyage.IVoyage
 	llmClient    llm.LLM
 
-	// Maestro - NotebookLM automation (optional)
-	maestroClient maestro.IMaestro
-	appConfig     *config.Config
-
 	// Monitoring & Notification
 	discord discord.IDiscord
 }
@@ -57,10 +52,6 @@ type Config struct {
 	// AI/ML clients
 	VoyageClient voyage.IVoyage
 	LLMClient    llm.LLM
-
-	// Maestro - NotebookLM automation (optional)
-	MaestroClient maestro.IMaestro
-	AppConfig     *config.Config
 
 	// Monitoring & Notification
 	Discord discord.IDiscord

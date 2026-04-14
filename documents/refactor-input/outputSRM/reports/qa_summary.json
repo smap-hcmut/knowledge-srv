@@ -1,0 +1,46 @@
+{
+  "qa_schema_version": "2026.03.16-r1",
+  "executed_at": "2026-03-23T19:06:56.092105+00:00",
+  "suite_count": 2,
+  "passed_checks": 3,
+  "failed_checks": 1,
+  "warning_count": 0,
+  "suites": [
+    {
+      "suite_name": "ev_suite",
+      "suite_family": "ev_suite",
+      "passed_checks": 2,
+      "failed_checks": 1,
+      "warning_count": 0,
+      "warnings": [],
+      "artifact_path": "var\\data\\reports\\qa_suites\\ev_suite.json"
+    },
+    {
+      "suite_name": "analyst_feedback_qa",
+      "suite_family": "analyst_feedback_qa",
+      "passed_checks": 1,
+      "failed_checks": 0,
+      "warning_count": 0,
+      "warnings": [],
+      "artifact_path": "var\\data\\reports\\qa_suites\\analyst_feedback_qa.json"
+    }
+  ],
+  "warnings": [],
+  "degraded_mode_notes": [],
+  "proxy_heavy_areas": [
+    "buzz_report",
+    "emerging_topics_report",
+    "top_issues_report",
+    "thread_controversy_report"
+  ],
+  "artifact_paths": [
+    {
+      "artifact_name": "ev_suite",
+      "path": "var\\data\\reports\\qa_suites\\ev_suite.json"
+    },
+    {
+      "artifact_name": "analyst_feedback_qa",
+      "path": "var\\data\\reports\\qa_suites\\analyst_feedback_qa.json"
+    }
+  ]
+}

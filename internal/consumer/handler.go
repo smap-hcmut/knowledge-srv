@@ -10,20 +10,13 @@ import (
 	indexingPostgre "knowledge-srv/internal/indexing/repository/postgre"
 	indexingRedis "knowledge-srv/internal/indexing/repository/redis"
 	indexingUsecase "knowledge-srv/internal/indexing/usecase"
-	"knowledge-srv/internal/model"
-	"knowledge-srv/internal/notebook"
-	notebookPostgre "knowledge-srv/internal/notebook/repository/postgre"
-	notebookUsecase "knowledge-srv/internal/notebook/usecase"
 	pointRepo "knowledge-srv/internal/point/repository/qdrant"
 	pointUsecase "knowledge-srv/internal/point/usecase"
-	"knowledge-srv/internal/transform"
-	transformUsecase "knowledge-srv/internal/transform/usecase"
 )
 
-// domainConsumers holds references to all domain consumers for cleanup (interface, like http.Handler)
+// domainConsumers holds references to all domain consumers for cleanup
 type domainConsumers struct {
 	indexingConsumer indexingConsumer.Consumer
-	notebookUC       notebook.UseCase
 }
 
 // setupDomains initializes all domain layers (repositories, usecases, consumers)
@@ -57,43 +50,10 @@ func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, 
 		srv.minioClient,
 	)
 
-	var notebookUC notebook.UseCase
-	var transformUC transform.UseCase
-	if srv.appConfig != nil && srv.appConfig.Notebook.Enabled && srv.maestroClient != nil {
-		transformUC = transformUsecase.New(pointUC, srv.appConfig.Notebook.MaxPostsPerPart, srv.l)
-		campaignRepo := notebookPostgre.NewCampaignRepo(srv.postgresDB)
-		sourceRepo := notebookPostgre.NewSourceRepo(srv.postgresDB)
-		sessionRepo := notebookPostgre.NewSessionRepo()
-		chatJobRepo := notebookPostgre.NewChatJobRepo(srv.postgresDB)
-		notebookUC = notebookUsecase.NewUseCase(
-			srv.maestroClient,
-			campaignRepo,
-			sourceRepo,
-			sessionRepo,
-			chatJobRepo,
-			notebookUsecase.Config{
-				NotebookEnabled:    srv.appConfig.Notebook.Enabled,
-				JobPollIntervalMs:  srv.appConfig.Maestro.JobPollIntervalMs,
-				JobPollMaxAttempts: srv.appConfig.Maestro.JobPollMaxAttempts,
-				SyncMaxRetries:     srv.appConfig.Notebook.SyncMaxRetries,
-				WebhookCallbackURL: srv.appConfig.Maestro.WebhookCallbackURL,
-				WebhookSecret:      srv.appConfig.Maestro.WebhookSecret,
-			},
-			srv.l,
-		)
-		if err := notebookUC.StartSessionLoop(ctx, model.Scope{}); err != nil {
-			srv.l.Warnf(ctx, "consumer.handler.setupDomains: notebook session start failed (non-fatal): %v", err)
-			notebookUC = nil
-			transformUC = nil
-		}
-	}
-
 	indexingCons, err := indexingConsumer.New(indexingConsumer.Config{
 		Logger:      srv.l,
 		KafkaConfig: srv.kafkaConfig,
 		UseCase:     indexingUC,
-		NotebookUC:  notebookUC,
-		TransformUC: transformUC,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create indexing consumer: %w", err)
@@ -103,7 +63,6 @@ func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, 
 
 	return &domainConsumers{
 		indexingConsumer: indexingCons,
-		notebookUC:       notebookUC,
 	}, nil
 }
 
@@ -128,11 +87,6 @@ func (srv *ConsumerServer) startConsumers(ctx context.Context, consumers *domain
 
 // stopConsumers gracefully stops all domain consumers
 func (srv *ConsumerServer) stopConsumers(ctx context.Context, consumers *domainConsumers) {
-	if consumers.notebookUC != nil {
-		if err := consumers.notebookUC.StopSessionLoop(ctx, model.Scope{}); err != nil {
-			srv.l.Warnf(ctx, "consumer.stopConsumers: notebook StopSessionLoop: %v", err)
-		}
-	}
 	// Close indexing consumer
 	if consumers.indexingConsumer != nil {
 		if err := consumers.indexingConsumer.Close(); err != nil {

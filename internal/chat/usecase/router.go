@@ -12,13 +12,6 @@ const (
 	IntentStructured QueryIntent = "STRUCTURED"
 )
 
-// QueryRoute defines the routing decision for a query.
-type QueryRoute struct {
-	Intent      QueryIntent
-	UseNotebook bool
-	UseQdrant   bool
-}
-
 // ClassifyIntent is rule-based: structured keywords first, then narrative.
 // Default (no match) is STRUCTURED per architecture (safe fallback to Qdrant).
 func ClassifyIntent(query string) QueryIntent {
@@ -43,23 +36,4 @@ func ClassifyIntent(query string) QueryIntent {
 	}
 
 	return IntentStructured
-}
-
-// RouteQuery sends NARRATIVE to NotebookLM only when enabled and campaign has synced sources; otherwise Qdrant.
-func RouteQuery(query string, notebookEnabled, notebookAvailable bool) QueryRoute {
-	intent := ClassifyIntent(query)
-
-	if intent == IntentNarrative && notebookEnabled && notebookAvailable {
-		return QueryRoute{
-			Intent:      IntentNarrative,
-			UseNotebook: true,
-			UseQdrant:   false,
-		}
-	}
-
-	return QueryRoute{
-		Intent:      intent,
-		UseNotebook: false,
-		UseQdrant:   true,
-	}
 }

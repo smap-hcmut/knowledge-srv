@@ -1,0 +1,39 @@
+{
+  "qa_schema_version": "2026.03.16-r1",
+  "metadata": {
+    "name": "analyst_feedback_qa",
+    "version": "1.0.0",
+    "description": "Analyst feedback and promotion loop QA summary.",
+    "suite_family": "analyst_feedback_qa"
+  },
+  "checks": [
+    {
+      "kind": "feedback_summary",
+      "check_id": "analyst_feedback_summary",
+      "title": "Approved, promoted, and benchmark-promoted feedback are summarized for QA",
+      "passed": true,
+      "warnings": [],
+      "artifacts": [],
+      "summary": {
+        "approved_semantic_count": 0,
+        "promoted_semantic_count": 0,
+        "benchmark_promoted_semantic_gold_count": 0,
+        "approved_topic_count": 0,
+        "promoted_topic_count": 0,
+        "semantic_correction_categories": [],
+        "semantic_correction_frequency": [],
+        "topic_review_actions": [],
+        "topic_usefulness_judgments": [],
+        "topic_stability_judgments": [],
+        "promoted_feedback_impact_notes": [],
+        "freshness_hints": [
+          "No promoted semantic knowledge is currently available."
+        ]
+      }
+    }
+  ],
+  "passed_checks": 1,
+  "failed_checks": 0,
+  "warning_count": 0,
+  "warnings": []
+}
