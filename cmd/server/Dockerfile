@@ -2,31 +2,35 @@
 
 # =============================================================================
 # STAGE 1: BUILDER
+# --platform=$BUILDPLATFORM: Go compiler runs natively (no QEMU emulation)
 # =============================================================================
-FROM golang:1.25-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
 ARG TARGETOS
 ARG TARGETARCH
 
-RUN apk add --no-cache git tzdata
+# Install swag alongside apk deps — cached before source COPY
+RUN apk add --no-cache git tzdata && \
+    go install github.com/swaggo/swag/cmd/swag@v1.8.12
 
 COPY go.mod go.sum ./
 COPY vendor/ vendor/
 
 COPY . .
 
-# Install Swag and Generate Swagger Documentation
-RUN go install github.com/swaggo/swag/cmd/swag@v1.8.12
+# Generate Swagger docs (swag already installed above)
 RUN swag init -g cmd/server/main.go --parseVendor
 
-# Build Binary (vendor mode)
-RUN CGO_ENABLED=0 \
+# Build Binary (vendor mode) with go-build cache mount
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
     -mod=vendor \
+    -trimpath \
     -ldflags="-s -w" \
     -o knowledge-srv ./cmd/server
 
