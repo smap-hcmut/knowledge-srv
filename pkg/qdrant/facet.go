@@ -4,6 +4,8 @@ import (
 	"context"
 
 	pb "github.com/qdrant/go-client/qdrant"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // Facet performs a facet request to get value counts.
@@ -27,6 +29,9 @@ func (c *qdrantImpl) Facet(ctx context.Context, collectionName string, key strin
 		Exact:          new(bool), // Default false for performance
 	})
 	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			return nil, ErrCollectionNotFound
+		}
 		return nil, WrapError(err, "failed to get facets")
 	}
 

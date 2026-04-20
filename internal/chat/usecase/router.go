@@ -12,30 +12,44 @@ const (
 	IntentStructured QueryIntent = "STRUCTURED"
 )
 
-// ClassifyIntent is rule-based: structured keywords first, then narrative.
-// Default (no match) is STRUCTURED per architecture (safe fallback to Qdrant).
+// structuredKeywords are signals that the user wants analytics/aggregation.
+var structuredKeywords = []string{
+	"bao nhiêu", "thống kê", "top", "so sánh", "tỷ lệ", "filter", "lọc", "đếm", "count",
+	"how many", "statistics", "compare", "ratio", "percentage", "rank", "ranking",
+}
+
+// narrativeKeywords are signals that the user wants summarisation or contextual insight.
+var narrativeKeywords = []string{
+	"xu hướng", "đánh giá", "tổng quan", "phân tích", "insight", "dự đoán",
+	"trend", "overview", "analysis", "analyze", "summary", "summarize", "predict", "sentiment",
+}
+
+// ClassifyIntent uses multi-signal scoring: count keyword matches for each intent bucket,
+// return the bucket with the most matches.
+//
+// Default (no matches at all) is NARRATIVE — a query with no analytics keywords is
+// most likely a broad contextual search, so we use the lower minScore (0.55) to avoid
+// returning 0 results for brand names, product names, or free-form questions.
 func ClassifyIntent(query string) QueryIntent {
 	q := strings.ToLower(strings.TrimSpace(query))
 
-	structuredKeywords := []string{
-		"bao nhiêu", "thống kê", "top", "so sánh", "tỷ lệ", "filter", "lọc", "đếm", "count",
-		"how many", "statistics", "compare", "ratio", "percentage", "rank", "ranking",
-	}
-	for _, keyword := range structuredKeywords {
-		if strings.Contains(q, keyword) {
-			return IntentStructured
+	structuredScore := 0
+	for _, kw := range structuredKeywords {
+		if strings.Contains(q, kw) {
+			structuredScore++
 		}
 	}
 
-	narrativeKeywords := []string{
-		"xu hướng", "đánh giá", "tổng quan", "phân tích", "insight", "dự đoán",
-		"trend", "overview", "analysis", "analyze", "summary", "summarize", "predict", "sentiment",
-	}
-	for _, keyword := range narrativeKeywords {
-		if strings.Contains(q, keyword) {
-			return IntentNarrative
+	narrativeScore := 0
+	for _, kw := range narrativeKeywords {
+		if strings.Contains(q, kw) {
+			narrativeScore++
 		}
 	}
 
-	return IntentStructured
+	if structuredScore > narrativeScore {
+		return IntentStructured
+	}
+	// NARRATIVE wins on tie or when neither matched — safer default for broad queries.
+	return IntentNarrative
 }

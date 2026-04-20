@@ -9,8 +9,8 @@ func (uc *implUseCase) extractCitations(results []search.SearchResult) []chat.Ci
 	citations := make([]chat.Citation, 0, len(results))
 	for _, r := range results {
 		content := r.Content
-		if len(content) > 200 {
-			content = content[:200] + "..."
+		if runes := []rune(content); len(runes) > 200 {
+			content = string(runes[:200]) + "..."
 		}
 		citations = append(citations, chat.Citation{
 			ID:             r.ID,
@@ -24,10 +24,11 @@ func (uc *implUseCase) extractCitations(results []search.SearchResult) []chat.Ci
 }
 
 func (uc *implUseCase) generateTitle(message string) string {
-	if len(message) <= 50 {
+	runes := []rune(message)
+	if len(runes) <= 50 {
 		return message
 	}
-	return message[:50] + "..."
+	return string(runes[:50]) + "..."
 }
 
 func (uc *implUseCase) generateSuggestions(query string, output search.SearchOutput) []string {

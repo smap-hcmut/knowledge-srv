@@ -449,6 +449,23 @@ func generateHashNumber(id string) uint64 {
 		uint64(hash[4])<<24 | uint64(hash[5])<<16 | uint64(hash[6])<<8 | uint64(hash[7])
 }
 
+// CreateFieldIndex creates a payload field index for faceting and filtering.
+// Calling this on an already-indexed field is idempotent and safe.
+func (c *qdrantImpl) CreateFieldIndex(ctx context.Context, colName string, fieldName string, fieldType pb.FieldType) error {
+	if colName == "" {
+		return ErrEmptyCollection
+	}
+	_, err := c.pointsClient.CreateFieldIndex(ctx, &pb.CreateFieldIndexCollection{
+		CollectionName: colName,
+		FieldName:      fieldName,
+		FieldType:      fieldType.Enum(),
+	})
+	if err != nil {
+		return WrapError(err, "failed to create field index")
+	}
+	return nil
+}
+
 // Close closes the gRPC connection
 func (c *qdrantImpl) Close() error {
 	if c.conn != nil {

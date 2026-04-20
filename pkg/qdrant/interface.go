@@ -38,6 +38,9 @@ type PointsOps interface {
 	CountPoints(ctx context.Context, colName string) (uint64, error)
 	// ScrollPoints iterates points matching filter (offset is next-page cursor from previous call).
 	ScrollPoints(ctx context.Context, colName string, filter *pb.Filter, limit uint32, withPayload bool, offset *pb.PointId) ([]Point, *pb.PointId, error)
+	// CreateFieldIndex creates a payload field index to enable faceting and filtering on the given field.
+	// Calling this on an already-indexed field is idempotent and safe.
+	CreateFieldIndex(ctx context.Context, colName string, fieldName string, fieldType pb.FieldType) error
 }
 
 // SearchOps defines interface for search operations.

@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/point"
 	"knowledge-srv/internal/search"
+	pkgQdrant "knowledge-srv/pkg/qdrant"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -183,6 +185,10 @@ func isCollectionNotFoundError(err error) bool {
 	if err == nil {
 		return false
 	}
+	if errors.Is(err, pkgQdrant.ErrCollectionNotFound) {
+		return true
+	}
+	// Fallback: string match for errors that may not be wrapped with the sentinel.
 	msg := err.Error()
 	return strings.Contains(msg, "Not found") ||
 		strings.Contains(msg, "not found") ||

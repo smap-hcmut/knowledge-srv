@@ -2,7 +2,10 @@ package qdrant
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
+	pkgQdrant "knowledge-srv/pkg/qdrant"
 
 	"knowledge-srv/internal/point"
 	"knowledge-srv/internal/point/repository"
@@ -12,6 +15,10 @@ func (r *implRepository) Facet(ctx context.Context, input repository.FacetOption
 
 	pkgResults, err := r.client.Facet(ctx, input.CollectionName, input.Key, input.Limit, input.Filter)
 	if err != nil {
+		if errors.Is(err, pkgQdrant.ErrCollectionNotFound) {
+			// Collection doesn't exist yet (no data indexed) — not an error, just empty.
+			return nil, err
+		}
 		r.l.Errorf(ctx, "point.repository.qdrant.Facet: Failed to facet points: %v", err)
 		return nil, err
 	}
