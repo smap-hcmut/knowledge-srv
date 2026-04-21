@@ -54,8 +54,14 @@ func (uc *implUseCase) mapQdrantResult(r point.SearchOutput) search.SearchResult
 		Metadata: r.Payload,
 	}
 
-	// Extract typed fields from payload
+	// Extract typed fields from payload.
+	// Two payload formats exist:
+	//   analyticsPayload: content, overall_sentiment, overall_sentiment_score
+	//   insightPayload:   content_summary, sentiment_label, sentiment_score
+	// Check both so that either format is handled correctly.
 	if v, ok := r.Payload["content"].(string); ok {
+		result.Content = v
+	} else if v, ok := r.Payload["content_summary"].(string); ok {
 		result.Content = v
 	}
 	if v, ok := r.Payload["project_id"].(string); ok {
@@ -66,8 +72,12 @@ func (uc *implUseCase) mapQdrantResult(r point.SearchOutput) search.SearchResult
 	}
 	if v, ok := r.Payload["overall_sentiment"].(string); ok {
 		result.OverallSentiment = v
+	} else if v, ok := r.Payload["sentiment_label"].(string); ok {
+		result.OverallSentiment = v
 	}
 	if v, ok := r.Payload["overall_sentiment_score"].(float64); ok {
+		result.SentimentScore = v
+	} else if v, ok := r.Payload["sentiment_score"].(float64); ok {
 		result.SentimentScore = v
 	}
 	if v, ok := r.Payload["risk_level"].(string); ok {
@@ -97,7 +107,10 @@ func (uc *implUseCase) mapQdrantResult(r point.SearchOutput) search.SearchResult
 				if s, ok := m["aspect_display_name"].(string); ok {
 					aspect.AspectDisplayName = s
 				}
+				// analyticsPayload uses "sentiment"; insightPayload uses "polarity"
 				if s, ok := m["sentiment"].(string); ok {
+					aspect.Sentiment = s
+				} else if s, ok := m["polarity"].(string); ok {
 					aspect.Sentiment = s
 				}
 				if f, ok := m["sentiment_score"].(float64); ok {
