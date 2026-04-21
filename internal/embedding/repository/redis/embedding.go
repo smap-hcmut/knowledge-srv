@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"knowledge-srv/internal/embedding/repository"
 	"time"
+
+	goredis "github.com/redis/go-redis/v9"
 )
 
 const Prefix = "embedding:"
@@ -14,6 +16,10 @@ func (r *implRepository) Get(ctx context.Context, opt repository.GetOptions) ([]
 	key := fmt.Sprintf("%s%s", Prefix, opt.Key)
 	data, err := r.redis.GetClient().Get(ctx, key).Result()
 	if err != nil {
+		if err == goredis.Nil {
+			r.l.Debugf(ctx, "embedding.repository.redis.Get: Cache miss: %v", key)
+			return nil, err
+		}
 		r.l.Errorf(ctx, "embedding.repository.redis.Get: Failed to get from cache: %v", err)
 		return nil, err
 	}

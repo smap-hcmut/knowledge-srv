@@ -19,7 +19,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 	intent := ClassifyIntent(input.Message)
 
 	if err := uc.validateChatInput(input); err != nil {
-		uc.l.Errorf(ctx, "chat.usecase.Chat: validateChatInput failed: %v", err)
+		uc.l.Warnf(ctx, "chat.usecase.Chat: validateChatInput failed: %v", err)
 		return chat.ChatOutput{}, err
 	}
 
@@ -46,7 +46,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 			return chat.ChatOutput{}, chat.ErrConversationNotFound
 		}
 		if conv.Status == "ARCHIVED" {
-			uc.l.Errorf(ctx, "chat.usecase.Chat: conversation is archived")
+			uc.l.Warnf(ctx, "chat.usecase.Chat: conversation is archived")
 			return chat.ChatOutput{}, chat.ErrConversationArchived
 		}
 		conversation = conv

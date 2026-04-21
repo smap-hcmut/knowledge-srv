@@ -34,7 +34,7 @@ func (r *implCacheRepository) SaveCampaignProjects(ctx context.Context, campaign
 		return err
 	}
 	if err := r.redis.GetClient().Set(ctx, key, data, 10*time.Minute).Err(); err != nil {
-		r.l.Errorf(ctx, "search.repository.redis.SaveCampaignProjects: Failed to save to cache: %v", err)
+		r.l.Warnf(ctx, "search.repository.redis.SaveCampaignProjects: Failed to save to cache: %v", err)
 		return err
 	}
 	return nil
@@ -54,7 +54,7 @@ func (r *implCacheRepository) GetSearchResults(ctx context.Context, cacheKey str
 
 func (r *implCacheRepository) SaveSearchResults(ctx context.Context, cacheKey string, data []byte) error {
 	if err := r.redis.GetClient().Set(ctx, cacheKey, data, 5*time.Minute).Err(); err != nil {
-		r.l.Errorf(ctx, "search.repository.redis.SaveSearchResults: Failed to save to cache: %v", err)
+		r.l.Warnf(ctx, "search.repository.redis.SaveSearchResults: Failed to save to cache: %v", err)
 		return err
 	}
 	return nil

@@ -10,7 +10,7 @@ import (
 
 func (uc *implUseCase) Generate(ctx context.Context, input embedding.GenerateInput) (embedding.GenerateOutput, error) {
 	if input.Text == "" {
-		uc.l.Errorf(ctx, "embedding.usecase.Generate: empty text provided")
+		uc.l.Warnf(ctx, "embedding.usecase.Generate: empty text provided")
 		return embedding.GenerateOutput{}, embedding.ErrEmptyText
 	}
 
@@ -48,7 +48,7 @@ func (uc *implUseCase) Generate(ctx context.Context, input embedding.GenerateInp
 
 func (uc *implUseCase) GenerateMany(ctx context.Context, input embedding.GenerateManyInput) (embedding.GenerateManyOutput, error) {
 	if len(input.Texts) == 0 {
-		uc.l.Errorf(ctx, "embedding.usecase.GenerateMany: empty texts provided")
+		uc.l.Warnf(ctx, "embedding.usecase.GenerateMany: empty texts provided")
 		return embedding.GenerateManyOutput{}, embedding.ErrEmptyTexts
 	}
 	results := make([][]float32, len(input.Texts))
