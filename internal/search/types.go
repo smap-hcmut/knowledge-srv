@@ -1,7 +1,7 @@
 package search
 
 const (
-	MinScore       = 0.65
+	MinScore       = 0.45
 	MaxResults     = 10
 	MinQueryLength = 3
 	MaxQueryLength = 1000

@@ -68,10 +68,10 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 	switch intent {
 	case IntentNarrative:
 		searchLimit = 15
-		searchMinScore = 0.55 // Broader coverage for analysis/trends
+		searchMinScore = 0.48 // Broader coverage for analysis/trends (social media content scores 0.45-0.60)
 	default: // IntentStructured
 		searchLimit = chat.MaxSearchDocs
-		searchMinScore = 0.70 // Precise, fewer docs
+		searchMinScore = 0.38 // Social media brand content rarely exceeds 0.45 for comparison queries
 	}
 
 	searchInput := search.SearchInput{
