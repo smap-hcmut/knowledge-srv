@@ -67,9 +67,19 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		}, nil
 	}
 
-	// Step 3: Embed query (Via Embedding Domain)
+	// Step 3: Enrich query with campaign name for better semantic matching.
+	// Generic analytical queries ("Tổng quan sentiment?") score very low against
+	// brand-specific social content without this context prefix.
+	// resolveCampaignProjects already cached the name, so this is effectively free.
+	campaignName := uc.resolveCampaignName(ctx, input.CampaignID)
+	enrichedQuery := input.Query
+	if campaignName != "" {
+		enrichedQuery = campaignName + ": " + input.Query
+	}
+
+	// Step 4: Embed enriched query (Via Embedding Domain)
 	generateOutput, err := uc.embeddingUC.Generate(ctx, embedding.GenerateInput{
-		Text: input.Query,
+		Text: enrichedQuery,
 	})
 	if err != nil {
 		uc.l.Errorf(ctx, "search.usecase.Search: Embedding generation failed: %v", err)
@@ -77,17 +87,17 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	}
 	vector := generateOutput.Vector
 
-	// Step 4: Build Qdrant filter (without project_id — implicit by collection)
+	// Step 5: Build Qdrant filter (without project_id — implicit by collection)
 	filter := uc.buildSearchFilter(nil, input.Filters)
 
-	// Step 5: Search per-project Qdrant collections in parallel (server-side score filtering)
+	// Step 6: Search per-project Qdrant collections in parallel (server-side score filtering)
 	pointResults, err := uc.searchMultipleCollections(ctx, projectIDs, vector, filter, uint64(limit), float32(minScore))
 	if err != nil {
 		uc.l.Errorf(ctx, "search.usecase.Search: Multi-collection search failed: %v", err)
 		return search.SearchOutput{}, fmt.Errorf("%w: %v", search.ErrSearchFailed, err)
 	}
 
-	// Step 6: Sort by score descending and apply limit (Qdrant already filtered by minScore server-side)
+	// Step 7: Sort by score descending and apply limit (Qdrant already filtered by minScore server-side)
 	sort.Slice(pointResults, func(i, j int) bool {
 		return pointResults[i].Score > pointResults[j].Score
 	})
@@ -100,13 +110,13 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		}
 	}
 
-	// Step 7: Hallucination control — NO relevant context flag
+	// Step 8: Hallucination control — NO relevant context flag
 	noRelevantContext := len(results) == 0
 
-	// Step 8: Build aggregations
+	// Step 9: Build aggregations
 	aggregations := uc.buildAggregations(results)
 
-	// Step 9: Build output
+	// Step 10: Build output
 	output := search.SearchOutput{
 		Results:           results,
 		TotalFound:        len(results),
@@ -116,15 +126,15 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		ProcessingTimeMs:  time.Since(startTime).Milliseconds(),
 	}
 
-	// Step 10: Cache results (Tầng 3)
+	// Step 11: Cache results (Tầng 3)
 	if data, err := json.Marshal(output); err == nil {
 		if err := uc.cacheRepo.SaveSearchResults(ctx, cacheKey, data); err != nil {
 			uc.l.Warnf(ctx, "search.usecase.Search: Failed to save cache: %v", err)
 		}
 	}
 
-	uc.l.Infof(ctx, "search.usecase.Search: query=%q, projects=%d, results=%d, no_context=%v, duration=%dms",
-		input.Query, len(projectIDs), len(results), noRelevantContext, output.ProcessingTimeMs)
+	uc.l.Infof(ctx, "search.usecase.Search: query=%q, enriched=%q, projects=%d, results=%d, no_context=%v, duration=%dms",
+		input.Query, enrichedQuery, len(projectIDs), len(results), noRelevantContext, output.ProcessingTimeMs)
 
 	return output, nil
 }

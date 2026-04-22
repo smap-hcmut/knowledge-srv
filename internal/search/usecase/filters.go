@@ -31,15 +31,38 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 		})
 	}
 
-	// 3. Filter by Sentiment
+	// 3. Filter by Sentiment — support both payload formats:
+	//   analyticsPayload (old): "overall_sentiment"
+	//   insightPayload   (new): "sentiment_label"
+	// Use Should (OR) so that either field format matches.
 	if len(filters.Sentiments) > 0 {
 		must = append(must, &pb.Condition{
-			ConditionOneOf: &pb.Condition_Field{
-				Field: &pb.FieldCondition{
-					Key: "overall_sentiment",
-					Match: &pb.Match{
-						MatchValue: &pb.Match_Keywords{
-							Keywords: &pb.RepeatedStrings{Strings: filters.Sentiments},
+			ConditionOneOf: &pb.Condition_Filter{
+				Filter: &pb.Filter{
+					Should: []*pb.Condition{
+						{
+							ConditionOneOf: &pb.Condition_Field{
+								Field: &pb.FieldCondition{
+									Key: "overall_sentiment",
+									Match: &pb.Match{
+										MatchValue: &pb.Match_Keywords{
+											Keywords: &pb.RepeatedStrings{Strings: filters.Sentiments},
+										},
+									},
+								},
+							},
+						},
+						{
+							ConditionOneOf: &pb.Condition_Field{
+								Field: &pb.FieldCondition{
+									Key: "sentiment_label",
+									Match: &pb.Match{
+										MatchValue: &pb.Match_Keywords{
+											Keywords: &pb.RepeatedStrings{Strings: filters.Sentiments},
+										},
+									},
+								},
+							},
 						},
 					},
 				},

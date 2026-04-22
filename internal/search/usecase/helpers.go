@@ -11,6 +11,7 @@ import (
 )
 
 // resolveCampaignProjects - Resolve campaign_id → project_ids (Tầng 2 cache)
+// As a side-effect, also caches the campaign name for query enrichment.
 func (uc *implUseCase) resolveCampaignProjects(ctx context.Context, campaignID string) ([]string, error) {
 	// Check cache
 	projectIDs, err := uc.cacheRepo.GetCampaignProjects(ctx, campaignID)
@@ -30,12 +31,38 @@ func (uc *implUseCase) resolveCampaignProjects(ctx context.Context, campaignID s
 		return nil, search.ErrCampaignNoProjects
 	}
 
-	// Save to cache
+	// Save project IDs to cache
 	if err := uc.cacheRepo.SaveCampaignProjects(ctx, campaignID, campaign.ProjectIDs); err != nil {
-		uc.l.Warnf(ctx, "search.usecase.resolveCampaignProjects: Failed to save cache: %v", err)
+		uc.l.Warnf(ctx, "search.usecase.resolveCampaignProjects: Failed to save project cache: %v", err)
+	}
+
+	// Also cache campaign name for query enrichment (best-effort)
+	if campaign.Name != "" {
+		if err := uc.cacheRepo.SaveCampaignName(ctx, campaignID, campaign.Name); err != nil {
+			uc.l.Warnf(ctx, "search.usecase.resolveCampaignProjects: Failed to save name cache: %v", err)
+		}
 	}
 
 	return campaign.ProjectIDs, nil
+}
+
+// resolveCampaignName returns the campaign display name for query enrichment.
+// Always a cache hit after resolveCampaignProjects has run in the same request.
+// Returns empty string on any error (enrichment is best-effort).
+func (uc *implUseCase) resolveCampaignName(ctx context.Context, campaignID string) string {
+	name, err := uc.cacheRepo.GetCampaignName(ctx, campaignID)
+	if err == nil && name != "" {
+		return name
+	}
+	// Fallback: fetch directly if cache was cold (e.g. first request after restart)
+	campaign, err := uc.projectSrv.GetCampaign(ctx, campaignID)
+	if err != nil {
+		return ""
+	}
+	if campaign.Name != "" {
+		_ = uc.cacheRepo.SaveCampaignName(ctx, campaignID, campaign.Name)
+	}
+	return campaign.Name
 }
 
 // generateCacheKey - Generate Tầng 3 cache key

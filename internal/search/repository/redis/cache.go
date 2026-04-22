@@ -13,6 +13,20 @@ import (
 // Tầng 2: Campaign Projects Cache (TTL 10 min)
 // =====================================================
 
+func (r *implCacheRepository) GetCampaignName(ctx context.Context, campaignID string) (string, error) {
+	key := fmt.Sprintf("campaign_name:%s", campaignID)
+	data, err := r.redis.GetClient().Get(ctx, key).Result()
+	if err != nil {
+		return "", err
+	}
+	return data, nil
+}
+
+func (r *implCacheRepository) SaveCampaignName(ctx context.Context, campaignID string, name string) error {
+	key := fmt.Sprintf("campaign_name:%s", campaignID)
+	return r.redis.GetClient().Set(ctx, key, name, 10*time.Minute).Err()
+}
+
 func (r *implCacheRepository) GetCampaignProjects(ctx context.Context, campaignID string) ([]string, error) {
 	key := fmt.Sprintf("campaign_projects:%s", campaignID)
 	data, err := r.redis.GetClient().Get(ctx, key).Result()
