@@ -80,17 +80,21 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		Limit:      searchLimit,
 		MinScore:   searchMinScore,
 	}
-	if len(input.Filters.Sentiments) > 0 || len(input.Filters.Aspects) > 0 ||
-		len(input.Filters.Platforms) > 0 || len(input.Filters.RiskLevels) > 0 ||
-		input.Filters.DateFrom != nil || input.Filters.DateTo != nil {
-		searchInput.Filters = search.SearchFilters{
-			Sentiments: input.Filters.Sentiments,
-			Aspects:    input.Filters.Aspects,
-			Platforms:  input.Filters.Platforms,
-			DateFrom:   input.Filters.DateFrom,
-			DateTo:     input.Filters.DateTo,
-			RiskLevels: input.Filters.RiskLevels,
-		}
+	searchFilters := search.SearchFilters{
+		Sentiments: input.Filters.Sentiments,
+		Aspects:    input.Filters.Aspects,
+		Platforms:  input.Filters.Platforms,
+		DateFrom:   input.Filters.DateFrom,
+		DateTo:     input.Filters.DateTo,
+		RiskLevels: input.Filters.RiskLevels,
+	}
+	if len(searchFilters.Platforms) == 0 {
+		searchFilters.Platforms = InferPlatforms(input.Message)
+	}
+	if len(searchFilters.Sentiments) > 0 || len(searchFilters.Aspects) > 0 ||
+		len(searchFilters.Platforms) > 0 || len(searchFilters.RiskLevels) > 0 ||
+		searchFilters.DateFrom != nil || searchFilters.DateTo != nil {
+		searchInput.Filters = searchFilters
 	}
 
 	searchOutput, err := uc.searchUC.Search(ctx, sc, searchInput)

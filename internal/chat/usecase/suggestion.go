@@ -66,18 +66,18 @@ func (uc *implUseCase) GetSuggestions(ctx context.Context, sc model.Scope, input
 	// Rule 4: General Insight (Always add if list is short)
 	if len(suggestions) < 4 {
 		suggestions = append(suggestions, chat.SmartSuggestion{
-			Query:       "Tổng quan sentiment về sản phẩm/dịch vụ?",
+			Query:       "Khách hàng đang phản hồi gì nổi bật về chiến dịch này?",
 			Category:    "insight",
-			Description: "Xem tổng quan cảm xúc của khách hàng",
+			Description: "Tóm tắt các phản hồi nổi bật gần đây",
 		})
 	}
 
 	// Rule 5: Trend (Always add if list is still short)
 	if len(suggestions) < 4 {
 		suggestions = append(suggestions, chat.SmartSuggestion{
-			Query:       "Xu hướng sentiment thay đổi thế nào trong tuần qua?",
+			Query:       "Các phản hồi tích cực nổi bật là gì?",
 			Category:    "sentiment_shift",
-			Description: "Theo dõi biến động sentiment theo thời gian",
+			Description: "Xem các điểm tích cực nổi bật trong dữ liệu hiện có",
 		})
 	}
 
@@ -94,9 +94,9 @@ func (uc *implUseCase) GetSuggestions(ctx context.Context, sc model.Scope, input
 func getFallbackSuggestions() []chat.SmartSuggestion {
 	return []chat.SmartSuggestion{
 		{
-			Query:       "Tổng quan sentiment về sản phẩm/dịch vụ?",
+			Query:       "Khách hàng đang phản hồi gì nổi bật về chiến dịch này?",
 			Category:    "insight",
-			Description: "Xem tổng quan cảm xúc của khách hàng",
+			Description: "Tóm tắt các phản hồi nổi bật gần đây",
 		},
 		{
 			Query:       "Vấn đề nào được nhắc đến nhiều nhất gần đây?",
@@ -104,9 +104,9 @@ func getFallbackSuggestions() []chat.SmartSuggestion {
 			Description: "Phát hiện các vấn đề phổ biến từ phản hồi khách hàng",
 		},
 		{
-			Query:       "So sánh phản hồi giữa các nền tảng?",
-			Category:    "comparison",
-			Description: "So sánh sentiment giữa Facebook, TikTok, Shopee...",
+			Query:       "Các phản hồi tích cực nổi bật là gì?",
+			Category:    "insight",
+			Description: "Tóm tắt các ý kiến tích cực đáng chú ý",
 		},
 	}
 }

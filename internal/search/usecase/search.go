@@ -90,17 +90,25 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	// Step 5: Build Qdrant filter (without project_id — implicit by collection)
 	filter := uc.buildSearchFilter(nil, input.Filters)
 
-	// Step 6: Search per-project Qdrant collections in parallel (server-side score filtering)
-	pointResults, err := uc.searchMultipleCollections(ctx, projectIDs, vector, filter, uint64(limit), float32(minScore))
+	// Step 6: Search per-project Qdrant collections in parallel (server-side score filtering).
+	// Over-fetch a bit so snapshot dedupe still leaves enough documents for the prompt.
+	fetchLimit := limit * 3
+	if fetchLimit > 50 {
+		fetchLimit = 50
+	}
+	pointResults, err := uc.searchMultipleCollections(ctx, projectIDs, vector, filter, uint64(fetchLimit), float32(minScore))
 	if err != nil {
 		uc.l.Errorf(ctx, "search.usecase.Search: Multi-collection search failed: %v", err)
 		return search.SearchOutput{}, fmt.Errorf("%w: %v", search.ErrSearchFailed, err)
 	}
 
-	// Step 7: Sort by score descending and apply limit (Qdrant already filtered by minScore server-side)
+	// Step 7: Sort by score descending, collapse repeated snapshots of the same logical
+	// post/UAP, then apply the final limit.
 	sort.Slice(pointResults, func(i, j int) bool {
 		return pointResults[i].Score > pointResults[j].Score
 	})
+	preDedupeCount := len(pointResults)
+	pointResults = uc.dedupePointResults(pointResults)
 
 	var results []search.SearchResult
 	for _, r := range pointResults {
@@ -133,8 +141,8 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		}
 	}
 
-	uc.l.Infof(ctx, "search.usecase.Search: query=%q, enriched=%q, projects=%d, results=%d, no_context=%v, duration=%dms",
-		input.Query, enrichedQuery, len(projectIDs), len(results), noRelevantContext, output.ProcessingTimeMs)
+	uc.l.Infof(ctx, "search.usecase.Search: query=%q, enriched=%q, projects=%d, fetched=%d, deduped=%d, results=%d, no_context=%v, duration=%dms",
+		input.Query, enrichedQuery, len(projectIDs), preDedupeCount, len(pointResults), len(results), noRelevantContext, output.ProcessingTimeMs)
 
 	return output, nil
 }

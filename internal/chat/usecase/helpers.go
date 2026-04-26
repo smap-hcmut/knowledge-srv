@@ -49,9 +49,18 @@ func (uc *implUseCase) generateSuggestions(query string, output search.SearchOut
 		suggestions = append(suggestions, "So sánh giữa các nền tảng?")
 	}
 
-	// Suggest trend analysis
-	if len(suggestions) < 3 {
+	// Prefer grounded follow-ups before broader analytical questions.
+	if len(output.Results) > 0 && len(suggestions) < 3 {
+		suggestions = append(suggestions, "Khách hàng đang phản hồi gì nổi bật?")
+	}
+
+	// Suggest trend analysis only when there is enough context to infer change.
+	if len(output.Results) >= 5 && len(suggestions) < 3 {
 		suggestions = append(suggestions, "Xu hướng theo thời gian?")
+	}
+
+	if len(output.Results) > 0 && len(suggestions) < 3 {
+		suggestions = append(suggestions, "Các phản hồi tích cực nổi bật là gì?")
 	}
 
 	if len(suggestions) > 3 {

@@ -15,6 +15,7 @@ var analyticsPayloadIndexes = []struct {
 }{
 	{"platform", pb.FieldType_FieldTypeKeyword},
 	{"overall_sentiment", pb.FieldType_FieldTypeKeyword},
+	{"sentiment_label", pb.FieldType_FieldTypeKeyword},
 	{"risk_level", pb.FieldType_FieldTypeKeyword},
 	{"aspects.aspect", pb.FieldType_FieldTypeKeyword},
 	{"content_created_at", pb.FieldType_FieldTypeFloat},

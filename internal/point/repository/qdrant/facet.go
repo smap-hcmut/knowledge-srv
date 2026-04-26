@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	pkgQdrant "knowledge-srv/pkg/qdrant"
 
@@ -17,6 +18,11 @@ func (r *implRepository) Facet(ctx context.Context, input repository.FacetOption
 	if err != nil {
 		if errors.Is(err, pkgQdrant.ErrCollectionNotFound) {
 			// Collection doesn't exist yet (no data indexed) — not an error, just empty.
+			return nil, err
+		}
+		if strings.Contains(err.Error(), "No appropriate index for faceting") {
+			// Some legacy collections do not have every optional payload index yet.
+			// Callers may intentionally fall back when a facet is unavailable.
 			return nil, err
 		}
 		r.l.Errorf(ctx, "point.repository.qdrant.Facet: Failed to facet points: %v", err)

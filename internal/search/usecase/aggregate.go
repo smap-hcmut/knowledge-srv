@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	"knowledge-srv/internal/model"
@@ -79,9 +80,11 @@ func (uc *implUseCase) aggregateCollection(
 
 	var (
 		colTotal   uint64
-		sentimentR []point.FacetOutput
-		platformR  []point.FacetOutput
-		aspectR    []point.FacetOutput
+		sentimentLegacyR []point.FacetOutput
+		sentimentNewR    []point.FacetOutput
+		platformR        []point.FacetOutput
+		aspectLegacyR    []point.FacetOutput
+		aspectNewR       []point.FacetOutput
 	)
 
 	g, gCtx := errgroup.WithContext(ctx)
@@ -116,7 +119,28 @@ func (uc *implUseCase) aggregateCollection(
 			}
 			return err
 		}
-		sentimentR = res
+		sentimentLegacyR = res
+		return nil
+	})
+
+	// Sentiment (new payload format)
+	g.Go(func() error {
+		res, err := uc.pointUC.Facet(gCtx, point.FacetInput{
+			CollectionName: collectionName,
+			Key:            "sentiment_label",
+			Filter:         emptyFilter,
+			Limit:          10,
+		})
+		if err != nil {
+			if isCollectionNotFoundError(err) {
+				return nil
+			}
+			if isMissingFacetIndexError(err, "sentiment_label") {
+				return nil
+			}
+			return err
+		}
+		sentimentNewR = res
 		return nil
 	})
 
@@ -138,7 +162,7 @@ func (uc *implUseCase) aggregateCollection(
 		return nil
 	})
 
-	// Negative aspects
+	// Negative aspects (legacy payload)
 	g.Go(func() error {
 		negFilter := &pb.Filter{
 			Must: []*pb.Condition{
@@ -166,7 +190,42 @@ func (uc *implUseCase) aggregateCollection(
 			}
 			return fmt.Errorf("failed to facet aspects in %s: %w", collectionName, err)
 		}
-		aspectR = res
+		aspectLegacyR = res
+		return nil
+	})
+
+	// Negative aspects (new payload format)
+	g.Go(func() error {
+		negFilter := &pb.Filter{
+			Must: []*pb.Condition{
+				{
+					ConditionOneOf: &pb.Condition_Field{
+						Field: &pb.FieldCondition{
+							Key: "sentiment_label",
+							Match: &pb.Match{
+								MatchValue: &pb.Match_Keyword{Keyword: "NEGATIVE"},
+							},
+						},
+					},
+				},
+			},
+		}
+		res, err := uc.pointUC.Facet(gCtx, point.FacetInput{
+			CollectionName: collectionName,
+			Key:            "aspects.aspect",
+			Filter:         negFilter,
+			Limit:          5,
+		})
+		if err != nil {
+			if isCollectionNotFoundError(err) {
+				return nil
+			}
+			if isMissingFacetIndexError(err, "sentiment_label") {
+				return nil
+			}
+			return fmt.Errorf("failed to facet aspects in %s: %w", collectionName, err)
+		}
+		aspectNewR = res
 		return nil
 	})
 
@@ -179,15 +238,29 @@ func (uc *implUseCase) aggregateCollection(
 	defer mu.Unlock()
 
 	*totalDocs += colTotal
-	for _, s := range sentimentR {
+	for _, s := range sentimentLegacyR {
+		sentimentMap[s.Value] += s.Count
+	}
+	for _, s := range sentimentNewR {
 		sentimentMap[s.Value] += s.Count
 	}
 	for _, p := range platformR {
 		platformMap[p.Value] += p.Count
 	}
-	for _, a := range aspectR {
+	for _, a := range aspectLegacyR {
+		aspectMap[a.Value] += a.Count
+	}
+	for _, a := range aspectNewR {
 		aspectMap[a.Value] += a.Count
 	}
 
 	return nil
+}
+
+func isMissingFacetIndexError(err error, field string) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "No appropriate index for faceting") && strings.Contains(msg, field)
 }

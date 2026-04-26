@@ -12,6 +12,12 @@ const (
 	IntentStructured QueryIntent = "STRUCTURED"
 )
 
+var platformKeywords = map[string][]string{
+	"TIKTOK":   {"tiktok", "tik tok"},
+	"FACEBOOK": {"facebook", "fb"},
+	"YOUTUBE":  {"youtube", "you tube", "yt"},
+}
+
 // structuredKeywords are signals that the user wants analytics/aggregation.
 var structuredKeywords = []string{
 	"bao nhiêu", "thống kê", "top", "so sánh", "tỷ lệ", "filter", "lọc", "đếm", "count",
@@ -52,4 +58,20 @@ func ClassifyIntent(query string) QueryIntent {
 	}
 	// NARRATIVE wins on tie or when neither matched — safer default for broad queries.
 	return IntentNarrative
+}
+
+func InferPlatforms(query string) []string {
+	q := strings.ToLower(strings.TrimSpace(query))
+	platforms := make([]string, 0, len(platformKeywords))
+
+	for platform, keywords := range platformKeywords {
+		for _, keyword := range keywords {
+			if strings.Contains(q, keyword) {
+				platforms = append(platforms, platform)
+				break
+			}
+		}
+	}
+
+	return platforms
 }

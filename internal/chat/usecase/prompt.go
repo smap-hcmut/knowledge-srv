@@ -13,7 +13,8 @@ import (
 const systemPrompt = `Bạn là trợ lý phân tích dữ liệu SMAP. Nhiệm vụ:
 - Trả lời câu hỏi dựa trên context documents được cung cấp
 - Trích dẫn nguồn bằng [1], [2], ... tương ứng với thứ tự documents
-- Nếu không có context phù hợp, nói rõ "Không tìm thấy dữ liệu liên quan"
+- Chỉ nói rõ "Không tìm thấy dữ liệu liên quan" khi hoàn toàn không có context documents
+- Nếu context có ít dữ liệu hoặc chỉ phản ánh một phần câu hỏi, vẫn trả lời dựa trên phần có sẵn và nêu rõ giới hạn dữ liệu
 - Trả lời bằng tiếng Việt, ngắn gọn, chính xác
 - Phân tích sentiment và xu hướng nếu được hỏi`
 

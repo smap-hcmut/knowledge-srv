@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"knowledge-srv/internal/point"
 	"knowledge-srv/internal/search"
@@ -68,7 +69,7 @@ func (uc *implUseCase) resolveCampaignName(ctx context.Context, campaignID strin
 // generateCacheKey - Generate Tầng 3 cache key
 func (uc *implUseCase) generateCacheKey(input search.SearchInput) string {
 	filterJSON, _ := json.Marshal(input.Filters)
-	raw := fmt.Sprintf("%s:%s:%s:%d:%.2f", input.CampaignID, input.Query, string(filterJSON), input.Limit, input.MinScore)
+	raw := fmt.Sprintf("v2:%s:%s:%s:%d:%.2f", input.CampaignID, input.Query, string(filterJSON), input.Limit, input.MinScore)
 	hash := sha256.Sum256([]byte(raw))
 	return fmt.Sprintf("search:%s:%x", input.CampaignID, hash)
 }
@@ -149,6 +150,136 @@ func (uc *implUseCase) mapQdrantResult(r point.SearchOutput) search.SearchResult
 	}
 
 	return result
+}
+
+// dedupePointResults collapses multiple snapshots of the same logical post/UAP.
+// Keep the first item because callers already sort by descending relevance score.
+func (uc *implUseCase) dedupePointResults(results []point.SearchOutput) []point.SearchOutput {
+	if len(results) == 0 {
+		return nil
+	}
+
+	deduped := make([]point.SearchOutput, 0, len(results))
+	seen := make(map[string]struct{}, len(results))
+
+	for _, result := range results {
+		key := dedupeKeyForPointResult(result)
+		if key == "" {
+			deduped = append(deduped, result)
+			continue
+		}
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		deduped = append(deduped, result)
+	}
+
+	return deduped
+}
+
+func dedupeKeyForPointResult(result point.SearchOutput) string {
+	payload := result.Payload
+	platform := normalizeDedupeValue(stringFromPayload(payload, "platform"))
+	if platform == "" {
+		platform = "unknown"
+	}
+
+	if uapID := normalizeDedupeValue(stringFromPayload(payload, "uap_id")); uapID != "" {
+		return fmt.Sprintf("%s|uap|%s", platform, uapID)
+	}
+
+	content := normalizeDedupeValue(firstNonEmpty(
+		stringFromPayload(payload, "content"),
+		stringFromPayload(payload, "content_summary"),
+	))
+	author := normalizeDedupeValue(firstNonEmpty(
+		stringFromNestedPayload(payload, "metadata", "author_username"),
+		stringFromNestedPayload(payload, "metadata", "author"),
+		stringFromNestedPayload(payload, "metadata", "author_display_name"),
+	))
+	createdAt := normalizeDedupeValue(firstNonEmpty(
+		stringFromPayload(payload, "published_at"),
+		fmt.Sprintf("%.0f", numberFromPayload(payload, "content_created_at")),
+	))
+	if content != "" {
+		return fmt.Sprintf("%s|content|%s|%s|%s", platform, author, createdAt, content)
+	}
+
+	if sourceID := normalizeDedupeValue(stringFromPayload(payload, "source_id")); sourceID != "" {
+		return fmt.Sprintf("%s|source|%s", platform, sourceID)
+	}
+
+	contentURL := normalizeDedupeValue(firstNonEmpty(
+		stringFromNestedPayload(payload, "metadata", "url"),
+		stringFromNestedPayload(payload, "metadata", "video_url"),
+	))
+	if contentURL != "" {
+		return fmt.Sprintf("%s|url|%s", platform, contentURL)
+	}
+
+	return ""
+}
+
+func numberFromPayload(payload map[string]interface{}, key string) float64 {
+	v, ok := payload[key]
+	if !ok {
+		return 0
+	}
+	f, ok := v.(float64)
+	if !ok {
+		return 0
+	}
+	return f
+}
+
+func stringFromPayload(payload map[string]interface{}, key string) string {
+	v, ok := payload[key]
+	if !ok {
+		return ""
+	}
+	s, ok := v.(string)
+	if !ok {
+		return ""
+	}
+	return s
+}
+
+func stringFromNestedPayload(payload map[string]interface{}, parentKey, childKey string) string {
+	parent, ok := payload[parentKey]
+	if !ok {
+		return ""
+	}
+	obj, ok := parent.(map[string]interface{})
+	if !ok {
+		return ""
+	}
+	v, ok := obj[childKey]
+	if !ok {
+		return ""
+	}
+	s, ok := v.(string)
+	if !ok {
+		return ""
+	}
+	return s
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+func normalizeDedupeValue(value string) string {
+	trimmed := strings.TrimSpace(strings.ToLower(value))
+	if trimmed == "" {
+		return ""
+	}
+	return strings.Join(strings.Fields(trimmed), " ")
 }
 
 // buildAggregations - Tổng hợp thống kê từ results
