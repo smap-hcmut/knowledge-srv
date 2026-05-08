@@ -5,18 +5,19 @@ import (
 )
 
 const (
-	MaxConcurrency    = 10
-	MinContentLength  = 10
-	MinQualityScore   = 0.3
-	EMBEDDING_ERROR   = "EMBEDDING_ERROR"
-	QDRANT_ERROR      = "QDRANT_ERROR"
-	DB_ERROR          = "DB_ERROR"
-	VALIDATION_ERROR  = "VALIDATION_ERROR"
-	DUPLICATE_CONTENT = "DUPLICATE_CONTENT"
-	STATUS_INDEXED    = "INDEXED"
-	STATUS_SKIPPED    = "SKIPPED"
-	STATUS_FAILED     = "FAILED"
-	STATUS_PENDING    = "PENDING"
+	MaxConcurrency            = 10
+	MinContentLength          = 10
+	MinQualityScore           = 0.3
+	MinBusinessRelevanceScore = 0.45
+	EMBEDDING_ERROR           = "EMBEDDING_ERROR"
+	QDRANT_ERROR              = "QDRANT_ERROR"
+	DB_ERROR                  = "DB_ERROR"
+	VALIDATION_ERROR          = "VALIDATION_ERROR"
+	DUPLICATE_CONTENT         = "DUPLICATE_CONTENT"
+	STATUS_INDEXED            = "INDEXED"
+	STATUS_SKIPPED            = "SKIPPED"
+	STATUS_FAILED             = "FAILED"
+	STATUS_PENDING            = "PENDING"
 )
 
 type IndexInput struct {
@@ -273,8 +274,9 @@ type InsightIdentityInput struct {
 }
 
 type InsightContentInput struct {
-	CleanText string
-	Summary   string
+	CleanText      string
+	Summary        string
+	ContextSummary string
 }
 
 type InsightNLPInput struct {
@@ -299,7 +301,9 @@ type InsightEntityInput struct {
 }
 
 type InsightBusinessInput struct {
-	Impact InsightImpactInput
+	Impact           InsightImpactInput
+	RelevanceScore   float64
+	RelevanceReasons []string
 }
 
 type InsightImpactInput struct {

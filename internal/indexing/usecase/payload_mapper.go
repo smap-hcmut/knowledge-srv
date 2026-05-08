@@ -6,31 +6,31 @@ import (
 )
 
 type analyticsPayload struct {
-	AnalyticsID          string                  `json:"analytics_id"`
-	ProjectID            string                  `json:"project_id"`
-	SourceID             string                  `json:"source_id"`
-	Content              string                  `json:"content"`
-	ContentCreatedAt     int64                   `json:"content_created_at"`
-	IngestedAt           int64                   `json:"ingested_at"`
-	Platform             string                  `json:"platform"`
-	OverallSentiment     string                  `json:"overall_sentiment"`
-	OverallSentimentScore float64                `json:"overall_sentiment_score"`
-	SentimentConfidence  float64                 `json:"sentiment_confidence"`
-	Keywords             []string                `json:"keywords"`
-	RiskLevel            string                  `json:"risk_level"`
-	RiskScore            float64                 `json:"risk_score"`
-	RequiresAttention    bool                    `json:"requires_attention"`
-	EngagementScore      float64                 `json:"engagement_score"`
-	ViralityScore        float64                 `json:"virality_score"`
-	InfluenceScore       float64                 `json:"influence_score"`
-	ReachEstimate        int                     `json:"reach_estimate"`
-	ContentQualityScore  float64                 `json:"content_quality_score"`
-	IsSpam               bool                    `json:"is_spam"`
-	IsBot                bool                    `json:"is_bot"`
-	Language             string                  `json:"language"`
-	ToxicityScore        float64                 `json:"toxicity_score"`
-	Aspects              []analyticsAspectPayload `json:"aspects,omitempty"`
-	Metadata             analyticsMetadataPayload `json:"metadata"`
+	AnalyticsID           string                   `json:"analytics_id"`
+	ProjectID             string                   `json:"project_id"`
+	SourceID              string                   `json:"source_id"`
+	Content               string                   `json:"content"`
+	ContentCreatedAt      int64                    `json:"content_created_at"`
+	IngestedAt            int64                    `json:"ingested_at"`
+	Platform              string                   `json:"platform"`
+	OverallSentiment      string                   `json:"overall_sentiment"`
+	OverallSentimentScore float64                  `json:"overall_sentiment_score"`
+	SentimentConfidence   float64                  `json:"sentiment_confidence"`
+	Keywords              []string                 `json:"keywords"`
+	RiskLevel             string                   `json:"risk_level"`
+	RiskScore             float64                  `json:"risk_score"`
+	RequiresAttention     bool                     `json:"requires_attention"`
+	EngagementScore       float64                  `json:"engagement_score"`
+	ViralityScore         float64                  `json:"virality_score"`
+	InfluenceScore        float64                  `json:"influence_score"`
+	ReachEstimate         int                      `json:"reach_estimate"`
+	ContentQualityScore   float64                  `json:"content_quality_score"`
+	IsSpam                bool                     `json:"is_spam"`
+	IsBot                 bool                     `json:"is_bot"`
+	Language              string                   `json:"language"`
+	ToxicityScore         float64                  `json:"toxicity_score"`
+	Aspects               []analyticsAspectPayload `json:"aspects,omitempty"`
+	Metadata              analyticsMetadataPayload `json:"metadata"`
 }
 
 type analyticsAspectPayload struct {
@@ -60,24 +60,28 @@ type analyticsEngagementPayload struct {
 }
 
 type insightPayload struct {
-	ProjectID      string                 `json:"project_id"`
-	CampaignID     string                 `json:"campaign_id"`
-	UapID          string                 `json:"uap_id"`
-	UapType        string                 `json:"uap_type"`
-	UapMediaType   string                 `json:"uap_media_type"`
-	Platform       string                 `json:"platform"`
-	PublishedAt    string                 `json:"published_at"`
-	ContentSummary string                 `json:"content_summary"`
-	SentimentLabel string                 `json:"sentiment_label"`
-	SentimentScore float64                `json:"sentiment_score"`
-	Aspects        []insightAspectPayload `json:"aspects,omitempty"`
-	Entities       []insightEntityPayload `json:"entities,omitempty"`
-	ImpactScore    float64                `json:"impact_score"`
-	Priority       string                 `json:"priority"`
-	Likes          int                    `json:"likes"`
-	Comments       int                    `json:"comments"`
-	Shares         int                    `json:"shares"`
-	Views          int                    `json:"views"`
+	ProjectID        string                 `json:"project_id"`
+	CampaignID       string                 `json:"campaign_id"`
+	UapID            string                 `json:"uap_id"`
+	UapType          string                 `json:"uap_type"`
+	UapMediaType     string                 `json:"uap_media_type"`
+	Platform         string                 `json:"platform"`
+	PublishedAt      string                 `json:"published_at"`
+	Content          string                 `json:"content"`
+	ContentSummary   string                 `json:"content_summary"`
+	ContextSummary   string                 `json:"context_summary,omitempty"`
+	SentimentLabel   string                 `json:"sentiment_label"`
+	SentimentScore   float64                `json:"sentiment_score"`
+	Aspects          []insightAspectPayload `json:"aspects,omitempty"`
+	Entities         []insightEntityPayload `json:"entities,omitempty"`
+	ImpactScore      float64                `json:"impact_score"`
+	RelevanceScore   float64                `json:"business_relevance_score"`
+	RelevanceReasons []string               `json:"business_relevance_reasons,omitempty"`
+	Priority         string                 `json:"priority"`
+	Likes            int                    `json:"likes"`
+	Comments         int                    `json:"comments"`
+	Shares           int                    `json:"shares"`
+	Views            int                    `json:"views"`
 }
 
 type insightAspectPayload struct {

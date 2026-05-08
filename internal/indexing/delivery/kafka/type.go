@@ -60,8 +60,9 @@ type InsightIdentity struct {
 }
 
 type InsightContent struct {
-	CleanText string `json:"clean_text"`
-	Summary   string `json:"summary"`
+	CleanText      string `json:"clean_text"`
+	Summary        string `json:"summary"`
+	ContextSummary string `json:"context_summary"`
 }
 
 type InsightNLP struct {
@@ -86,7 +87,9 @@ type InsightEntity struct {
 }
 
 type InsightBusiness struct {
-	Impact InsightImpact `json:"impact"`
+	Impact           InsightImpact `json:"impact"`
+	RelevanceScore   float64       `json:"relevance_score"`
+	RelevanceReasons []string      `json:"relevance_reasons"`
 }
 
 type InsightImpact struct {

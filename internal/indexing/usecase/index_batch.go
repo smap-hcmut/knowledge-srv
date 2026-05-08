@@ -7,6 +7,7 @@ import (
 	"knowledge-srv/internal/indexing"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/point"
+	"strings"
 	"sync"
 	"time"
 
@@ -102,12 +103,17 @@ func (uc *implUseCase) indexSingleInsight(
 		return indexing.STATUS_SKIPPED
 	}
 
-	if doc.Identity.UapID == "" || doc.Content.CleanText == "" {
+	cleanText := strings.TrimSpace(doc.Content.CleanText)
+	if doc.Identity.UapID == "" || cleanText == "" {
 		uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: skipping doc with empty uap_id or clean_text")
 		return indexing.STATUS_SKIPPED
 	}
+	if !isIndexableInsight(doc, cleanText) {
+		return indexing.STATUS_SKIPPED
+	}
 
-	genOutput, err := uc.embeddingUC.Generate(ctx, embedding.GenerateInput{Text: doc.Content.CleanText})
+	embeddingText := buildEmbeddingText(doc, cleanText)
+	genOutput, err := uc.embeddingUC.Generate(ctx, embedding.GenerateInput{Text: embeddingText})
 	if err != nil {
 		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: embedding failed for %s: %v", doc.Identity.UapID, err)
 		return indexing.STATUS_FAILED
@@ -138,26 +144,123 @@ func (uc *implUseCase) buildInsightPayload(
 	campaignID string,
 	doc indexing.InsightMessageInput,
 ) map[string]interface{} {
+	cleanText := strings.TrimSpace(doc.Content.CleanText)
 	payload := insightPayload{
-		ProjectID:      projectID,
-		CampaignID:     campaignID,
-		UapID:          doc.Identity.UapID,
-		UapType:        doc.Identity.UapType,
-		UapMediaType:   doc.Identity.UapMediaType,
-		Platform:       doc.Identity.Platform,
-		PublishedAt:    doc.Identity.PublishedAt,
-		ContentSummary: doc.Content.Summary,
-		SentimentLabel: doc.NLP.Sentiment.Label,
-		SentimentScore: doc.NLP.Sentiment.Score,
-		Aspects:        mapInsightAspects(doc.NLP.Aspects),
-		Entities:       mapInsightEntities(doc.NLP.Entities),
-		ImpactScore:    doc.Business.Impact.ImpactScore,
-		Priority:       doc.Business.Impact.Priority,
-		Likes:          doc.Business.Impact.Engagement.Likes,
-		Comments:       doc.Business.Impact.Engagement.Comments,
-		Shares:         doc.Business.Impact.Engagement.Shares,
-		Views:          doc.Business.Impact.Engagement.Views,
+		ProjectID:        projectID,
+		CampaignID:       campaignID,
+		UapID:            doc.Identity.UapID,
+		UapType:          doc.Identity.UapType,
+		UapMediaType:     doc.Identity.UapMediaType,
+		Platform:         doc.Identity.Platform,
+		PublishedAt:      doc.Identity.PublishedAt,
+		Content:          cleanText,
+		ContentSummary:   firstNonEmptyString(doc.Content.Summary, cleanText),
+		ContextSummary:   strings.TrimSpace(doc.Content.ContextSummary),
+		SentimentLabel:   doc.NLP.Sentiment.Label,
+		SentimentScore:   doc.NLP.Sentiment.Score,
+		Aspects:          mapInsightAspects(doc.NLP.Aspects),
+		Entities:         mapInsightEntities(doc.NLP.Entities),
+		ImpactScore:      doc.Business.Impact.ImpactScore,
+		RelevanceScore:   doc.Business.RelevanceScore,
+		RelevanceReasons: doc.Business.RelevanceReasons,
+		Priority:         doc.Business.Impact.Priority,
+		Likes:            doc.Business.Impact.Engagement.Likes,
+		Comments:         doc.Business.Impact.Engagement.Comments,
+		Shares:           doc.Business.Impact.Engagement.Shares,
+		Views:            doc.Business.Impact.Engagement.Views,
 	}
 
 	return uc.payloadFromStruct(payload)
+}
+
+func isIndexableInsight(doc indexing.InsightMessageInput, cleanText string) bool {
+	if len([]rune(cleanText)) < indexing.MinContentLength {
+		return false
+	}
+	if len([]rune(cleanText)) < 20 {
+		return false
+	}
+	if businessRelevanceScore(doc, cleanText) < indexing.MinBusinessRelevanceScore {
+		return false
+	}
+	if hasInsightSignal(doc) {
+		return true
+	}
+	return containsBusinessSignal(cleanText)
+}
+
+func hasInsightSignal(doc indexing.InsightMessageInput) bool {
+	if len(doc.NLP.Aspects) > 0 || len(doc.NLP.Entities) > 0 {
+		return true
+	}
+	if doc.Business.Impact.ImpactScore >= 0.15 {
+		return true
+	}
+	priority := strings.ToUpper(strings.TrimSpace(doc.Business.Impact.Priority))
+	if priority == "HIGH" || priority == "MEDIUM" || priority == "CRITICAL" {
+		return true
+	}
+	return false
+}
+
+func buildEmbeddingText(doc indexing.InsightMessageInput, cleanText string) string {
+	contextSummary := strings.TrimSpace(doc.Content.ContextSummary)
+	if contextSummary == "" {
+		return cleanText
+	}
+	return cleanText + "\n\nContext: " + contextSummary
+}
+
+func businessRelevanceScore(doc indexing.InsightMessageInput, cleanText string) float64 {
+	if doc.Business.RelevanceScore > 0 {
+		return doc.Business.RelevanceScore
+	}
+	if containsBusinessSignal(cleanText) {
+		return 0.45
+	}
+	if containsBusinessSignal(doc.Content.ContextSummary) && len([]rune(cleanText)) >= 35 {
+		return 0.36
+	}
+	return 0.0
+}
+
+func containsBusinessSignal(text string) bool {
+	lowered := strings.ToLower(text)
+	signals := []string{
+		"ahamove",
+		"aha move",
+		"ahatruck",
+		"giao hang",
+		"giao hàng",
+		"ship",
+		"shipper",
+		"tai xe",
+		"tài xế",
+		"don hang",
+		"đơn hàng",
+		"cod",
+		"thu ho",
+		"thu hộ",
+		"huy don",
+		"hủy đơn",
+		"tong dai",
+		"tổng đài",
+		"ho tro",
+		"hỗ trợ",
+	}
+	for _, signal := range signals {
+		if strings.Contains(lowered, signal) {
+			return true
+		}
+	}
+	return false
+}
+
+func firstNonEmptyString(values ...string) string {
+	for _, value := range values {
+		if trimmed := strings.TrimSpace(value); trimmed != "" {
+			return trimmed
+		}
+	}
+	return ""
 }

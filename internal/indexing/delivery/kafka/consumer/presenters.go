@@ -45,8 +45,9 @@ func toIndexBatchInput(m kafkaDelivery.BatchCompletedMessage) indexing.IndexBatc
 				PublishedAt:  d.Identity.PublishedAt,
 			},
 			Content: indexing.InsightContentInput{
-				CleanText: d.Content.CleanText,
-				Summary:   d.Content.Summary,
+				CleanText:      d.Content.CleanText,
+				Summary:        d.Content.Summary,
+				ContextSummary: d.Content.ContextSummary,
 			},
 			NLP: indexing.InsightNLPInput{
 				Sentiment: indexing.InsightSentimentInput{
@@ -57,6 +58,8 @@ func toIndexBatchInput(m kafkaDelivery.BatchCompletedMessage) indexing.IndexBatc
 				Entities: entities,
 			},
 			Business: indexing.InsightBusinessInput{
+				RelevanceScore:   d.Business.RelevanceScore,
+				RelevanceReasons: d.Business.RelevanceReasons,
 				Impact: indexing.InsightImpactInput{
 					Engagement: indexing.InsightEngagementInput{
 						Likes:    d.Business.Impact.Engagement.Likes,
