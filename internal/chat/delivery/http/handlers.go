@@ -1,7 +1,10 @@
 package http
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
+	pkgErrors "github.com/smap-hcmut/shared-libs/go/errors"
 	"github.com/smap-hcmut/shared-libs/go/response"
 )
 
@@ -20,19 +23,29 @@ func (h *handler) Chat(c *gin.Context) {
 
 	req, sc, err := h.processChatRequest(c)
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.Chat: processChatRequest failed: %v", err)
-		response.Error(c, err, h.discord)
+		h.respondChatError(c, "chat.delivery.http.Chat: processChatRequest failed", err)
 		return
 	}
 
 	o, err := h.uc.Chat(ctx, sc, req.toInput())
 	if err != nil {
-		h.l.Errorf(ctx, "chat.delivery.http.Chat: usecase Chat failed: %v", err)
-		response.Error(c, h.mapError(err), h.discord)
+		h.respondChatError(c, "chat.delivery.http.Chat: usecase Chat failed", err)
 		return
 	}
 
 	response.OK(c, h.newChatResp(o))
+}
+
+func (h *handler) respondChatError(c *gin.Context, logPrefix string, err error) {
+	ctx := c.Request.Context()
+	mapped := h.mapError(err)
+	var httpErr *pkgErrors.HTTPError
+	if errors.As(mapped, &httpErr) && httpErr.StatusCode < 500 {
+		h.l.Warnf(ctx, "%s: %v", logPrefix, err)
+	} else {
+		h.l.Errorf(ctx, "%s: %v", logPrefix, err)
+	}
+	response.Error(c, mapped, h.discord)
 }
 
 // @Summary Get conversation detail

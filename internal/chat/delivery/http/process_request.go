@@ -3,17 +3,28 @@ package http
 import (
 	"knowledge-srv/internal/model"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/smap-hcmut/shared-libs/go/auth"
+	pkgErrors "github.com/smap-hcmut/shared-libs/go/errors"
 )
 
 func (h *handler) processChatRequest(c *gin.Context) (chatReq, model.Scope, error) {
 	var req chatReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		return req, model.Scope{}, err
+		if strings.TrimSpace(req.CampaignID) == "" {
+			return req, model.Scope{}, errCampaignRequired
+		}
+		if strings.TrimSpace(req.Message) == "" {
+			return req, model.Scope{}, errMessageTooShort
+		}
+		return req, model.Scope{}, pkgErrors.NewHTTPError(400, "Invalid chat request")
 	}
+	req.CampaignID = strings.TrimSpace(req.CampaignID)
+	req.Message = strings.TrimSpace(req.Message)
+	req.ConversationID = strings.TrimSpace(req.ConversationID)
 
 	sc := auth.GetScopeFromContext(c.Request.Context())
 	return req, model.ToScope(sc), nil

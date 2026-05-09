@@ -19,6 +19,11 @@ var (
 )
 
 func (h *handler) mapError(err error) error {
+	var httpErr *pkgErrors.HTTPError
+	if errors.As(err, &httpErr) {
+		return httpErr
+	}
+
 	switch {
 	case errors.Is(err, chat.ErrConversationNotFound):
 		return errConversationNotFound

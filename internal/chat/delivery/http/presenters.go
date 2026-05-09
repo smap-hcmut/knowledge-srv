@@ -9,7 +9,7 @@ import (
 type chatReq struct {
 	CampaignID     string         `json:"campaign_id" binding:"required"`
 	ConversationID string         `json:"conversation_id,omitempty"`
-	Message        string         `json:"message" binding:"required,min=3,max=2000"`
+	Message        string         `json:"message" binding:"required,max=2000"`
 	Filters        *chatFilterReq `json:"filters,omitempty"`
 }
 
