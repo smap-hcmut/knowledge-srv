@@ -49,3 +49,20 @@ func (r *implRepository) buildListReportsQuery(opts repository.ListReportsOption
 
 	return mods
 }
+
+// buildCountReportsQuery - Build count query for ListReports filters.
+func (r *implRepository) buildCountReportsQuery(opts repository.ListReportsOptions) []qm.QueryMod {
+	mods := []qm.QueryMod{}
+
+	if opts.CampaignID != "" {
+		mods = append(mods, qm.Where("campaign_id = ?", opts.CampaignID))
+	}
+	if opts.UserID != "" {
+		mods = append(mods, qm.Where("user_id = ?", opts.UserID))
+	}
+	if opts.Status != "" {
+		mods = append(mods, qm.Where("status = ?", opts.Status))
+	}
+
+	return mods
+}

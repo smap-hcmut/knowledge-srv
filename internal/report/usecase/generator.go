@@ -71,11 +71,14 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 		i, tmpl := i, tmpl
 		g.Go(func() error {
 			prompt := buildSectionPrompt(tmpl, promptData{
-				CampaignID:  input.CampaignID,
-				ReportType:  input.ReportType,
-				Samples:     formatSamples(samples),
-				TotalDocs:   totalDocs,
-				Aggregation: formatAggregation(searchOutput.Aggregations),
+				CampaignID:     input.CampaignID,
+				ReportType:     input.ReportType,
+				Samples:        formatSamples(samples),
+				TotalDocs:      totalDocs,
+				Aggregation:    formatAggregation(searchOutput.Aggregations),
+				UserPrompt:     input.Filters.Prompt,
+				Sections:       strings.Join(input.Filters.Sections, ", "),
+				CompetitorURLs: strings.Join(input.Filters.CompetitorURLs, ", "),
 			})
 
 			llmCtx, cancel := context.WithTimeout(gCtx, 3*time.Minute)
@@ -134,6 +137,12 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 	// Mark report as completed
 	completedAt := time.Now()
 	generationTimeMs := completedAt.Sub(startTime).Milliseconds()
+
+	latest, err := uc.repo.GetReportByID(ctx, reportID)
+	if err == nil && latest.Status == report.StatusCancelled {
+		uc.l.Infof(ctx, "report.usecase.generateInBackground: Report %s was cancelled, skipping completion update", reportID)
+		return
+	}
 
 	err = uc.repo.UpdateCompleted(ctx, repository.UpdateCompletedOptions{
 		ReportID:          reportID,
@@ -229,6 +238,12 @@ func compileMarkdown(input report.GenerateInput, sections []generatedSection, to
 	sb.WriteString(fmt.Sprintf("# %s\n\n", title))
 	sb.WriteString(fmt.Sprintf("**Campaign ID:** %s\n\n", input.CampaignID))
 	sb.WriteString(fmt.Sprintf("**Loại báo cáo:** %s\n\n", input.ReportType))
+	if len(input.Filters.Sections) > 0 {
+		sb.WriteString(fmt.Sprintf("**Sections:** %s\n\n", strings.Join(input.Filters.Sections, ", ")))
+	}
+	if strings.TrimSpace(input.Filters.Prompt) != "" {
+		sb.WriteString(fmt.Sprintf("**Yêu cầu:** %s\n\n", input.Filters.Prompt))
+	}
 	sb.WriteString(fmt.Sprintf("**Tổng số documents phân tích:** %d\n\n", totalDocs))
 	sb.WriteString(fmt.Sprintf("**Thời gian tạo:** %s\n\n", time.Now().Format("02/01/2006 15:04")))
 	sb.WriteString("---\n\n")

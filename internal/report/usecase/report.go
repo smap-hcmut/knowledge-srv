@@ -27,7 +27,7 @@ func (uc *implUseCase) Generate(ctx context.Context, sc model.Scope, input repor
 	}
 
 	// Generate params hash for deduplication
-	paramsHash, err := uc.generateParamsHash(input)
+	paramsHash, err := uc.generateParamsHash(input, sc.UserID)
 	if err != nil {
 		uc.l.Errorf(ctx, "report.usecase.Generate: Failed to generate params hash: %v", err)
 		return report.GenerateOutput{}, report.ErrGenerationFailed
@@ -113,6 +113,9 @@ func (uc *implUseCase) GetReport(ctx context.Context, sc model.Scope, input repo
 		uc.l.Errorf(ctx, "report.usecase.GetReport: Failed to get report: %v", err)
 		return report.ReportOutput{}, report.ErrReportNotFound
 	}
+	if !canAccessReport(sc, rpt) {
+		return report.ReportOutput{}, report.ErrReportForbidden
+	}
 
 	return uc.buildReportOutput(rpt), nil
 }
@@ -123,6 +126,9 @@ func (uc *implUseCase) DownloadReport(ctx context.Context, sc model.Scope, input
 	if err != nil {
 		uc.l.Errorf(ctx, "report.usecase.DownloadReport: Failed to get report: %v", err)
 		return report.DownloadOutput{}, report.ErrReportNotFound
+	}
+	if !canAccessReport(sc, rpt) {
+		return report.DownloadOutput{}, report.ErrReportForbidden
 	}
 
 	if rpt.Status != report.StatusCompleted {
@@ -164,11 +170,12 @@ func isValidReportType(rt string) bool {
 }
 
 // generateParamsHash creates a SHA-256 hash for deduplication.
-func (uc *implUseCase) generateParamsHash(input report.GenerateInput) (string, error) {
+func (uc *implUseCase) generateParamsHash(input report.GenerateInput, userID string) (string, error) {
 	data := map[string]interface{}{
 		"campaign_id": input.CampaignID,
 		"report_type": input.ReportType,
 		"filters":     input.Filters,
+		"user_id":     userID,
 	}
 	b, err := json.Marshal(data)
 	if err != nil {

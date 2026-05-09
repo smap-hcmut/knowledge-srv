@@ -10,11 +10,14 @@ import (
 
 // promptData holds the context data injected into section prompts.
 type promptData struct {
-	CampaignID  string
-	ReportType  string
-	Samples     string
-	TotalDocs   int
-	Aggregation string
+	CampaignID     string
+	ReportType     string
+	Samples        string
+	TotalDocs      int
+	Aggregation    string
+	UserPrompt     string
+	Sections       string
+	CompetitorURLs string
 }
 
 // buildSectionPrompt injects context data into the section template prompt.
@@ -22,6 +25,9 @@ func buildSectionPrompt(tmpl report.SectionTemplate, data promptData) string {
 	context := fmt.Sprintf(`**Campaign:** %s
 **Loại báo cáo:** %s
 **Tổng số documents:** %d
+**Yêu cầu người dùng:** %s
+**Sections mong muốn:** %s
+**Nguồn/đối thủ tham chiếu:** %s
 
 ### Dữ liệu tổng hợp:
 %s
@@ -31,11 +37,22 @@ func buildSectionPrompt(tmpl report.SectionTemplate, data promptData) string {
 		data.CampaignID,
 		data.ReportType,
 		data.TotalDocs,
+		emptyAsDash(data.UserPrompt),
+		emptyAsDash(data.Sections),
+		emptyAsDash(data.CompetitorURLs),
 		data.Aggregation,
 		data.Samples,
 	)
 
 	return fmt.Sprintf(tmpl.Prompt, context)
+}
+
+func emptyAsDash(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return "-"
+	}
+	return value
 }
 
 // formatSamples formats search results into a human-readable string for LLM prompts.

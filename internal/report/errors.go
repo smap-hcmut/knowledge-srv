@@ -4,6 +4,7 @@ import "errors"
 
 var (
 	ErrReportNotFound      = errors.New("report not found")
+	ErrReportForbidden     = errors.New("report access forbidden")
 	ErrReportNotCompleted  = errors.New("report is not completed")
 	ErrCampaignRequired    = errors.New("campaign_id is required")
 	ErrInvalidReportType   = errors.New("invalid report type")

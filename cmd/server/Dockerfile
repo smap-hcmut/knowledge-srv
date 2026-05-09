@@ -11,25 +11,23 @@ WORKDIR /app
 ARG TARGETOS
 ARG TARGETARCH
 
-# Install swag alongside apk deps — cached before source COPY
-RUN apk add --no-cache git tzdata && \
-    go install github.com/swaggo/swag/cmd/swag@v1.8.12
+# Install apk deps — cached before source COPY
+RUN apk add --no-cache git tzdata
 
 COPY go.mod go.sum ./
-COPY vendor/ vendor/
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
 
 COPY . .
 
-# Generate Swagger docs (swag already installed above)
-RUN swag init -g cmd/server/main.go --parseVendor
-
-# Build Binary (vendor mode) with go-build cache mount
+# Build Binary with module and go-build cache mounts
 RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
     CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
-    -mod=vendor \
+    -mod=mod \
     -trimpath \
     -ldflags="-s -w" \
     -o knowledge-srv ./cmd/server

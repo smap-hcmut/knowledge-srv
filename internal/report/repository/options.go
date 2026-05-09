@@ -33,6 +33,15 @@ type UpdateFailedOptions struct {
 	ErrorMessage string
 }
 
+type UpdateProcessingOptions struct {
+	ReportID     string
+	ErrorMessage string
+}
+
+type UpdateCancelledOptions struct {
+	ReportID string
+}
+
 type ListReportsOptions struct {
 	CampaignID string
 	UserID     string

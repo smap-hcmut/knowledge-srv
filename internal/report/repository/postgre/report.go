@@ -103,6 +103,48 @@ func (r *implRepository) UpdateFailed(ctx context.Context, opts repository.Updat
 	return nil
 }
 
+// UpdateProcessing - Mark report as PROCESSING for retry.
+func (r *implRepository) UpdateProcessing(ctx context.Context, opts repository.UpdateProcessingOptions) error {
+	dbReport, err := sqlboiler.FindReport(ctx, r.db, opts.ReportID)
+	if err != nil {
+		r.l.Errorf(ctx, "report.repository.postgre.UpdateProcessing: Failed to find report: %v", err)
+		return repository.ErrReportUpdateFailed
+	}
+
+	dbReport.Status = "PROCESSING"
+	dbReport.ErrorMessage = null.String{}
+	dbReport.CompletedAt = null.Time{}
+	dbReport.UpdatedAt = null.TimeFrom(time.Now())
+
+	_, err = dbReport.Update(ctx, r.db, boil.Infer())
+	if err != nil {
+		r.l.Errorf(ctx, "report.repository.postgre.UpdateProcessing: Failed to update report: %v", err)
+		return repository.ErrReportUpdateFailed
+	}
+
+	return nil
+}
+
+// UpdateCancelled - Mark report as CANCELLED.
+func (r *implRepository) UpdateCancelled(ctx context.Context, opts repository.UpdateCancelledOptions) error {
+	dbReport, err := sqlboiler.FindReport(ctx, r.db, opts.ReportID)
+	if err != nil {
+		r.l.Errorf(ctx, "report.repository.postgre.UpdateCancelled: Failed to find report: %v", err)
+		return repository.ErrReportUpdateFailed
+	}
+
+	dbReport.Status = "CANCELLED"
+	dbReport.UpdatedAt = null.TimeFrom(time.Now())
+
+	_, err = dbReport.Update(ctx, r.db, boil.Infer())
+	if err != nil {
+		r.l.Errorf(ctx, "report.repository.postgre.UpdateCancelled: Failed to update report: %v", err)
+		return repository.ErrReportUpdateFailed
+	}
+
+	return nil
+}
+
 // ListReports - List reports with filters and pagination.
 func (r *implRepository) ListReports(ctx context.Context, opts repository.ListReportsOptions) ([]*model.Report, error) {
 	mods := r.buildListReportsQuery(opts)
@@ -121,4 +163,17 @@ func (r *implRepository) ListReports(ctx context.Context, opts repository.ListRe
 	}
 
 	return result, nil
+}
+
+// CountReports - Count reports with filters.
+func (r *implRepository) CountReports(ctx context.Context, opts repository.ListReportsOptions) (int, error) {
+	mods := r.buildCountReportsQuery(opts)
+
+	count, err := sqlboiler.Reports(mods...).Count(ctx, r.db)
+	if err != nil {
+		r.l.Errorf(ctx, "report.repository.postgre.CountReports: Failed to count reports: %v", err)
+		return 0, err
+	}
+
+	return int(count), nil
 }

@@ -9,6 +9,7 @@ import (
 
 var (
 	errReportNotFound      = pkgErrors.NewHTTPError(404, "Report not found")
+	errReportForbidden     = pkgErrors.NewHTTPError(403, "Report access forbidden")
 	errReportNotCompleted  = pkgErrors.NewHTTPError(400, "Report is not completed yet")
 	errCampaignRequired    = pkgErrors.NewHTTPError(400, "Campaign ID is required")
 	errInvalidReportType   = pkgErrors.NewHTTPError(400, "Invalid report type")
@@ -21,6 +22,8 @@ func (h *handler) mapError(err error) error {
 	switch {
 	case errors.Is(err, report.ErrReportNotFound):
 		return errReportNotFound
+	case errors.Is(err, report.ErrReportForbidden):
+		return errReportForbidden
 	case errors.Is(err, report.ErrReportNotCompleted):
 		return errReportNotCompleted
 	case errors.Is(err, report.ErrCampaignRequired):

@@ -13,8 +13,6 @@ k8s/secret.yaml
 manifests/secret.yaml
 manifests/configmap.yaml
 
-docs
-
 # OpenSpec
 .cursor/*
 .agent/*

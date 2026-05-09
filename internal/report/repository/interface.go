@@ -13,7 +13,10 @@ type ReportRepository interface {
 	FindByParamsHash(ctx context.Context, opts FindByParamsHashOptions) (*model.Report, error)
 	UpdateCompleted(ctx context.Context, opts UpdateCompletedOptions) error
 	UpdateFailed(ctx context.Context, opts UpdateFailedOptions) error
+	UpdateProcessing(ctx context.Context, opts UpdateProcessingOptions) error
+	UpdateCancelled(ctx context.Context, opts UpdateCancelledOptions) error
 	ListReports(ctx context.Context, opts ListReportsOptions) ([]*model.Report, error)
+	CountReports(ctx context.Context, opts ListReportsOptions) (int, error)
 }
 
 //go:generate mockery --name PostgresRepository
