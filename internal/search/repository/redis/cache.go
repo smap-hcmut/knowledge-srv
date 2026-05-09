@@ -86,7 +86,7 @@ func (r *implCacheRepository) InvalidateSearchCache(ctx context.Context, project
 	for {
 		keys, nextCursor, err := client.Scan(ctx, cursor, pattern, 100).Result()
 		if err != nil {
-			r.l.Errorf(ctx, "search.repository.redis.InvalidateSearchCache: Failed to scan cache: %v", err)
+			r.l.Warnf(ctx, "search.repository.redis.InvalidateSearchCache: cache scan unavailable: %v", err)
 			return err
 		}
 		if len(keys) > 0 {
@@ -95,7 +95,7 @@ func (r *implCacheRepository) InvalidateSearchCache(ctx context.Context, project
 				pipe.Del(ctx, key)
 			}
 			if _, err := pipe.Exec(ctx); err != nil && err != goredis.Nil {
-				r.l.Errorf(ctx, "search.repository.redis.InvalidateSearchCache: Failed to execute pipeline: %v", err)
+				r.l.Warnf(ctx, "search.repository.redis.InvalidateSearchCache: cache delete unavailable: %v", err)
 				return err
 			}
 		}

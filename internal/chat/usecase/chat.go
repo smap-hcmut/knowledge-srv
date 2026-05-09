@@ -103,34 +103,19 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		return chat.ChatOutput{}, fmt.Errorf("%w: %v", chat.ErrSearchFailed, err)
 	}
 	if searchOutput.NoRelevantContext || len(searchOutput.Results) == 0 {
+		if output, ok := uc.tryAnalyticsFallback(ctx, conversation, input, startTime, intent); ok {
+			return output, nil
+		}
+
 		answer := "Mình chưa tìm thấy đủ dữ liệu liên quan trong campaign này để trả lời chắc chắn. Bạn có thể hỏi hẹp hơn theo nền tảng, khoảng thời gian, hoặc chủ đề cụ thể như phí giao hàng, tài xế, hủy đơn, hỗ trợ."
 		suggestions := uc.generateSuggestions(input.Message, searchOutput)
-		filtersJSON, _ := json.Marshal(input.Filters)
-		_, _ = uc.repo.CreateMessage(ctx, repository.CreateMessageOptions{
-			ConversationID: conversation.ID,
-			Role:           "user",
-			Content:        input.Message,
-			FiltersUsed:    filtersJSON,
-		})
 		searchMeta := chat.SearchMeta{
 			TotalDocsSearched: searchOutput.TotalFound,
 			DocsUsed:          0,
 			ProcessingTimeMs:  time.Since(startTime).Milliseconds(),
 			ModelUsed:         uc.llm.Name(),
 		}
-		suggestionsJSON, _ := json.Marshal(suggestions)
-		searchMetaJSON, _ := json.Marshal(searchMeta)
-		_, _ = uc.repo.CreateMessage(ctx, repository.CreateMessageOptions{
-			ConversationID: conversation.ID,
-			Role:           "assistant",
-			Content:        answer,
-			SearchMetadata: searchMetaJSON,
-			Suggestions:    suggestionsJSON,
-		})
-		_ = uc.repo.UpdateConversationLastMessage(ctx, repository.UpdateLastMessageOptions{
-			ConversationID: conversation.ID,
-			MessageCount:   conversation.MessageCount + 2,
-		})
+		uc.persistChatExchange(ctx, conversation, input, answer, nil, suggestions, searchMeta)
 		return chat.ChatOutput{
 			ConversationID: conversation.ID,
 			Answer:         answer,

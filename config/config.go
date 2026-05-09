@@ -37,6 +37,9 @@ type Config struct {
 	// Project Service - Campaign projects
 	Project ProjectConfig
 
+	// Analysis API - campaign analytics fallback for assistant/report context
+	Analysis AnalysisConfig
+
 	// MinIO - Storage
 	MinIO MinIOConfig
 
@@ -122,6 +125,12 @@ type GeminiConfig struct {
 
 // ProjectConfig is the configuration for Project Service
 type ProjectConfig struct {
+	URL     string
+	Timeout int // in seconds
+}
+
+// AnalysisConfig is the configuration for the Analysis API client.
+type AnalysisConfig struct {
 	URL     string
 	Timeout int // in seconds
 }
@@ -248,6 +257,8 @@ func Load() (*Config, error) {
 	// Project / Environment / HTTP
 	_ = viper.BindEnv("project.url", "PROJECT_URL")
 	_ = viper.BindEnv("project.timeout", "PROJECT_TIMEOUT")
+	_ = viper.BindEnv("analysis.url", "ANALYSIS_URL", "ANALYSIS_API_URL", "ANALYSIS_API_INTERNAL_URL")
+	_ = viper.BindEnv("analysis.timeout", "ANALYSIS_TIMEOUT")
 	_ = viper.BindEnv("environment.name", "ENVIRONMENT_NAME")
 	_ = viper.BindEnv("http_server.port", "HTTP_SERVER_PORT")
 	_ = viper.BindEnv("http_server.mode", "HTTP_SERVER_MODE")
@@ -324,6 +335,10 @@ func Load() (*Config, error) {
 	// Project Service - Get campaign projects
 	cfg.Project.URL = viper.GetString("project.url")
 	cfg.Project.Timeout = viper.GetInt("project.timeout")
+
+	// Analysis API - dashboard-grade analytics fallback
+	cfg.Analysis.URL = viper.GetString("analysis.url")
+	cfg.Analysis.Timeout = viper.GetInt("analysis.timeout")
 
 	// MinIO - Report storage (PDF/DOCX)
 	cfg.MinIO.Endpoint = viper.GetString("minio.endpoint")
@@ -406,6 +421,10 @@ func setDefaults() {
 	// 5. Project Service
 	viper.SetDefault("project.url", "http://project-service:8080")
 	viper.SetDefault("project.timeout", 10)
+
+	// 5b. Analysis API
+	viper.SetDefault("analysis.url", "http://analysis-api.smap.svc.cluster.local")
+	viper.SetDefault("analysis.timeout", 12)
 
 	// 6. MinIO (bucket per specs: smap-reports)
 	viper.SetDefault("minio.endpoint", "localhost:9000")
@@ -491,6 +510,9 @@ func validate(cfg *Config) error {
 	// Validate Project Service Configuration
 	if cfg.Project.URL == "" {
 		return fmt.Errorf("project.url is required")
+	}
+	if cfg.Analysis.URL == "" {
+		return fmt.Errorf("analysis.url is required")
 	}
 
 	// Validate MinIO Configuration
