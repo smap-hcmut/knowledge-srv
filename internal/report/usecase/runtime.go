@@ -15,7 +15,7 @@ import (
 const (
 	defaultListPageSize  = 20
 	maxListPageSize      = 50
-	reportSearchMinScore = 0.25
+	reportSearchMinScore = 0.45
 )
 
 func (uc *implUseCase) ListReports(ctx context.Context, sc model.Scope, input report.ListReportsInput) (report.ListReportsOutput, error) {
@@ -88,15 +88,10 @@ func (uc *implUseCase) ListReportPosts(ctx context.Context, sc model.Scope, inpu
 		filters.Platforms = []string{strings.ToLower(input.Platform)}
 	}
 
-	fetchLimit := offset + pageSize
-	if fetchLimit > maxListPageSize {
-		fetchLimit = maxListPageSize
-	}
-
 	searchOutput, err := uc.searchUC.Search(ctx, sc, search.SearchInput{
 		CampaignID: rpt.CampaignID,
 		Query:      buildReportEvidenceQuery(rpt.ReportType, filters),
-		Limit:      fetchLimit,
+		Limit:      maxListPageSize,
 		MinScore:   reportSearchMinScore,
 		Filters: search.SearchFilters{
 			Sentiments: filters.Sentiments,
@@ -111,6 +106,7 @@ func (uc *implUseCase) ListReportPosts(ctx context.Context, sc model.Scope, inpu
 		uc.l.Errorf(ctx, "report.usecase.ListReportPosts: Search failed: %v", err)
 		return report.ListReportPostsOutput{}, report.ErrGenerationFailed
 	}
+	searchOutput = sanitizeReportSearchOutput(searchOutput)
 
 	results := searchOutput.Results
 	if offset > len(results) {
@@ -295,13 +291,7 @@ func processStatusFromReportStatus(status string) string {
 }
 
 func buildReportEvidenceQuery(reportType string, filters report.ReportFilters) string {
-	if strings.TrimSpace(filters.Prompt) != "" {
-		return filters.Prompt
-	}
-	if len(filters.Sections) > 0 {
-		return strings.Join(filters.Sections, ", ")
-	}
-	return buildAggregateQuery(reportType)
+	return buildReportRetrievalQuery(reportType, filters)
 }
 
 func mapSearchResultToReportPost(reportID string, result search.SearchResult) report.ReportPostOutput {
@@ -321,18 +311,14 @@ func mapSearchResultToReportPost(reportID string, result search.SearchResult) re
 		}
 	}
 
-	author := firstNonEmpty(
-		stringFromNestedPayload(metadata, "metadata", "author_display_name"),
-		stringFromNestedPayload(metadata, "metadata", "author"),
-		stringFromPayload(metadata, "author"),
-		"Unknown",
+	author := authorFromMetadata(metadata)
+	authorAvatar := firstURL(
+		stringFromNestedPayload(metadata, "metadata", "author_avatar"),
+		stringFromNestedPayload(metadata, "metadata", "author_avatar_url"),
+		stringFromPayload(metadata, "author_avatar"),
+		stringFromPayload(metadata, "author_avatar_url"),
 	)
-	url := firstNonEmpty(
-		stringFromNestedPayload(metadata, "metadata", "video_url"),
-		stringFromNestedPayload(metadata, "metadata", "url"),
-		stringFromPayload(metadata, "url"),
-		stringFromPayload(metadata, "source_id"),
-	)
+	url := sourceURLFromMetadata(metadata)
 	postedAt := time.Now().Format(time.RFC3339)
 	if result.ContentCreatedAt > 0 {
 		postedAt = time.Unix(result.ContentCreatedAt, 0).Format(time.RFC3339)
@@ -348,6 +334,7 @@ func mapSearchResultToReportPost(reportID string, result search.SearchResult) re
 		CompetitorURL: "",
 		Platform:      strings.ToLower(result.Platform),
 		Author:        author,
+		AuthorAvatar:  authorAvatar,
 		Content:       result.Content,
 		PostedAt:      postedAt,
 		URL:           url,
@@ -427,6 +414,17 @@ func stringFromNestedPayload(payload map[string]interface{}, parentKey, childKey
 func firstNonEmpty(values ...string) string {
 	for _, value := range values {
 		if strings.TrimSpace(value) != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+func firstURL(values ...string) string {
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		lower := strings.ToLower(value)
+		if strings.HasPrefix(lower, "http://") || strings.HasPrefix(lower, "https://") {
 			return value
 		}
 	}

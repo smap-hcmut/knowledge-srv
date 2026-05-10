@@ -53,6 +53,10 @@ type DownloadReportInput struct {
 	ReportID string
 }
 
+type GetReportContentInput struct {
+	ReportID string
+}
+
 type GetReportProcessInput struct {
 	ReportID string
 }
@@ -191,6 +195,14 @@ type ReportCommentOutput struct {
 type DownloadOutput struct {
 	DownloadURL string `json:"download_url"`
 	ExpiresAt   string `json:"expires_at"`
+	FileName    string `json:"file_name"`
+	FileSize    int64  `json:"file_size"`
+}
+
+type ReportContentOutput struct {
+	ReportID    string `json:"report_id"`
+	Content     string `json:"content"`
+	ContentType string `json:"content_type"`
 	FileName    string `json:"file_name"`
 	FileSize    int64  `json:"file_size"`
 }

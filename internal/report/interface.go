@@ -14,6 +14,7 @@ type UseCase interface {
 	ListReportPosts(ctx context.Context, sc model.Scope, input ListReportPostsInput) (ListReportPostsOutput, error)
 	ListPostComments(ctx context.Context, sc model.Scope, input ListPostCommentsInput) (ListPostCommentsOutput, error)
 	DownloadReport(ctx context.Context, sc model.Scope, input DownloadReportInput) (DownloadOutput, error)
+	GetReportContent(ctx context.Context, sc model.Scope, input GetReportContentInput) (ReportContentOutput, error)
 	CancelReport(ctx context.Context, sc model.Scope, input CancelReportInput) (CancelOutput, error)
 	RetryReport(ctx context.Context, sc model.Scope, input RetryReportInput) (RetryOutput, error)
 }

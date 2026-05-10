@@ -12,13 +12,12 @@ import (
 	"time"
 
 	"github.com/smap-hcmut/shared-libs/go/minio"
-	"golang.org/x/sync/errgroup"
 )
 
-// generateInBackground runs the full Map-Reduce report generation pipeline.
+// generateInBackground runs the report generation pipeline.
 // This is called in a goroutine and must handle its own errors.
 //
-// Pipeline: Aggregate → Sample → Generate (LLM per section) → Compile → Upload
+// Pipeline: Aggregate → rank evidence → generate business brief → compile → upload
 func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string, input report.GenerateInput) {
 	startTime := time.Now()
 
@@ -59,44 +58,24 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 
 	// Phase 2: Sample - Select representative documents
 	samples := uc.sampleDocs(searchOutput.Results)
-
-	// Phase 3: Generate - Parallel LLM generation per section (up to 3 concurrent)
-	templates := getTemplates(input.ReportType)
-	sections := make([]generatedSection, len(templates))
-
-	g, gCtx := errgroup.WithContext(ctx)
-	g.SetLimit(3) // Max 3 concurrent LLM calls
-
-	for i, tmpl := range templates {
-		i, tmpl := i, tmpl
-		g.Go(func() error {
-			prompt := buildSectionPrompt(tmpl, promptData{
-				CampaignID:     input.CampaignID,
-				ReportType:     input.ReportType,
-				Samples:        formatSamples(samples),
-				TotalDocs:      totalDocs,
-				Aggregation:    formatAggregation(searchOutput.Aggregations),
-				UserPrompt:     input.Filters.Prompt,
-				Sections:       strings.Join(input.Filters.Sections, ", "),
-				CompetitorURLs: strings.Join(input.Filters.CompetitorURLs, ", "),
-			})
-
-			llmCtx, cancel := context.WithTimeout(gCtx, 3*time.Minute)
-			defer cancel()
-			content, err := uc.llm.Generate(llmCtx, prompt)
-			if err != nil {
-				return fmt.Errorf("section '%s': %w", tmpl.Title, err)
-			}
-
-			sections[i] = generatedSection{
-				Title:   tmpl.Title,
-				Content: content,
-			}
-			return nil
-		})
+	evidence := buildBusinessEvidencePack(samples, uc.config.SampleSize)
+	if len(evidence) == 0 {
+		evidence = buildBusinessEvidencePack(searchOutput.Results, uc.config.SampleSize)
 	}
 
-	if err := g.Wait(); err != nil {
+	// Phase 3: Generate - one coherent business report, grounded by evidence IDs.
+	prompt := buildBusinessReportPrompt(input, businessPromptData{
+		TotalDocs:      totalDocs,
+		Aggregation:    formatAggregation(searchOutput.Aggregations),
+		Evidence:       formatBusinessEvidenceForPrompt(evidence),
+		Sections:       strings.Join(input.Filters.Sections, ", "),
+		CompetitorURLs: strings.Join(input.Filters.CompetitorURLs, ", "),
+	})
+
+	llmCtx, cancel := context.WithTimeout(ctx, 4*time.Minute)
+	content, err := uc.llm.Generate(llmCtx, prompt)
+	cancel()
+	if err != nil {
 		uc.l.Errorf(ctx, "report.usecase.generateInBackground: LLM generation failed: %v", err)
 		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
 			ReportID:     reportID,
@@ -104,14 +83,25 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 		})
 		return
 	}
+	content = normalizeBusinessReportMarkdown(content)
+	sectionsCount := countBusinessSections(content)
 
-	uc.l.Infof(ctx, "report.usecase.generateInBackground: Generated %d sections for report %s", len(sections), reportID)
+	uc.l.Infof(ctx, "report.usecase.generateInBackground: Generated business report with %d sections for report %s", sectionsCount, reportID)
 
 	// Phase 4: Compile - Assemble markdown and upload
-	markdown := compileMarkdown(input, sections, totalDocs)
+	markdown := compileBusinessMarkdown(input, content, evidence, totalDocs)
 
 	objectName := fmt.Sprintf("reports/%s.md", reportID)
 	fileBytes := []byte(markdown)
+
+	if err := uc.ensureReportBucket(ctx); err != nil {
+		uc.l.Errorf(ctx, "report.usecase.generateInBackground: Storage setup failed for bucket %q: %v", uc.config.ReportBucket, err)
+		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
+			ReportID:     reportID,
+			ErrorMessage: fmt.Sprintf("storage setup failed: %v", err),
+		})
+		return
+	}
 
 	_, err = uc.minio.UploadFile(ctx, &minio.UploadRequest{
 		BucketName:  uc.config.ReportBucket,
@@ -126,10 +116,10 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 		},
 	})
 	if err != nil {
-		uc.l.Errorf(ctx, "report.usecase.generateInBackground: Upload failed: %v", err)
+		uc.l.Errorf(ctx, "report.usecase.generateInBackground: Upload failed to bucket %q: %v", uc.config.ReportBucket, err)
 		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
 			ReportID:     reportID,
-			ErrorMessage: fmt.Sprintf("upload failed: %v", err),
+			ErrorMessage: fmt.Sprintf("upload failed to bucket %q: %v", uc.config.ReportBucket, err),
 		})
 		return
 	}
@@ -150,7 +140,7 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 		FileSizeBytes:     int64(len(fileBytes)),
 		FileFormat:        "md",
 		TotalDocsAnalyzed: totalDocs,
-		SectionsCount:     len(sections),
+		SectionsCount:     sectionsCount,
 		GenerationTimeMs:  generationTimeMs,
 		CompletedAt:       completedAt,
 	})
@@ -168,9 +158,9 @@ func (uc *implUseCase) aggregateDocs(ctx context.Context, input report.GenerateI
 
 	searchInput := search.SearchInput{
 		CampaignID: input.CampaignID,
-		Query:      buildAggregateQuery(input.ReportType),
+		Query:      buildReportRetrievalQuery(input.ReportType, input.Filters),
 		Limit:      uc.config.MaxDocs,
-		MinScore:   0.3, // Lower threshold for broader coverage
+		MinScore:   0.45,
 		Filters: search.SearchFilters{
 			Sentiments: input.Filters.Sentiments,
 			Aspects:    input.Filters.Aspects,
@@ -181,7 +171,37 @@ func (uc *implUseCase) aggregateDocs(ctx context.Context, input report.GenerateI
 		},
 	}
 
-	return uc.searchUC.Search(ctx, sc, searchInput)
+	output, err := uc.searchUC.Search(ctx, sc, searchInput)
+	if err != nil {
+		return output, err
+	}
+	return sanitizeReportSearchOutput(output), nil
+}
+
+func (uc *implUseCase) ensureReportBucket(ctx context.Context) error {
+	bucket := strings.TrimSpace(uc.config.ReportBucket)
+	if bucket == "" {
+		return fmt.Errorf("report bucket is empty")
+	}
+
+	exists, err := uc.minio.BucketExists(ctx, bucket)
+	if err != nil {
+		return fmt.Errorf("check report bucket %q: %w", bucket, err)
+	}
+	if exists {
+		return nil
+	}
+
+	if err := uc.minio.CreateBucket(ctx, bucket); err != nil {
+		existsAfterCreate, checkErr := uc.minio.BucketExists(ctx, bucket)
+		if checkErr == nil && existsAfterCreate {
+			return nil
+		}
+		return fmt.Errorf("create report bucket %q: %w", bucket, err)
+	}
+
+	uc.l.Infof(ctx, "report.usecase.ensureReportBucket: Created report bucket %s", bucket)
+	return nil
 }
 
 // sampleDocs selects representative documents from the full result set.
@@ -208,15 +228,15 @@ func (uc *implUseCase) sampleDocs(results []search.SearchResult) []search.Search
 func buildAggregateQuery(reportType string) string {
 	switch reportType {
 	case report.ReportTypeSummary:
-		return "tổng quan phân tích tất cả phản hồi khách hàng"
+		return "phản hồi khách hàng mạng xã hội khiếu nại khen chê dịch vụ app tài xế phí giao hàng COD hủy đơn hỗ trợ"
 	case report.ReportTypeComparison:
-		return "so sánh phản hồi theo nền tảng và khía cạnh khác nhau"
+		return "so sánh phản hồi khách hàng theo nền tảng YouTube TikTok Facebook sentiment chủ đề tiêu cực tích cực"
 	case report.ReportTypeTrend:
-		return "xu hướng thay đổi cảm xúc và phản hồi theo thời gian"
+		return "xu hướng thay đổi cảm xúc khách hàng spike momentum chủ đề tăng nhanh khiếu nại khen chê theo thời gian"
 	case report.ReportTypeAspectDeep:
-		return "phân tích chi tiết từng khía cạnh sản phẩm dịch vụ"
+		return "phân tích sâu chủ đề khách hàng dịch vụ app tài xế giá phí hỗ trợ hủy đơn COD khiếu nại"
 	default:
-		return "phân tích tổng quan dữ liệu"
+		return "phân tích phản hồi khách hàng mạng xã hội chủ đề cảm xúc và hành động marketing"
 	}
 }
 

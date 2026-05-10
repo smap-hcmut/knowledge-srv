@@ -29,6 +29,12 @@ func buildSectionPrompt(tmpl report.SectionTemplate, data promptData) string {
 **Sections mong muốn:** %s
 **Nguồn/đối thủ tham chiếu:** %s
 
+### Quy tắc bắt buộc:
+- Chỉ dùng dữ liệu trong context này; không suy diễn sự kiện, đối thủ, chính sách hoặc số liệu ngoài dữ liệu.
+- Nếu bằng chứng yếu hoặc thiếu, ghi rõ "chưa đủ bằng chứng" thay vì viết chắc chắn.
+- Ưu tiên góc nhìn marketing: vấn đề khách hàng, insight thông điệp, kênh ưu tiên, hành động đề xuất.
+- Khi kết luận, gắn với ví dụ trong phần mẫu phản hồi bằng platform/sentiment/nội dung.
+
 ### Dữ liệu tổng hợp:
 %s
 

@@ -55,11 +55,27 @@ type AnalyticsPost struct {
 type UAPMetadata struct {
 	Author            string             `json:"author"`
 	AuthorDisplayName string             `json:"author_display_name"`
+	AuthorUsername    string             `json:"author_username,omitempty"`
+	AuthorAvatar      string             `json:"author_avatar,omitempty"`
 	AuthorFollowers   int                `json:"author_followers"`
+	AuthorIsVerified  bool               `json:"author_is_verified,omitempty"`
 	Engagement        EngagementMetadata `json:"engagement"`
+	URL               string             `json:"url,omitempty"`
+	PostURL           string             `json:"post_url,omitempty"`
+	OriginalURL       string             `json:"original_url,omitempty"`
+	Permalink         string             `json:"permalink,omitempty"`
+	SourceURL         string             `json:"source_url,omitempty"`
+	WebURL            string             `json:"web_url,omitempty"`
+	CommentURL        string             `json:"comment_url,omitempty"`
+	ParentPostURL     string             `json:"parent_post_url,omitempty"`
 	VideoURL          string             `json:"video_url,omitempty"`
+	ContentType       string             `json:"content_type,omitempty"`
+	RootID            string             `json:"root_id,omitempty"`
+	ParentID          string             `json:"parent_id,omitempty"`
 	Hashtags          []string           `json:"hashtags,omitempty"`
 	Location          string             `json:"location,omitempty"`
+	PlatformMeta      map[string]any     `json:"platform_meta,omitempty"`
+	Hierarchy         map[string]any     `json:"hierarchy,omitempty"`
 }
 
 // EngagementMetadata - Engagement in metadata

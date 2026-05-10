@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/report"
 	"knowledge-srv/internal/report/repository"
@@ -13,6 +14,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/smap-hcmut/shared-libs/go/minio"
 )
+
+const maxReportContentBytes = 2 * 1024 * 1024
 
 // Generate creates a new report or returns existing one if already processing/completed.
 // Flow: validate → hash params → check dedup → create record → kick off background generation.
@@ -140,6 +143,7 @@ func (uc *implUseCase) DownloadReport(ctx context.Context, sc model.Scope, input
 	presigned, err := uc.minio.GetPresignedDownloadURL(ctx, &minio.PresignedURLRequest{
 		BucketName: uc.config.ReportBucket,
 		ObjectName: rpt.FileURL,
+		Method:     minio.MethodGET,
 		Expiry:     expiry,
 	})
 	if err != nil {
@@ -152,6 +156,54 @@ func (uc *implUseCase) DownloadReport(ctx context.Context, sc model.Scope, input
 	return report.DownloadOutput{
 		DownloadURL: presigned.URL,
 		ExpiresAt:   presigned.ExpiresAt.Format(time.RFC3339),
+		FileName:    fileName,
+		FileSize:    rpt.FileSizeBytes,
+	}, nil
+}
+
+// GetReportContent returns the generated markdown artifact through the API so
+// the frontend can render the report without depending on private MinIO URLs.
+func (uc *implUseCase) GetReportContent(ctx context.Context, sc model.Scope, input report.GetReportContentInput) (report.ReportContentOutput, error) {
+	rpt, err := uc.repo.GetReportByID(ctx, input.ReportID)
+	if err != nil {
+		uc.l.Errorf(ctx, "report.usecase.GetReportContent: Failed to get report: %v", err)
+		return report.ReportContentOutput{}, report.ErrReportNotFound
+	}
+	if !canAccessReport(sc, rpt) {
+		return report.ReportContentOutput{}, report.ErrReportForbidden
+	}
+	if rpt.Status != report.StatusCompleted || rpt.FileURL == "" {
+		return report.ReportContentOutput{}, report.ErrReportNotCompleted
+	}
+	if rpt.FileSizeBytes > maxReportContentBytes {
+		return report.ReportContentOutput{}, report.ErrDownloadURLFailed
+	}
+
+	reader, _, err := uc.minio.DownloadFile(ctx, &minio.DownloadRequest{
+		BucketName:  uc.config.ReportBucket,
+		ObjectName:  rpt.FileURL,
+		Disposition: "inline",
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "report.usecase.GetReportContent: Failed to download artifact: %v", err)
+		return report.ReportContentOutput{}, report.ErrDownloadURLFailed
+	}
+	defer reader.Close()
+
+	data, err := io.ReadAll(io.LimitReader(reader, maxReportContentBytes+1))
+	if err != nil {
+		uc.l.Errorf(ctx, "report.usecase.GetReportContent: Failed to read artifact: %v", err)
+		return report.ReportContentOutput{}, report.ErrDownloadURLFailed
+	}
+	if len(data) > maxReportContentBytes {
+		return report.ReportContentOutput{}, report.ErrDownloadURLFailed
+	}
+
+	fileName := fmt.Sprintf("report_%s.%s", rpt.ID, rpt.FileFormat)
+	return report.ReportContentOutput{
+		ReportID:    rpt.ID,
+		Content:     string(data),
+		ContentType: "text/markdown; charset=utf-8",
 		FileName:    fileName,
 		FileSize:    rpt.FileSizeBytes,
 	}, nil

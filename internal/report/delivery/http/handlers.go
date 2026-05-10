@@ -216,6 +216,36 @@ func (h *handler) DownloadReport(c *gin.Context) {
 	response.OK(c, h.newDownloadResp(o))
 }
 
+// @Summary Get report markdown content
+// @Description Return completed report artifact content for in-app rendering
+// @Tags Report
+// @Produce json
+// @Param report_id path string true "Report ID"
+// @Success 200 {object} reportContentResp
+// @Failure 400 {object} response.Resp
+// @Failure 404 {object} response.Resp
+// @Failure 500 {object} response.Resp
+// @Router /reports/{report_id}/content [get]
+func (h *handler) GetReportContent(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, sc, err := h.processDownloadReportRequest(c)
+	if err != nil {
+		h.l.Errorf(ctx, "report.delivery.http.GetReportContent: processDownloadReportRequest failed: %v", err)
+		response.Error(c, err, h.discord)
+		return
+	}
+
+	o, err := h.uc.GetReportContent(ctx, sc, report.GetReportContentInput{ReportID: req.ReportID})
+	if err != nil {
+		h.logUsecaseError(ctx, "report.delivery.http.GetReportContent: usecase GetReportContent failed", err)
+		response.Error(c, h.mapError(err), h.discord)
+		return
+	}
+
+	response.OK(c, h.newReportContentResp(o))
+}
+
 // @Summary Cancel report generation
 // @Description Mark a processing report as cancelled
 // @Tags Report

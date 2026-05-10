@@ -281,6 +281,14 @@ type downloadResp struct {
 	FileSize    int64  `json:"file_size"`
 }
 
+type reportContentResp struct {
+	ReportID    string `json:"report_id"`
+	Content     string `json:"content"`
+	ContentType string `json:"content_type"`
+	FileName    string `json:"file_name"`
+	FileSize    int64  `json:"file_size"`
+}
+
 type cancelResp struct {
 	OK bool `json:"ok"`
 }
@@ -443,6 +451,16 @@ func (h *handler) newDownloadResp(o report.DownloadOutput) downloadResp {
 	return downloadResp{
 		DownloadURL: o.DownloadURL,
 		ExpiresAt:   o.ExpiresAt,
+		FileName:    o.FileName,
+		FileSize:    o.FileSize,
+	}
+}
+
+func (h *handler) newReportContentResp(o report.ReportContentOutput) reportContentResp {
+	return reportContentResp{
+		ReportID:    o.ReportID,
+		Content:     o.Content,
+		ContentType: o.ContentType,
 		FileName:    o.FileName,
 		FileSize:    o.FileSize,
 	}

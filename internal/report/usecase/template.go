@@ -1,6 +1,11 @@
 package usecase
 
-import "knowledge-srv/internal/report"
+import (
+	"fmt"
+	"strings"
+
+	"knowledge-srv/internal/report"
+)
 
 // getTemplates returns the section templates for a given report type.
 func getTemplates(reportType string) []report.SectionTemplate {
@@ -16,6 +21,40 @@ func getTemplates(reportType string) []report.SectionTemplate {
 	default:
 		return summaryTemplates
 	}
+}
+
+func getTemplatesForSections(reportType string, sections []string) []report.SectionTemplate {
+	cleaned := make([]string, 0, len(sections))
+	for _, section := range sections {
+		section = strings.TrimSpace(section)
+		if section == "" {
+			continue
+		}
+		cleaned = append(cleaned, section)
+		if len(cleaned) >= 6 {
+			break
+		}
+	}
+	if len(cleaned) == 0 {
+		return getTemplates(reportType)
+	}
+
+	templates := make([]report.SectionTemplate, 0, len(cleaned))
+	for _, title := range cleaned {
+		templates = append(templates, report.SectionTemplate{
+			Title: title,
+			Prompt: fmt.Sprintf(`Viết phần %q cho một báo cáo marketing intelligence.
+Yêu cầu:
+- Chỉ dùng dữ liệu trong context bên dưới; không bịa số liệu, đối thủ, chính sách hoặc sự kiện ngoài dữ liệu.
+- Nếu evidence chưa đủ mạnh, nói rõ "chưa đủ bằng chứng" và nêu phần còn thiếu.
+- Ưu tiên insight mà marketer có thể hành động: audience pain point, message angle, kênh ưu tiên, rủi ro thương hiệu.
+- Trích dẫn ví dụ bằng platform/sentiment/nội dung mẫu khi đưa kết luận.
+- Viết gọn, chuyên môn, bằng tiếng Việt.
+
+%%s`, title),
+		})
+	}
+	return templates
 }
 
 // ----------- SUMMARY templates -----------

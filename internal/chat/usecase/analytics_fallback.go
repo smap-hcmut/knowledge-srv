@@ -10,6 +10,7 @@ import (
 
 	"knowledge-srv/internal/chat"
 	"knowledge-srv/internal/chat/repository"
+	"knowledge-srv/internal/contentquality"
 	"knowledge-srv/internal/model"
 	analyticspkg "knowledge-srv/pkg/analytics"
 )
@@ -254,6 +255,9 @@ func samplePosts(posts []analyticspkg.PostItem, sentiment string, limit int) []a
 		if strings.TrimSpace(post.Content) == "" {
 			continue
 		}
+		if contentquality.IsLowValueMarketingContent(post.Content) {
+			continue
+		}
 		out = append(out, post)
 		if len(out) >= limit {
 			break
@@ -267,6 +271,9 @@ func citationsFromPosts(posts []analyticspkg.PostItem, limit int) []chat.Citatio
 	for _, post := range posts {
 		content := strings.TrimSpace(post.Content)
 		if content == "" {
+			continue
+		}
+		if contentquality.IsLowValueMarketingContent(content) {
 			continue
 		}
 		citations = append(citations, chat.Citation{
