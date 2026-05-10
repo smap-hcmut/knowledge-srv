@@ -7,12 +7,14 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
 
 type Config struct {
 	BaseURL    string
 	Timeout    time.Duration
+	CacheTTL   time.Duration
 	HTTPClient *http.Client
 }
 
@@ -21,8 +23,16 @@ type Client interface {
 }
 
 type implClient struct {
-	baseURL string
-	client  *http.Client
+	baseURL  string
+	client   *http.Client
+	cacheTTL time.Duration
+	mu       sync.RWMutex
+	cache    map[string]cachedSnapshot
+}
+
+type cachedSnapshot struct {
+	value     Snapshot
+	expiresAt time.Time
 }
 
 func New(cfg Config) Client {
@@ -30,13 +40,19 @@ func New(cfg Config) Client {
 	if timeout <= 0 {
 		timeout = 12 * time.Second
 	}
+	cacheTTL := cfg.CacheTTL
+	if cacheTTL <= 0 {
+		cacheTTL = 45 * time.Second
+	}
 	client := cfg.HTTPClient
 	if client == nil {
 		client = &http.Client{Timeout: timeout}
 	}
 	return &implClient{
-		baseURL: strings.TrimRight(cfg.BaseURL, "/"),
-		client:  client,
+		baseURL:  strings.TrimRight(cfg.BaseURL, "/"),
+		client:   client,
+		cacheTTL: cacheTTL,
+		cache:    make(map[string]cachedSnapshot),
 	}
 }
 
@@ -64,6 +80,10 @@ func (s Snapshot) HasData() bool {
 		}
 	}
 	return false
+}
+
+func (s Snapshot) HasCoreAnalytics() bool {
+	return len(s.KPIs.Metrics) > 0 && len(s.Platforms.Stats) > 0 && s.Sentiment.Total > 0
 }
 
 type KPIsResponse struct {
@@ -147,30 +167,125 @@ func (c *implClient) Snapshot(ctx context.Context, campaignID string) (Snapshot,
 	if strings.TrimSpace(c.baseURL) == "" {
 		return snapshot, fmt.Errorf("analytics base URL is empty")
 	}
+	campaignID = strings.TrimSpace(campaignID)
+	if campaignID == "" {
+		return snapshot, fmt.Errorf("campaign id is empty")
+	}
 
+	if cached, ok := c.getCachedSnapshot(campaignID); ok {
+		return cached, nil
+	}
+
+	var mu sync.Mutex
 	requests := []struct {
-		name   string
-		path   string
-		params map[string]string
-		target any
+		name string
+		run  func(context.Context) error
 	}{
-		{name: "kpis", path: "/api/v1/analytics/kpis", params: map[string]string{"campaignId": campaignID}, target: &snapshot.KPIs},
-		{name: "platforms", path: "/api/v1/analytics/platforms", params: map[string]string{"campaignId": campaignID}, target: &snapshot.Platforms},
-		{name: "sentiment", path: "/api/v1/analytics/sentiment", params: map[string]string{"campaignId": campaignID}, target: &snapshot.Sentiment},
-		{name: "keywords", path: "/api/v1/analytics/keywords", params: map[string]string{"campaignId": campaignID, "limit": "8"}, target: &snapshot.Keywords},
-		{name: "posts", path: "/api/v1/analytics/posts", params: map[string]string{"campaignId": campaignID, "sort": "engagement", "limit": "8", "offset": "0"}, target: &snapshot.Posts},
+		{name: "kpis", run: func(ctx context.Context) error {
+			var out KPIsResponse
+			if err := c.getJSON(ctx, "/api/v1/analytics/kpis", map[string]string{"campaignId": campaignID}, &out); err != nil {
+				return err
+			}
+			mu.Lock()
+			snapshot.KPIs = out
+			mu.Unlock()
+			return nil
+		}},
+		{name: "platforms", run: func(ctx context.Context) error {
+			var out PlatformsResponse
+			if err := c.getJSON(ctx, "/api/v1/analytics/platforms", map[string]string{"campaignId": campaignID}, &out); err != nil {
+				return err
+			}
+			mu.Lock()
+			snapshot.Platforms = out
+			mu.Unlock()
+			return nil
+		}},
+		{name: "sentiment", run: func(ctx context.Context) error {
+			var out SentimentResponse
+			if err := c.getJSON(ctx, "/api/v1/analytics/sentiment", map[string]string{"campaignId": campaignID}, &out); err != nil {
+				return err
+			}
+			mu.Lock()
+			snapshot.Sentiment = out
+			mu.Unlock()
+			return nil
+		}},
+		{name: "keywords", run: func(ctx context.Context) error {
+			var out KeywordsResponse
+			if err := c.getJSON(ctx, "/api/v1/analytics/keywords", map[string]string{"campaignId": campaignID, "limit": "12"}, &out); err != nil {
+				return err
+			}
+			mu.Lock()
+			snapshot.Keywords = out
+			mu.Unlock()
+			return nil
+		}},
+		{name: "posts", run: func(ctx context.Context) error {
+			var out PostsResponse
+			if err := c.getJSON(ctx, "/api/v1/analytics/posts", map[string]string{"campaignId": campaignID, "sort": "engagement", "limit": "12", "offset": "0"}, &out); err != nil {
+				return err
+			}
+			mu.Lock()
+			snapshot.Posts = out
+			mu.Unlock()
+			return nil
+		}},
 	}
 
+	var wg sync.WaitGroup
 	for _, req := range requests {
-		if err := c.getJSON(ctx, req.path, req.params, req.target); err != nil {
-			snapshot.Errors = append(snapshot.Errors, fmt.Sprintf("%s: %v", req.name, err))
-		}
+		req := req
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := req.run(ctx); err != nil {
+				mu.Lock()
+				snapshot.Errors = append(snapshot.Errors, fmt.Sprintf("%s: %v", req.name, err))
+				mu.Unlock()
+			}
+		}()
 	}
+	wg.Wait()
 
 	if !snapshot.HasData() && len(snapshot.Errors) > 0 {
 		return snapshot, fmt.Errorf("analytics snapshot unavailable: %s", strings.Join(snapshot.Errors, "; "))
 	}
+	if snapshot.HasData() {
+		ttl := c.cacheTTL
+		if len(snapshot.Errors) > 0 || !snapshot.HasCoreAnalytics() {
+			ttl = 5 * time.Second
+		}
+		c.saveCachedSnapshot(campaignID, snapshot, ttl)
+	}
 	return snapshot, nil
+}
+
+func (c *implClient) getCachedSnapshot(campaignID string) (Snapshot, bool) {
+	c.mu.RLock()
+	item, ok := c.cache[campaignID]
+	c.mu.RUnlock()
+	if !ok || time.Now().After(item.expiresAt) {
+		if ok {
+			c.mu.Lock()
+			delete(c.cache, campaignID)
+			c.mu.Unlock()
+		}
+		return Snapshot{}, false
+	}
+	return item.value, true
+}
+
+func (c *implClient) saveCachedSnapshot(campaignID string, snapshot Snapshot, ttl time.Duration) {
+	if ttl <= 0 {
+		ttl = c.cacheTTL
+	}
+	c.mu.Lock()
+	c.cache[campaignID] = cachedSnapshot{
+		value:     snapshot,
+		expiresAt: time.Now().Add(ttl),
+	}
+	c.mu.Unlock()
 }
 
 func (c *implClient) getJSON(ctx context.Context, path string, params map[string]string, target any) error {

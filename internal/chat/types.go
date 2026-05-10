@@ -57,6 +57,7 @@ type Citation struct {
 	RelevanceScore float64
 	Platform       string
 	Sentiment      string
+	URL            string
 }
 
 type SearchMeta struct {

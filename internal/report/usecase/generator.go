@@ -56,20 +56,20 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 	totalDocs := len(searchOutput.Results)
 	uc.l.Infof(ctx, "report.usecase.generateInBackground: Found %d documents for report %s", totalDocs, reportID)
 
-	// Phase 2: Sample - Select representative documents
-	samples := uc.sampleDocs(searchOutput.Results)
-	evidence := buildBusinessEvidencePack(samples, uc.config.SampleSize)
-	if len(evidence) == 0 {
-		evidence = buildBusinessEvidencePack(searchOutput.Results, uc.config.SampleSize)
-	}
+	// Phase 2: Evidence - Select representative, business-grade documents.
+	// Use the full retrieval set here so the evidence pack can cover sentiment
+	// and platform diversity instead of only mirroring the top semantic hits.
+	evidence := buildBusinessEvidencePack(searchOutput.Results, uc.config.SampleSize)
+	analyticsSummary := uc.loadReportAnalyticsSummary(ctx, input.CampaignID)
 
 	// Phase 3: Generate - one coherent business report, grounded by evidence IDs.
 	prompt := buildBusinessReportPrompt(input, businessPromptData{
-		TotalDocs:      totalDocs,
-		Aggregation:    formatAggregation(searchOutput.Aggregations),
-		Evidence:       formatBusinessEvidenceForPrompt(evidence),
-		Sections:       strings.Join(input.Filters.Sections, ", "),
-		CompetitorURLs: strings.Join(input.Filters.CompetitorURLs, ", "),
+		TotalDocs:        totalDocs,
+		Aggregation:      formatAggregation(searchOutput.Aggregations),
+		AnalyticsSummary: analyticsSummary,
+		Evidence:         formatBusinessEvidenceForPrompt(evidence),
+		Sections:         strings.Join(input.Filters.Sections, ", "),
+		CompetitorURLs:   strings.Join(input.Filters.CompetitorURLs, ", "),
 	})
 
 	llmCtx, cancel := context.WithTimeout(ctx, 4*time.Minute)
@@ -202,6 +202,24 @@ func (uc *implUseCase) ensureReportBucket(ctx context.Context) error {
 
 	uc.l.Infof(ctx, "report.usecase.ensureReportBucket: Created report bucket %s", bucket)
 	return nil
+}
+
+func (uc *implUseCase) loadReportAnalyticsSummary(ctx context.Context, campaignID string) string {
+	if uc.analytics == nil {
+		return ""
+	}
+	snapshotCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
+	defer cancel()
+
+	snapshot, err := uc.analytics.Snapshot(snapshotCtx, campaignID)
+	if err != nil {
+		uc.l.Warnf(ctx, "report.usecase.loadReportAnalyticsSummary: analytics snapshot failed: %v", err)
+		return ""
+	}
+	if !snapshot.HasData() {
+		return ""
+	}
+	return formatAnalyticsSnapshotForReport(snapshot)
 }
 
 // sampleDocs selects representative documents from the full result set.

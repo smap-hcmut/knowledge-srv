@@ -89,6 +89,7 @@ type citationResp struct {
 	RelevanceScore float64 `json:"relevance_score"`
 	Platform       string  `json:"platform"`
 	Sentiment      string  `json:"sentiment"`
+	URL            string  `json:"url,omitempty"`
 }
 
 type searchMetaResp struct {
@@ -150,6 +151,7 @@ func (h *handler) newChatResp(o chat.ChatOutput) chatResp {
 			RelevanceScore: c.RelevanceScore,
 			Platform:       c.Platform,
 			Sentiment:      c.Sentiment,
+			URL:            c.URL,
 		}
 	}
 	return resp
@@ -181,6 +183,7 @@ func (h *handler) newConversationResp(o chat.ConversationOutput) conversationRes
 				RelevanceScore: c.RelevanceScore,
 				Platform:       c.Platform,
 				Sentiment:      c.Sentiment,
+				URL:            c.URL,
 			})
 		}
 		if m.SearchMetadata != nil {

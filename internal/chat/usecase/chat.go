@@ -103,7 +103,8 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		return chat.ChatOutput{}, fmt.Errorf("%w: %v", chat.ErrSearchFailed, err)
 	}
 	if searchOutput.NoRelevantContext || len(searchOutput.Results) == 0 {
-		if output, ok := uc.tryAnalyticsFallback(ctx, conversation, input, startTime, intent); ok {
+		analyticsSnapshot, _ := uc.loadAnalyticsSnapshot(ctx, input.CampaignID, 8*time.Second)
+		if output, ok := uc.tryAnalyticsFallback(ctx, conversation, input, startTime, intent, analyticsSnapshot); ok {
 			return output, nil
 		}
 
@@ -127,7 +128,8 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		}, nil
 	}
 
-	prompt := uc.buildPrompt(input.Message, searchOutput.Results, history)
+	analyticsSnapshot, _ := uc.loadAnalyticsSnapshot(ctx, input.CampaignID, 8*time.Second)
+	prompt := uc.buildPrompt(input.Message, searchOutput.Results, history, analyticsSnapshot)
 
 	llmCtx, llmCancel := context.WithTimeout(ctx, 60*time.Second)
 	defer llmCancel()

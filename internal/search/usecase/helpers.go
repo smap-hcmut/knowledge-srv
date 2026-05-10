@@ -69,7 +69,7 @@ func (uc *implUseCase) resolveCampaignName(ctx context.Context, campaignID strin
 // generateCacheKey - Generate Tầng 3 cache key
 func (uc *implUseCase) generateCacheKey(input search.SearchInput) string {
 	filterJSON, _ := json.Marshal(input.Filters)
-	raw := fmt.Sprintf("v2:%s:%s:%s:%d:%.2f", input.CampaignID, input.Query, string(filterJSON), input.Limit, input.MinScore)
+	raw := fmt.Sprintf("v3:%s:%s:%s:%d:%.2f", input.CampaignID, input.Query, string(filterJSON), input.Limit, input.MinScore)
 	hash := sha256.Sum256([]byte(raw))
 	return fmt.Sprintf("search:%s:%x", input.CampaignID, hash)
 }

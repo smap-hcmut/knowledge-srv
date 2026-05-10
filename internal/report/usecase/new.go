@@ -4,6 +4,7 @@ import (
 	"knowledge-srv/internal/report"
 	"knowledge-srv/internal/report/repository"
 	"knowledge-srv/internal/search"
+	"knowledge-srv/pkg/analytics"
 
 	"github.com/smap-hcmut/shared-libs/go/llm"
 	"github.com/smap-hcmut/shared-libs/go/log"
@@ -26,6 +27,7 @@ type Config struct {
 type implUseCase struct {
 	repo      repository.PostgresRepository
 	searchUC  search.UseCase
+	analytics analytics.Client
 	llm       llm.LLM
 	minio     minio.MinIO
 	l         log.Logger
@@ -37,6 +39,7 @@ type implUseCase struct {
 func New(
 	repo repository.PostgresRepository,
 	searchUC search.UseCase,
+	analyticsClient analytics.Client,
 	llmClient llm.LLM,
 	minioClient minio.MinIO,
 	l log.Logger,
@@ -55,6 +58,7 @@ func New(
 	return &implUseCase{
 		repo:      repo,
 		searchUC:  searchUC,
+		analytics: analyticsClient,
 		llm:       llmClient,
 		minio:     minioClient,
 		l:         l,

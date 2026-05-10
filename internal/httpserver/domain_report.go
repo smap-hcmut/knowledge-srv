@@ -5,6 +5,8 @@ import (
 	reportHTTP "knowledge-srv/internal/report/delivery/http"
 	reportPostgre "knowledge-srv/internal/report/repository/postgre"
 	reportUsecase "knowledge-srv/internal/report/usecase"
+	"knowledge-srv/pkg/analytics"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/smap-hcmut/shared-libs/go/middleware"
@@ -12,8 +14,12 @@ import (
 
 func (srv *HTTPServer) setupReportDomain(ctx context.Context, r *gin.RouterGroup, mw *middleware.Middleware) error {
 	repo := reportPostgre.New(srv.postgresDB, srv.l)
+	analyticsClient := analytics.New(analytics.Config{
+		BaseURL: srv.config.Analysis.URL,
+		Timeout: time.Duration(srv.config.Analysis.Timeout) * time.Second,
+	})
 
-	uc := reportUsecase.New(repo, srv.searchUC, srv.llmClient, srv.minioClient, srv.l, reportUsecase.Config{
+	uc := reportUsecase.New(repo, srv.searchUC, analyticsClient, srv.llmClient, srv.minioClient, srv.l, reportUsecase.Config{
 		ReportBucket: srv.config.MinIO.Bucket,
 	})
 

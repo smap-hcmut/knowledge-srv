@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"fmt"
+	"knowledge-srv/internal/contentquality"
 	"knowledge-srv/internal/report"
 	"knowledge-srv/internal/search"
+	analyticspkg "knowledge-srv/pkg/analytics"
 	"math"
 	"sort"
 	"strings"
@@ -16,11 +18,12 @@ const (
 )
 
 type businessPromptData struct {
-	TotalDocs      int
-	Aggregation    string
-	Evidence       string
-	Sections       string
-	CompetitorURLs string
+	TotalDocs        int
+	Aggregation      string
+	AnalyticsSummary string
+	Evidence         string
+	Sections         string
+	CompetitorURLs   string
 }
 
 type businessEvidence struct {
@@ -72,13 +75,81 @@ func buildBusinessEvidencePack(results []search.SearchResult, limit int) []busin
 		return items[i].RankScore > items[j].RankScore
 	})
 
-	if len(items) > limit {
-		items = items[:limit]
-	}
+	items = selectCoverageEvidence(items, limit)
 	for i := range items {
 		items[i].ID = fmt.Sprintf("E%02d", i+1)
 	}
 	return items
+}
+
+func selectCoverageEvidence(items []businessEvidence, limit int) []businessEvidence {
+	if len(items) <= limit {
+		return items
+	}
+
+	selected := make([]businessEvidence, 0, limit)
+	seen := make(map[string]struct{}, limit)
+	add := func(ev businessEvidence) bool {
+		if len(selected) >= limit {
+			return false
+		}
+		key := evidenceSelectionKey(ev)
+		if _, ok := seen[key]; ok {
+			return false
+		}
+		seen[key] = struct{}{}
+		selected = append(selected, ev)
+		return true
+	}
+
+	addByBucket := func(bucket func(businessEvidence) string, perBucket int) {
+		if perBucket <= 0 {
+			return
+		}
+		counts := make(map[string]int)
+		for _, ev := range items {
+			key := strings.TrimSpace(strings.ToLower(bucket(ev)))
+			if key == "" || counts[key] >= perBucket {
+				continue
+			}
+			if add(ev) {
+				counts[key]++
+			}
+			if len(selected) >= limit {
+				return
+			}
+		}
+	}
+
+	addByBucket(func(ev businessEvidence) string { return ev.Sentiment }, 3)
+	addByBucket(func(ev businessEvidence) string { return ev.Platform }, 2)
+	for _, ev := range items {
+		if !add(ev) {
+			continue
+		}
+		if len(selected) >= limit {
+			break
+		}
+	}
+
+	sort.SliceStable(selected, func(i, j int) bool {
+		if selected[i].RankScore == selected[j].RankScore {
+			return selected[i].SearchScore > selected[j].SearchScore
+		}
+		return selected[i].RankScore > selected[j].RankScore
+	})
+	return selected
+}
+
+func evidenceSelectionKey(ev businessEvidence) string {
+	if id := strings.TrimSpace(ev.SearchID); id != "" {
+		return id
+	}
+	return strings.Join([]string{
+		strings.ToLower(strings.TrimSpace(ev.Platform)),
+		strings.ToLower(strings.TrimSpace(ev.Author)),
+		compactEvidenceFingerprint(ev.Content),
+	}, "|")
 }
 
 func businessEvidenceFromSearchResult(result search.SearchResult) businessEvidence {
@@ -188,13 +259,153 @@ Sections người dùng chọn: %s
 Nguồn/đối thủ tham chiếu: %s
 Tổng số evidence có thể truy xuất: %d
 
+### Analytics snapshot
+%s
+
 ### Dữ liệu tổng hợp
 %s
 
 ### Evidence pack
 %s
 
-Chỉ trả về markdown body theo cấu trúc bắt buộc.`, input.CampaignID, input.ReportType, emptyAsDash(input.Filters.Prompt), emptyAsDash(data.Sections), emptyAsDash(data.CompetitorURLs), data.TotalDocs, data.Aggregation, data.Evidence)
+Chỉ trả về markdown body theo cấu trúc bắt buộc.`, input.CampaignID, input.ReportType, emptyAsDash(input.Filters.Prompt), emptyAsDash(data.Sections), emptyAsDash(data.CompetitorURLs), data.TotalDocs, emptyAsDash(data.AnalyticsSummary), data.Aggregation, data.Evidence)
+}
+
+func formatAnalyticsSnapshotForReport(snapshot analyticspkg.Snapshot) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("- Total mentions: %s\n", formatAnalyticsMetric(snapshot.KPIs.Metrics, "Total Mentions", totalSnapshotMentions(snapshot))))
+	if score, ok := formatAnalyticsMetricIfPresent(snapshot.KPIs.Metrics, "Sentiment Score"); ok {
+		sb.WriteString(fmt.Sprintf("- Sentiment score: %s\n", score))
+	}
+	engagementFallback := snapshotEngagement(snapshot)
+	if engagementFallback == 0 {
+		engagementFallback = snapshotPostEngagement(snapshot)
+	}
+	sb.WriteString(fmt.Sprintf("- Engagement: %s\n", formatAnalyticsMetric(snapshot.KPIs.Metrics, "Engagement", engagementFallback)))
+	if len(snapshot.Errors) > 0 || !snapshot.HasCoreAnalytics() {
+		sb.WriteString("- Snapshot note: partial analytics response; missing metrics must not be interpreted as zero.\n")
+	}
+	if snapshot.Sentiment.Total > 0 {
+		sb.WriteString(fmt.Sprintf("- Sentiment share: positive %.1f%%, neutral %.1f%%, negative %.1f%%\n",
+			snapshotSentimentShare(snapshot, "positive"),
+			snapshotSentimentShare(snapshot, "neutral"),
+			snapshotSentimentShare(snapshot, "negative"),
+		))
+	}
+	platforms := snapshot.Platforms.Stats
+	sort.SliceStable(platforms, func(i, j int) bool {
+		return platforms[i].Mentions > platforms[j].Mentions
+	})
+	if len(platforms) > 0 {
+		sb.WriteString("- Platform signal:\n")
+		for _, p := range platforms {
+			if p.Mentions <= 0 {
+				continue
+			}
+			sb.WriteString(fmt.Sprintf("  - %s: mentions=%d, sentiment=%.1f%%, engagement=%d, reach=%d\n",
+				displayPlatform(firstNonEmpty(p.Name, p.Platform)), p.Mentions, p.Sentiment, p.EngagementRaw, p.Reach))
+		}
+	}
+	if len(snapshot.Keywords.Keywords) > 0 {
+		sb.WriteString("- Top topics:\n")
+		for i, kw := range snapshot.Keywords.Keywords {
+			if i >= 10 {
+				break
+			}
+			if strings.TrimSpace(kw.Text) == "" {
+				continue
+			}
+			sb.WriteString(fmt.Sprintf("  - %s: volume=%d, sentiment=%.1f, change=%.1f%%\n", kw.Text, kw.Volume, kw.Sentiment, kw.Change))
+		}
+	}
+	if len(snapshot.Posts.Posts) > 0 {
+		sb.WriteString("- High-engagement posts from analytics API:\n")
+		count := 0
+		for _, post := range snapshot.Posts.Posts {
+			if strings.TrimSpace(post.Content) == "" || contentquality.IsLowValueMarketingContent(post.Content) {
+				continue
+			}
+			source := "source unavailable"
+			if strings.TrimSpace(post.URL) != "" {
+				source = post.URL
+			}
+			sb.WriteString(fmt.Sprintf("  - %s · %s · %s · engagement=%d · source=%s · %s\n",
+				displayPlatform(post.Platform), post.Sentiment, firstNonEmpty(post.AuthorUsername, post.Author), post.Engagement, source, truncateRunes(post.Content, 180)))
+			count++
+			if count >= 8 {
+				break
+			}
+		}
+	}
+	return strings.TrimSpace(sb.String())
+}
+
+func totalSnapshotMentions(snapshot analyticspkg.Snapshot) int64 {
+	if snapshot.Sentiment.Total > 0 {
+		return snapshot.Sentiment.Total
+	}
+	if snapshot.Posts.Total > 0 {
+		return snapshot.Posts.Total
+	}
+	var total int64
+	for _, p := range snapshot.Platforms.Stats {
+		total += p.Mentions
+	}
+	return total
+}
+
+func snapshotEngagement(snapshot analyticspkg.Snapshot) int64 {
+	var total int64
+	for _, p := range snapshot.Platforms.Stats {
+		total += p.EngagementRaw
+	}
+	return total
+}
+
+func snapshotPostEngagement(snapshot analyticspkg.Snapshot) int64 {
+	var total int64
+	for _, post := range snapshot.Posts.Posts {
+		total += post.Engagement
+	}
+	return total
+}
+
+func snapshotSentimentShare(snapshot analyticspkg.Snapshot, label string) float64 {
+	var total, matched int64
+	for _, item := range snapshot.Sentiment.Donut {
+		total += item.Value
+		if strings.EqualFold(item.Label, label) {
+			matched += item.Value
+		}
+	}
+	if total == 0 {
+		return 0
+	}
+	return float64(matched) / float64(total) * 100
+}
+
+func formatAnalyticsMetric(metrics []analyticspkg.KPIMetric, label string, fallback any) string {
+	for _, metric := range metrics {
+		if strings.EqualFold(metric.Label, label) {
+			if strings.TrimSpace(metric.Formatted) != "" {
+				return metric.Formatted
+			}
+			return fmt.Sprintf("%.1f", metric.Value)
+		}
+	}
+	return fmt.Sprint(fallback)
+}
+
+func formatAnalyticsMetricIfPresent(metrics []analyticspkg.KPIMetric, label string) (string, bool) {
+	for _, metric := range metrics {
+		if strings.EqualFold(metric.Label, label) {
+			if strings.TrimSpace(metric.Formatted) != "" {
+				return metric.Formatted, true
+			}
+			return fmt.Sprintf("%.1f", metric.Value), true
+		}
+	}
+	return "", false
 }
 
 func formatBusinessEvidenceForPrompt(evidence []businessEvidence) string {

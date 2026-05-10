@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"strings"
+
 	"knowledge-srv/internal/chat"
 	"knowledge-srv/internal/search"
 )
@@ -18,9 +20,62 @@ func (uc *implUseCase) extractCitations(results []search.SearchResult) []chat.Ci
 			RelevanceScore: r.Score,
 			Platform:       r.Platform,
 			Sentiment:      r.OverallSentiment,
+			URL:            sourceURLFromSearchMetadata(r.Metadata),
 		})
 	}
 	return citations
+}
+
+func sourceURLFromSearchMetadata(metadata map[string]interface{}) string {
+	return firstURLString(
+		stringValuePath(metadata, "metadata", "comment_url"),
+		stringValuePath(metadata, "metadata", "original_url"),
+		stringValuePath(metadata, "metadata", "post_url"),
+		stringValuePath(metadata, "metadata", "permalink_url"),
+		stringValuePath(metadata, "metadata", "permalink"),
+		stringValuePath(metadata, "metadata", "url"),
+		stringValuePath(metadata, "metadata", "source_url"),
+		stringValuePath(metadata, "metadata", "web_url"),
+		stringValuePath(metadata, "metadata", "parent_post_url"),
+		stringValuePath(metadata, "metadata", "platform_meta", "youtube", "parent_url"),
+		stringValuePath(metadata, "metadata", "platform_meta", "youtube", "video_url"),
+		stringValuePath(metadata, "comment_url"),
+		stringValuePath(metadata, "original_url"),
+		stringValuePath(metadata, "post_url"),
+		stringValuePath(metadata, "permalink_url"),
+		stringValuePath(metadata, "permalink"),
+		stringValuePath(metadata, "url"),
+		stringValuePath(metadata, "source_url"),
+		stringValuePath(metadata, "web_url"),
+		stringValuePath(metadata, "parent_post_url"),
+		stringValuePath(metadata, "platform_meta", "youtube", "parent_url"),
+		stringValuePath(metadata, "platform_meta", "youtube", "video_url"),
+	)
+}
+
+func firstURLString(values ...string) string {
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if strings.HasPrefix(value, "http://") || strings.HasPrefix(value, "https://") {
+			return value
+		}
+	}
+	return ""
+}
+
+func stringValuePath(payload map[string]interface{}, keys ...string) string {
+	var current interface{} = payload
+	for _, key := range keys {
+		obj, ok := current.(map[string]interface{})
+		if !ok {
+			return ""
+		}
+		current = obj[key]
+	}
+	if s, ok := current.(string); ok {
+		return s
+	}
+	return ""
 }
 
 func (uc *implUseCase) generateTitle(message string) string {

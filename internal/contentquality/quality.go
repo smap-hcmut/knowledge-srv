@@ -1,9 +1,12 @@
 package contentquality
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
 )
+
+var phoneNumberPattern = regexp.MustCompile(`(^|[^0-9])0[0-9]{8,10}([^0-9]|$)`)
 
 // IsLowValueMarketingContent filters evidence that is technically present in the
 // index but poor for marketer-facing reports: corporate/internal posts,
@@ -71,13 +74,59 @@ func IsLowValueMarketingContent(content string) bool {
 		"call of duty",
 		"cod fandom",
 		"apex movement",
+		"youtube.com/shopcollection",
+		"bộ đồ nghề",
+		"bo do nghe",
+		"menu trái cây",
+		"menu trai cay",
+		"bánh cuốn",
+		"banh cuon",
+		"serum",
+		"cọ gấu",
+		"co gau",
+		"hàng có sẵn",
+		"hang co san",
+		"hàng_có_sẵn",
+		"định danh chủ",
+		"định danh chu",
+		"cà mau aa",
+		"ca mau aa",
+		"ship toàn quốc",
+		"ship toan quoc",
+		"ship từ",
+		"ship tu",
+		"phí ship",
+		"phi ship",
 	}
 	for _, pattern := range lowValuePatterns {
 		if strings.Contains(normalized, pattern) {
 			return true
 		}
 	}
+	if phoneNumberPattern.MatchString(normalized) && containsAny(normalized, []string{
+		"zalo",
+		"alo",
+		"liên hệ",
+		"lien he",
+		"ib",
+		"inbox",
+		"tư vấn",
+		"tu van",
+		"chuyên bán",
+		"chuyen ban",
+	}) {
+		return true
+	}
 
+	return false
+}
+
+func containsAny(content string, patterns []string) bool {
+	for _, pattern := range patterns {
+		if strings.Contains(content, pattern) {
+			return true
+		}
+	}
 	return false
 }
 

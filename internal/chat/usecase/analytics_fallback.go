@@ -21,23 +21,15 @@ func (uc *implUseCase) tryAnalyticsFallback(
 	input chat.ChatInput,
 	startTime time.Time,
 	intent QueryIntent,
+	snapshot *analyticspkg.Snapshot,
 ) (chat.ChatOutput, bool) {
-	if uc.analytics == nil {
+	if snapshot == nil || !snapshot.HasData() {
 		return chat.ChatOutput{}, false
 	}
 
-	snapshot, err := uc.analytics.Snapshot(ctx, input.CampaignID)
-	if err != nil {
-		uc.l.Warnf(ctx, "chat.usecase.tryAnalyticsFallback: analytics snapshot failed: %v", err)
-		return chat.ChatOutput{}, false
-	}
-	if !snapshot.HasData() {
-		return chat.ChatOutput{}, false
-	}
-
-	answer, citations, suggestions, docsUsed := buildAnalyticsAnswer(input.Message, snapshot)
+	answer, citations, suggestions, docsUsed := buildAnalyticsAnswer(input.Message, *snapshot)
 	searchMeta := chat.SearchMeta{
-		TotalDocsSearched: int(totalDocsFromSnapshot(snapshot)),
+		TotalDocsSearched: int(totalDocsFromSnapshot(*snapshot)),
 		DocsUsed:          docsUsed,
 		ProcessingTimeMs:  time.Since(startTime).Milliseconds(),
 		ModelUsed:         "analysis-api",
@@ -54,6 +46,27 @@ func (uc *implUseCase) tryAnalyticsFallback(
 		QueryIntent:    string(intent),
 		Backend:        "AnalysisAPI",
 	}, true
+}
+
+func (uc *implUseCase) loadAnalyticsSnapshot(ctx context.Context, campaignID string, timeout time.Duration) (*analyticspkg.Snapshot, bool) {
+	if uc.analytics == nil {
+		return nil, false
+	}
+	if timeout <= 0 {
+		timeout = 4 * time.Second
+	}
+	snapshotCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	snapshot, err := uc.analytics.Snapshot(snapshotCtx, campaignID)
+	if err != nil {
+		uc.l.Warnf(ctx, "chat.usecase.loadAnalyticsSnapshot: analytics snapshot failed: %v", err)
+		return nil, false
+	}
+	if !snapshot.HasData() {
+		return nil, false
+	}
+	return &snapshot, true
 }
 
 func (uc *implUseCase) persistChatExchange(
@@ -94,13 +107,23 @@ func (uc *implUseCase) persistChatExchange(
 func buildAnalyticsAnswer(question string, snapshot analyticspkg.Snapshot) (string, []chat.Citation, []string, int) {
 	platforms := sortedPlatformStats(snapshot.Platforms.Stats)
 	totalMentions := metricFormatted(snapshot.KPIs.Metrics, "Total Mentions", totalDocsFromSnapshot(snapshot))
-	engagement := metricFormatted(snapshot.KPIs.Metrics, "Engagement", totalEngagement(platforms))
-	sentimentScore := metricFormatted(snapshot.KPIs.Metrics, "Sentiment Score", snapshot.Sentiment.Pulse)
+	engagementFallback := totalEngagement(platforms)
+	if engagementFallback == 0 {
+		engagementFallback = totalPostEngagement(snapshot.Posts.Posts)
+	}
+	engagement := metricFormatted(snapshot.KPIs.Metrics, "Engagement", engagementFallback)
 	negativeShare := sentimentShare(snapshot.Sentiment.Donut, "negative")
 	positiveShare := sentimentShare(snapshot.Sentiment.Donut, "positive")
 
 	var lines []string
-	lines = append(lines, fmt.Sprintf("Mình đang dựa trên analytics live của campaign: %s mentions, sentiment trung bình %s, engagement %s.", totalMentions, sentimentScore, engagement))
+	intro := fmt.Sprintf("Mình đang dựa trên analytics live của campaign: %s mentions, engagement %s.", totalMentions, engagement)
+	if sentimentScore, ok := metricFormattedIfPresent(snapshot.KPIs.Metrics, "Sentiment Score"); ok {
+		intro = fmt.Sprintf("Mình đang dựa trên analytics live của campaign: %s mentions, sentiment trung bình %s, engagement %s.", totalMentions, sentimentScore, engagement)
+	}
+	lines = append(lines, intro)
+	if len(snapshot.Errors) > 0 || !snapshot.HasCoreAnalytics() {
+		lines = append(lines, "Một phần endpoint analytics chưa đủ dữ liệu trong snapshot này, nên các kết luận định lượng bên dưới chỉ dùng những phần đã lấy được.")
+	}
 	if snapshot.Sentiment.Total > 0 {
 		lines = append(lines, fmt.Sprintf("Cơ cấu cảm xúc hiện tại: negative %.1f%%, neutral %.1f%%, positive %.1f%%.", negativeShare, sentimentShare(snapshot.Sentiment.Donut, "neutral"), positiveShare))
 	}
@@ -197,6 +220,14 @@ func totalEngagement(platforms []analyticspkg.PlatformStat) int64 {
 	return total
 }
 
+func totalPostEngagement(posts []analyticspkg.PostItem) int64 {
+	var total int64
+	for _, post := range posts {
+		total += post.Engagement
+	}
+	return total
+}
+
 func metricFormatted(metrics []analyticspkg.KPIMetric, label string, fallback any) string {
 	for _, metric := range metrics {
 		if strings.EqualFold(metric.Label, label) {
@@ -214,6 +245,18 @@ func metricFormatted(metrics []analyticspkg.KPIMetric, label string, fallback an
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+func metricFormattedIfPresent(metrics []analyticspkg.KPIMetric, label string) (string, bool) {
+	for _, metric := range metrics {
+		if strings.EqualFold(metric.Label, label) {
+			if strings.TrimSpace(metric.Formatted) != "" {
+				return metric.Formatted, true
+			}
+			return formatFloat(metric.Value), true
+		}
+	}
+	return "", false
 }
 
 func sentimentShare(items []analyticspkg.SentimentItem, label string) float64 {
@@ -282,6 +325,7 @@ func citationsFromPosts(posts []analyticspkg.PostItem, limit int) []chat.Citatio
 			RelevanceScore: float64(post.Engagement),
 			Platform:       post.Platform,
 			Sentiment:      post.Sentiment,
+			URL:            post.URL,
 		})
 		if len(citations) >= limit {
 			break

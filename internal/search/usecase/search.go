@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
+	"knowledge-srv/internal/contentquality"
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/point"
@@ -110,12 +112,21 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	preDedupeCount := len(pointResults)
 	pointResults = uc.dedupePointResults(pointResults)
 
-	var results []search.SearchResult
+	var candidates []search.SearchResult
 	for _, r := range pointResults {
-		results = append(results, uc.mapQdrantResult(r))
-		if len(results) >= limit {
-			break
+		mapped := uc.mapQdrantResult(r)
+		if !isUsefulSearchResult(mapped) {
+			continue
 		}
+		candidates = append(candidates, mapped)
+	}
+	sort.SliceStable(candidates, func(i, j int) bool {
+		return searchResultRankScore(candidates[i]) > searchResultRankScore(candidates[j])
+	})
+
+	results := candidates
+	if len(results) > limit {
+		results = results[:limit]
 	}
 
 	// Step 8: Hallucination control — NO relevant context flag
@@ -141,10 +152,94 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		}
 	}
 
-	uc.l.Infof(ctx, "search.usecase.Search: query=%q, enriched=%q, projects=%d, fetched=%d, deduped=%d, results=%d, no_context=%v, duration=%dms",
-		input.Query, enrichedQuery, len(projectIDs), preDedupeCount, len(pointResults), len(results), noRelevantContext, output.ProcessingTimeMs)
+	uc.l.Infof(ctx, "search.usecase.Search: query=%q, enriched=%q, projects=%d, fetched=%d, deduped=%d, useful=%d, results=%d, no_context=%v, duration=%dms",
+		input.Query, enrichedQuery, len(projectIDs), preDedupeCount, len(pointResults), len(candidates), len(results), noRelevantContext, output.ProcessingTimeMs)
 
 	return output, nil
+}
+
+func isUsefulSearchResult(result search.SearchResult) bool {
+	content := strings.TrimSpace(result.Content)
+	if content == "" {
+		return false
+	}
+	if contentquality.IsLowValueMarketingContent(content) {
+		return false
+	}
+	biz := maxFloat(
+		numberFromPayload(result.Metadata, "business_relevance_score"),
+		numberFromNestedPayload(result.Metadata, "metadata", "business_relevance_score"),
+	)
+	if biz > 0 && biz < 0.30 && result.Score < 0.68 {
+		return false
+	}
+	return true
+}
+
+func searchResultRankScore(result search.SearchResult) float64 {
+	biz := maxFloat(
+		numberFromPayload(result.Metadata, "business_relevance_score"),
+		numberFromNestedPayload(result.Metadata, "metadata", "business_relevance_score"),
+	)
+	engagement := math.Log10(math.Max(result.EngagementScore, 0) + 1)
+	contentCoverage := math.Min(float64(len([]rune(result.Content)))/260, 1)
+	score := result.Score*10 + biz*2.2 + engagement*0.45 + contentCoverage*0.25
+	switch strings.ToLower(strings.TrimSpace(result.OverallSentiment)) {
+	case "negative":
+		score += 0.20
+	case "positive":
+		score += 0.10
+	}
+	if sourceURLFromSearchPayload(result.Metadata) != "" {
+		score += 0.15
+	}
+	if len(result.Aspects) > 0 {
+		score += 0.20
+	}
+	return score
+}
+
+func sourceURLFromSearchPayload(payload map[string]interface{}) string {
+	for _, value := range []string{
+		stringFromNestedPayload(payload, "metadata", "comment_url"),
+		stringFromNestedPayload(payload, "metadata", "original_url"),
+		stringFromNestedPayload(payload, "metadata", "post_url"),
+		stringFromNestedPayload(payload, "metadata", "permalink_url"),
+		stringFromNestedPayload(payload, "metadata", "url"),
+		stringFromPayload(payload, "comment_url"),
+		stringFromPayload(payload, "original_url"),
+		stringFromPayload(payload, "post_url"),
+		stringFromPayload(payload, "permalink_url"),
+		stringFromPayload(payload, "url"),
+	} {
+		value = strings.TrimSpace(value)
+		if strings.HasPrefix(value, "http://") || strings.HasPrefix(value, "https://") {
+			return value
+		}
+	}
+	return ""
+}
+
+func numberFromNestedPayload(payload map[string]interface{}, parentKey, childKey string) float64 {
+	parent, ok := payload[parentKey]
+	if !ok {
+		return 0
+	}
+	obj, ok := parent.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+	return numberFromPayload(obj, childKey)
+}
+
+func maxFloat(values ...float64) float64 {
+	var max float64
+	for _, value := range values {
+		if value > max {
+			max = value
+		}
+	}
+	return max
 }
 
 // searchMultipleCollections searches across per-project Qdrant collections in parallel.
