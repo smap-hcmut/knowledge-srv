@@ -165,6 +165,14 @@ func (r retryReportReq) toInput() report.RetryReportInput {
 	return report.RetryReportInput{ReportID: r.ReportID}
 }
 
+type deleteReportReq struct {
+	ReportID string
+}
+
+func (r deleteReportReq) toInput() report.DeleteReportInput {
+	return report.DeleteReportInput{ReportID: r.ReportID}
+}
+
 type generateReportResp struct {
 	ReportID string `json:"report_id"`
 	Status   string `json:"status"`
@@ -297,6 +305,10 @@ type retryResp struct {
 	ReportID  string `json:"report_id"`
 	ProcessID string `json:"process_id"`
 	Status    string `json:"status"`
+}
+
+type deleteResp struct {
+	OK bool `json:"ok"`
 }
 
 func (h *handler) newGenerateReportResp(o report.GenerateOutput) generateReportResp {
@@ -476,4 +488,8 @@ func (h *handler) newRetryResp(o report.RetryOutput) retryResp {
 		ProcessID: o.ProcessID,
 		Status:    o.Status,
 	}
+}
+
+func (h *handler) newDeleteResp(o report.DeleteOutput) deleteResp {
+	return deleteResp{OK: o.OK}
 }

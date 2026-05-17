@@ -17,4 +17,5 @@ type UseCase interface {
 	GetReportContent(ctx context.Context, sc model.Scope, input GetReportContentInput) (ReportContentOutput, error)
 	CancelReport(ctx context.Context, sc model.Scope, input CancelReportInput) (CancelOutput, error)
 	RetryReport(ctx context.Context, sc model.Scope, input RetryReportInput) (RetryOutput, error)
+	DeleteReport(ctx context.Context, sc model.Scope, input DeleteReportInput) (DeleteOutput, error)
 }

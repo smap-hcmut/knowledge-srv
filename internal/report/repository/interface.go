@@ -15,6 +15,7 @@ type ReportRepository interface {
 	UpdateFailed(ctx context.Context, opts UpdateFailedOptions) error
 	UpdateProcessing(ctx context.Context, opts UpdateProcessingOptions) error
 	UpdateCancelled(ctx context.Context, opts UpdateCancelledOptions) error
+	DeleteReport(ctx context.Context, opts DeleteReportOptions) error
 	ListReports(ctx context.Context, opts ListReportsOptions) ([]*model.Report, error)
 	CountReports(ctx context.Context, opts ListReportsOptions) (int, error)
 }

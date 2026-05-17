@@ -17,6 +17,7 @@ func (h *handler) RegisterRoutes(r *gin.RouterGroup, mw *middleware.Middleware) 
 		r.GET("/reports/:report_id/download", h.DownloadReport)
 		r.POST("/reports/:report_id/cancel", h.CancelReport)
 		r.POST("/reports/:report_id/retry", h.RetryReport)
+		r.DELETE("/reports/:report_id", h.DeleteReport)
 		r.GET("/reports/posts/:post_id/comments", h.ListPostComments)
 	}
 }

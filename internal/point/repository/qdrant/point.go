@@ -2,6 +2,7 @@ package qdrant
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/point"
@@ -14,6 +15,9 @@ import (
 func (r *implRepository) Search(ctx context.Context, opt repository.SearchOptions) ([]point.SearchOutput, error) {
 	pkgResults, err := r.client.SearchWithFilter(ctx, opt.CollectionName, opt.Vector, opt.Limit, opt.Filter, opt.ScoreThreshold)
 	if err != nil {
+		if errors.Is(err, pkgQdrant.ErrCollectionNotFound) {
+			return nil, err
+		}
 		r.l.Errorf(ctx, "point.repository.qdrant.Search: Failed to search points: %v", err)
 		return nil, err
 	}
@@ -74,6 +78,9 @@ func (r *implRepository) Scroll(ctx context.Context, opt repository.ScrollOption
 		}
 		points, next, err := r.client.ScrollPoints(ctx, opt.CollectionName, opt.Filter, uint32(n), opt.WithPayload, pbOffset)
 		if err != nil {
+			if errors.Is(err, pkgQdrant.ErrCollectionNotFound) {
+				return nil, err
+			}
 			r.l.Errorf(ctx, "point.repository.qdrant.Scroll: %v", err)
 			return nil, err
 		}

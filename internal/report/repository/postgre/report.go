@@ -145,6 +145,29 @@ func (r *implRepository) UpdateCancelled(ctx context.Context, opts repository.Up
 	return nil
 }
 
+// DeleteReport - Permanently removes a report metadata record.
+func (r *implRepository) DeleteReport(ctx context.Context, opts repository.DeleteReportOptions) error {
+	dbReport, err := sqlboiler.FindReport(ctx, r.db, opts.ReportID)
+	if err == sql.ErrNoRows {
+		return repository.ErrReportNotFound
+	}
+	if err != nil {
+		r.l.Errorf(ctx, "report.repository.postgre.DeleteReport: Failed to find report: %v", err)
+		return repository.ErrReportDeleteFailed
+	}
+
+	rows, err := dbReport.Delete(ctx, r.db)
+	if err != nil {
+		r.l.Errorf(ctx, "report.repository.postgre.DeleteReport: Failed to delete report: %v", err)
+		return repository.ErrReportDeleteFailed
+	}
+	if rows == 0 {
+		return repository.ErrReportNotFound
+	}
+
+	return nil
+}
+
 // ListReports - List reports with filters and pagination.
 func (r *implRepository) ListReports(ctx context.Context, opts repository.ListReportsOptions) ([]*model.Report, error) {
 	mods := r.buildListReportsQuery(opts)

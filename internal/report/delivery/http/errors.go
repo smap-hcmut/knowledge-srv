@@ -16,6 +16,7 @@ var (
 	errGenerationFailed    = pkgErrors.NewHTTPError(500, "Report generation failed")
 	errDuplicateProcessing = pkgErrors.NewHTTPError(409, "Report is already being processed")
 	errDownloadURLFailed   = pkgErrors.NewHTTPError(500, "Failed to generate download URL")
+	errReportDeleteFailed  = pkgErrors.NewHTTPError(500, "Failed to delete report")
 )
 
 func (h *handler) mapError(err error) error {
@@ -36,6 +37,8 @@ func (h *handler) mapError(err error) error {
 		return errDuplicateProcessing
 	case errors.Is(err, report.ErrDownloadURLFailed):
 		return errDownloadURLFailed
+	case errors.Is(err, report.ErrReportDeleteFailed):
+		return errReportDeleteFailed
 	default:
 		return pkgErrors.NewHTTPError(500, "Internal server error")
 	}

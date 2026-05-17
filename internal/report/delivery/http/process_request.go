@@ -102,6 +102,15 @@ func (h *handler) processRetryReportRequest(c *gin.Context) (retryReportReq, mod
 	return req, model.ToScope(sc), nil
 }
 
+func (h *handler) processDeleteReportRequest(c *gin.Context) (deleteReportReq, model.Scope, error) {
+	req := deleteReportReq{
+		ReportID: c.Param("report_id"),
+	}
+
+	sc := auth.GetScopeFromContext(c.Request.Context())
+	return req, model.ToScope(sc), nil
+}
+
 func queryInt(c *gin.Context, key string, fallback int) int {
 	raw := c.Query(key)
 	if raw == "" {

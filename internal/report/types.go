@@ -83,6 +83,10 @@ type RetryReportInput struct {
 	ReportID string
 }
 
+type DeleteReportInput struct {
+	ReportID string
+}
+
 type GenerateOutput struct {
 	ReportID string `json:"report_id"`
 	Status   string `json:"status"`
@@ -215,6 +219,10 @@ type RetryOutput struct {
 	ReportID  string `json:"report_id"`
 	ProcessID string `json:"process_id"`
 	Status    string `json:"status"`
+}
+
+type DeleteOutput struct {
+	OK bool `json:"ok"`
 }
 
 type SectionTemplate struct {

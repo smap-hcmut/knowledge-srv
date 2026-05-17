@@ -11,4 +11,5 @@ var (
 	ErrGenerationFailed    = errors.New("report generation failed")
 	ErrDuplicateProcessing = errors.New("duplicate report is already being processed")
 	ErrDownloadURLFailed   = errors.New("failed to generate download URL")
+	ErrReportDeleteFailed  = errors.New("failed to delete report")
 )

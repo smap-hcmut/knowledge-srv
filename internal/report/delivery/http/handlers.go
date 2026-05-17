@@ -304,6 +304,36 @@ func (h *handler) RetryReport(c *gin.Context) {
 	response.OK(c, h.newRetryResp(o))
 }
 
+// @Summary Delete report
+// @Description Delete a report metadata record and best-effort cleanup its stored artifact
+// @Tags Report
+// @Produce json
+// @Param report_id path string true "Report ID"
+// @Success 200 {object} deleteResp
+// @Failure 403 {object} response.Resp
+// @Failure 404 {object} response.Resp
+// @Failure 500 {object} response.Resp
+// @Router /reports/{report_id} [delete]
+func (h *handler) DeleteReport(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, sc, err := h.processDeleteReportRequest(c)
+	if err != nil {
+		h.l.Errorf(ctx, "report.delivery.http.DeleteReport: processDeleteReportRequest failed: %v", err)
+		response.Error(c, err, h.discord)
+		return
+	}
+
+	o, err := h.uc.DeleteReport(ctx, sc, req.toInput())
+	if err != nil {
+		h.logUsecaseError(ctx, "report.delivery.http.DeleteReport: usecase DeleteReport failed", err)
+		response.Error(c, h.mapError(err), h.discord)
+		return
+	}
+
+	response.OK(c, h.newDeleteResp(o))
+}
+
 func (h *handler) logUsecaseError(ctx context.Context, msg string, err error) {
 	if errors.Is(err, report.ErrReportForbidden) ||
 		errors.Is(err, report.ErrReportNotFound) ||

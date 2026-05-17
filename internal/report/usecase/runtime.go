@@ -26,10 +26,12 @@ func (uc *implUseCase) ListReports(ctx context.Context, sc model.Scope, input re
 	page, pageSize, offset := normalizePagination(input.Page, input.PageSize)
 	opts := repository.ListReportsOptions{
 		CampaignID: input.CampaignID,
-		UserID:     sc.UserID,
 		Status:     normalizeStatus(input.Status),
 		Limit:      pageSize,
 		Offset:     offset,
+	}
+	if !sc.IsAdmin() {
+		opts.UserID = sc.UserID
 	}
 
 	total, err := uc.repo.CountReports(ctx, opts)
@@ -196,6 +198,39 @@ func (uc *implUseCase) RetryReport(ctx context.Context, sc model.Scope, input re
 	return report.RetryOutput{ReportID: rpt.ID, ProcessID: rpt.ID, Status: report.StatusProcessing}, nil
 }
 
+func (uc *implUseCase) DeleteReport(ctx context.Context, sc model.Scope, input report.DeleteReportInput) (report.DeleteOutput, error) {
+	rpt, err := uc.repo.GetReportByID(ctx, input.ReportID)
+	if err != nil {
+		uc.l.Errorf(ctx, "report.usecase.DeleteReport: Failed to get report: %v", err)
+		return report.DeleteOutput{}, report.ErrReportNotFound
+	}
+	if !canDeleteReport(sc, rpt) {
+		return report.DeleteOutput{}, report.ErrReportForbidden
+	}
+
+	if rpt.Status == report.StatusProcessing {
+		if err := uc.repo.UpdateCancelled(ctx, repository.UpdateCancelledOptions{ReportID: rpt.ID}); err != nil {
+			uc.l.Warnf(ctx, "report.usecase.DeleteReport: Failed to mark processing report as cancelled before delete: %v", err)
+		}
+	}
+
+	if err := uc.repo.DeleteReport(ctx, repository.DeleteReportOptions{ReportID: rpt.ID}); err != nil {
+		uc.l.Errorf(ctx, "report.usecase.DeleteReport: Failed to delete report metadata: %v", err)
+		if err == repository.ErrReportNotFound {
+			return report.DeleteOutput{}, report.ErrReportNotFound
+		}
+		return report.DeleteOutput{}, report.ErrReportDeleteFailed
+	}
+
+	if rpt.FileURL != "" {
+		if err := uc.minio.DeleteFile(ctx, uc.config.ReportBucket, rpt.FileURL); err != nil {
+			uc.l.Warnf(ctx, "report.usecase.DeleteReport: report metadata deleted but artifact cleanup failed: report_id=%s object=%s err=%v", rpt.ID, rpt.FileURL, err)
+		}
+	}
+
+	return report.DeleteOutput{OK: true}, nil
+}
+
 func normalizePagination(page, pageSize int) (int, int, int) {
 	if page <= 0 {
 		page = 1
@@ -224,6 +259,19 @@ func canAccessReport(sc model.Scope, rpt *model.Report) bool {
 		return false
 	}
 	return sc.IsAdmin() || (sc.UserID != "" && sc.UserID == rpt.UserID)
+}
+
+func canDeleteReport(sc model.Scope, rpt *model.Report) bool {
+	if rpt == nil {
+		return false
+	}
+	if sc.IsAdmin() {
+		return true
+	}
+	if sc.IsViewer() {
+		return false
+	}
+	return sc.IsAnalyst() && sc.UserID != "" && sc.UserID == rpt.UserID
 }
 
 func decodeReportFilters(raw json.RawMessage) report.ReportFilters {

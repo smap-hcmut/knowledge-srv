@@ -42,6 +42,10 @@ type UpdateCancelledOptions struct {
 	ReportID string
 }
 
+type DeleteReportOptions struct {
+	ReportID string
+}
+
 type ListReportsOptions struct {
 	CampaignID string
 	UserID     string

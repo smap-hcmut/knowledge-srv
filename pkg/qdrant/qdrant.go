@@ -100,7 +100,7 @@ func (c *qdrantImpl) GetCollectionInfo(ctx context.Context, name string) (*Colle
 	}
 	resp, err := c.collectionsClient.Get(ctx, &pb.GetCollectionInfoRequest{CollectionName: name})
 	if err != nil {
-		return nil, WrapError(err, "failed to get collection info")
+		return nil, wrapQdrantError(err, "failed to get collection info")
 	}
 	if resp.Result == nil {
 		return nil, ErrCollectionNotFound
@@ -292,7 +292,7 @@ func (c *qdrantImpl) Search(ctx context.Context, collectionName string, vector [
 		WithPayload:    &pb.WithPayloadSelector{SelectorOptions: &pb.WithPayloadSelector_Enable{Enable: true}},
 	})
 	if err != nil {
-		return nil, WrapError(err, "failed to search")
+		return nil, wrapQdrantError(err, "failed to search")
 	}
 	return c.searchResultsFromHits(resp.Result), nil
 }
@@ -321,7 +321,7 @@ func (c *qdrantImpl) SearchWithFilter(ctx context.Context, collectionName string
 	}
 	resp, err := c.pointsClient.Search(ctx, req)
 	if err != nil {
-		return nil, WrapError(err, "failed to search with filter")
+		return nil, wrapQdrantError(err, "failed to search with filter")
 	}
 	return c.searchResultsFromHits(resp.Result), nil
 }
@@ -354,7 +354,7 @@ func (c *qdrantImpl) SearchBatch(ctx context.Context, collectionName string, vec
 		SearchPoints:   searches,
 	})
 	if err != nil {
-		return nil, WrapError(err, "failed to batch search")
+		return nil, wrapQdrantError(err, "failed to batch search")
 	}
 	allResults := make([][]SearchResult, 0, len(resp.Result))
 	for _, batchResult := range resp.Result {
@@ -370,7 +370,7 @@ func (c *qdrantImpl) CountPoints(ctx context.Context, collectionName string) (ui
 	}
 	resp, err := c.pointsClient.Count(ctx, &pb.CountPoints{CollectionName: collectionName})
 	if err != nil {
-		return 0, WrapError(err, "failed to count points")
+		return 0, wrapQdrantError(err, "failed to count points")
 	}
 	if resp.Result == nil {
 		return 0, nil
@@ -395,7 +395,7 @@ func (c *qdrantImpl) ScrollPoints(ctx context.Context, collectionName string, fi
 		Offset:         offset,
 	})
 	if err != nil {
-		return nil, nil, WrapError(err, "failed to scroll points")
+		return nil, nil, wrapQdrantError(err, "failed to scroll points")
 	}
 	out := make([]Point, 0, len(resp.Result))
 	for _, rp := range resp.Result {
@@ -434,6 +434,19 @@ func (c *qdrantImpl) searchResultsFromHits(hits []*pb.ScoredPoint) []SearchResul
 		results = append(results, SearchResult{ID: id, Score: hit.Score, Payload: payload})
 	}
 	return results
+}
+
+// wrapQdrantError maps Qdrant's gRPC NotFound response to the package sentinel
+// so higher layers can treat an unindexed project as an empty result instead of
+// an operational error.
+func wrapQdrantError(err error, msg string) error {
+	if err == nil {
+		return nil
+	}
+	if status.Code(err) == codes.NotFound {
+		return WrapError(ErrCollectionNotFound, msg)
+	}
+	return WrapError(err, msg)
 }
 
 // isValidUUID checks if the string is a valid UUID using the pre-compiled reUUID regex.
