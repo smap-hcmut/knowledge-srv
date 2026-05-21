@@ -112,7 +112,9 @@ type LLMProviderConfig struct {
 
 // LLMConfig holds multi-provider LLM configuration.
 type LLMConfig struct {
-	Providers []LLMProviderConfig
+	Providers         []LLMProviderConfig
+	ProviderOrder     []string
+	DisabledProviders []string
 }
 
 // GeminiConfig is the legacy configuration for Google Gemini (LLM).
@@ -246,6 +248,8 @@ func Load() (*Config, error) {
 	_ = viper.BindEnv("llm.deepseek_model", "DEEPSEEK_MODEL")
 	_ = viper.BindEnv("llm.qwen_api_key", "QWEN_API_KEY")
 	_ = viper.BindEnv("llm.qwen_model", "QWEN_MODEL")
+	_ = viper.BindEnv("llm.provider_order", "LLM_PROVIDER_ORDER")
+	_ = viper.BindEnv("llm.disabled_providers", "LLM_DISABLED_PROVIDERS")
 	// JWT / Cookie / Encrypter / Internal
 	_ = viper.BindEnv("jwt.secret_key", "JWT_SECRET_KEY")
 	_ = viper.BindEnv("jwt.secret_key", "JWT_SECRET") // alt name used in k8s secret
@@ -314,7 +318,8 @@ func Load() (*Config, error) {
 	}
 
 	// LLM multi-provider config: build from explicit per-provider env vars + legacy gemini config.
-	// Order: gemini, openai, deepseek, qwen (all equal, round-robin)
+	cfg.LLM.ProviderOrder = splitCSV(viper.GetString("llm.provider_order"))
+	cfg.LLM.DisabledProviders = splitCSV(viper.GetString("llm.disabled_providers"))
 	cfg.LLM.Providers = buildLLMProviders(cfg.Gemini, viper.GetViper())
 
 	// PostgreSQL - Metadata, conversation history
@@ -539,43 +544,106 @@ func validate(cfg *Config) error {
 
 // buildLLMProviders assembles multi-provider config from env vars and legacy gemini config.
 func buildLLMProviders(geminiCfg GeminiConfig, v *viper.Viper) []LLMProviderConfig {
-	var providers []LLMProviderConfig
+	available := make(map[string]LLMProviderConfig)
 
 	// Gemini (from legacy config or env)
 	if geminiCfg.APIKey != "" {
-		providers = append(providers, LLMProviderConfig{
+		available["gemini"] = LLMProviderConfig{
 			Name:   "gemini",
 			APIKey: geminiCfg.APIKey,
 			Model:  geminiCfg.Model,
-		})
+		}
 	}
 
 	// OpenAI
 	if key := v.GetString("llm.openai_api_key"); key != "" {
-		providers = append(providers, LLMProviderConfig{
+		available["openai"] = LLMProviderConfig{
 			Name:   "openai",
 			APIKey: key,
 			Model:  v.GetString("llm.openai_model"),
-		})
+		}
 	}
 
 	// DeepSeek
 	if key := v.GetString("llm.deepseek_api_key"); key != "" {
-		providers = append(providers, LLMProviderConfig{
+		available["deepseek"] = LLMProviderConfig{
 			Name:   "deepseek",
 			APIKey: key,
 			Model:  v.GetString("llm.deepseek_model"),
-		})
+		}
 	}
 
 	// Qwen
 	if key := v.GetString("llm.qwen_api_key"); key != "" {
-		providers = append(providers, LLMProviderConfig{
+		available["qwen"] = LLMProviderConfig{
 			Name:   "qwen",
 			APIKey: key,
 			Model:  v.GetString("llm.qwen_model"),
-		})
+		}
+	}
+
+	disabled := providerSet(splitCSV(v.GetString("llm.disabled_providers")))
+	order := splitCSV(v.GetString("llm.provider_order"))
+	if len(order) == 0 {
+		order = []string{"deepseek", "openai", "gemini", "qwen"}
+	}
+
+	providers := make([]LLMProviderConfig, 0, len(available))
+	seen := make(map[string]struct{}, len(order))
+	for _, rawName := range order {
+		name := normalizeProviderName(rawName)
+		if name == "" {
+			continue
+		}
+		seen[name] = struct{}{}
+		if disabled[name] {
+			continue
+		}
+		if cfg, ok := available[name]; ok {
+			providers = append(providers, cfg)
+		}
+	}
+
+	if len(splitCSV(v.GetString("llm.provider_order"))) == 0 {
+		for name, cfg := range available {
+			if disabled[name] {
+				continue
+			}
+			if _, ok := seen[name]; ok {
+				continue
+			}
+			providers = append(providers, cfg)
+		}
 	}
 
 	return providers
+}
+
+func splitCSV(value string) []string {
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+	parts := strings.Split(value, ",")
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = normalizeProviderName(part)
+		if part != "" {
+			out = append(out, part)
+		}
+	}
+	return out
+}
+
+func providerSet(values []string) map[string]bool {
+	set := make(map[string]bool, len(values))
+	for _, value := range values {
+		if value != "" {
+			set[value] = true
+		}
+	}
+	return set
+}
+
+func normalizeProviderName(value string) string {
+	return strings.ToLower(strings.TrimSpace(value))
 }

@@ -145,11 +145,18 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		ProcessingTimeMs:  time.Since(startTime).Milliseconds(),
 	}
 
-	// Step 11: Cache results (Tầng 3)
-	if data, err := json.Marshal(output); err == nil {
-		if err := uc.cacheRepo.SaveSearchResults(ctx, cacheKey, data); err != nil {
+	// Step 11: Cache only meaningful positive search results.
+	// Empty context is intentionally not cached: a transient Qdrant/embedding/filter
+	// miss must not poison chat into repeating analytics fallback.
+	if !output.NoRelevantContext && len(output.Results) > 0 {
+		data, err := json.Marshal(output)
+		if err != nil {
+			uc.l.Warnf(ctx, "search.usecase.Search: Failed to marshal cache payload: %v", err)
+		} else if err := uc.cacheRepo.SaveSearchResults(ctx, cacheKey, data); err != nil {
 			uc.l.Warnf(ctx, "search.usecase.Search: Failed to save cache: %v", err)
 		}
+	} else {
+		uc.l.Debugf(ctx, "search.usecase.Search: query=%q returned no useful context; skipping search cache", input.Query)
 	}
 
 	uc.l.Infof(ctx, "search.usecase.Search: query=%q, enriched=%q, projects=%d, fetched=%d, deduped=%d, useful=%d, results=%d, no_context=%v, duration=%dms",

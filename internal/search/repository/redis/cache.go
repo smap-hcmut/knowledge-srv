@@ -10,7 +10,12 @@ import (
 )
 
 // =====================================================
-// Tầng 2: Campaign Projects Cache (TTL 10 min)
+const (
+	campaignMetadataTTL = 2 * time.Minute
+	searchResultsTTL    = 15 * time.Second
+)
+
+// Tầng 2: Campaign Projects Cache (short TTL to reflect project changes quickly)
 // =====================================================
 
 func (r *implCacheRepository) GetCampaignName(ctx context.Context, campaignID string) (string, error) {
@@ -24,7 +29,7 @@ func (r *implCacheRepository) GetCampaignName(ctx context.Context, campaignID st
 
 func (r *implCacheRepository) SaveCampaignName(ctx context.Context, campaignID string, name string) error {
 	key := fmt.Sprintf("campaign_name:%s", campaignID)
-	return r.redis.GetClient().Set(ctx, key, name, 10*time.Minute).Err()
+	return r.redis.GetClient().Set(ctx, key, name, campaignMetadataTTL).Err()
 }
 
 func (r *implCacheRepository) GetCampaignProjects(ctx context.Context, campaignID string) ([]string, error) {
@@ -47,7 +52,7 @@ func (r *implCacheRepository) SaveCampaignProjects(ctx context.Context, campaign
 	if err != nil {
 		return err
 	}
-	if err := r.redis.GetClient().Set(ctx, key, data, 10*time.Minute).Err(); err != nil {
+	if err := r.redis.GetClient().Set(ctx, key, data, campaignMetadataTTL).Err(); err != nil {
 		r.l.Warnf(ctx, "search.repository.redis.SaveCampaignProjects: Failed to save to cache: %v", err)
 		return err
 	}
@@ -55,7 +60,7 @@ func (r *implCacheRepository) SaveCampaignProjects(ctx context.Context, campaign
 }
 
 // =====================================================
-// Tầng 3: Search Results Cache (TTL 5 min)
+// Tầng 3: Search Results Cache (very short TTL; empty context is not cached)
 // =====================================================
 
 func (r *implCacheRepository) GetSearchResults(ctx context.Context, cacheKey string) ([]byte, error) {
@@ -67,7 +72,7 @@ func (r *implCacheRepository) GetSearchResults(ctx context.Context, cacheKey str
 }
 
 func (r *implCacheRepository) SaveSearchResults(ctx context.Context, cacheKey string, data []byte) error {
-	if err := r.redis.GetClient().Set(ctx, cacheKey, data, 5*time.Minute).Err(); err != nil {
+	if err := r.redis.GetClient().Set(ctx, cacheKey, data, searchResultsTTL).Err(); err != nil {
 		r.l.Warnf(ctx, "search.repository.redis.SaveSearchResults: Failed to save to cache: %v", err)
 		return err
 	}

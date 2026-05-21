@@ -12,6 +12,12 @@ import (
 	"knowledge-srv/internal/search"
 )
 
+const (
+	analyticsFirstTimeout    = 2 * time.Second
+	analyticsFallbackTimeout = 3 * time.Second
+	analyticsPromptTimeout   = 2 * time.Second
+)
+
 // Chat is the main synchronous RAG entrypoint.
 func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.ChatInput) (chat.ChatOutput, error) {
 	startTime := time.Now()
@@ -62,13 +68,45 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		history = msgs
 	}
 
+	if IsSmallTalkMessage(input.Message) {
+		answer := "Mình đây. Bạn hỏi thẳng về campaign, nền tảng, sentiment hoặc top mentions là mình phân tích tiếp."
+		suggestions := []string{
+			"So sánh giữa các nền tảng?",
+			"Đào sâu lý do sentiment thấp nhất theo nền tảng",
+			"Tại sao có sự trái chiều trong đánh giá về chiến dịch này?",
+		}
+		searchMeta := chat.SearchMeta{
+			TotalDocsSearched: 0,
+			DocsUsed:          0,
+			ProcessingTimeMs:  time.Since(startTime).Milliseconds(),
+			ModelUsed:         "local-router",
+		}
+		uc.persistChatExchange(ctx, conversation, input, answer, nil, suggestions, searchMeta)
+		return chat.ChatOutput{
+			ConversationID: conversation.ID,
+			Answer:         answer,
+			Citations:      nil,
+			Suggestions:    suggestions,
+			SearchMetadata: searchMeta,
+			QueryIntent:    string(intent),
+			Backend:        "local-router",
+		}, nil
+	}
+
+	if ShouldUseAnalyticsFirst(intent, input.Message) {
+		analyticsSnapshot, _ := uc.loadAnalyticsSnapshot(ctx, input.CampaignID, analyticsFirstTimeout)
+		if output, ok := uc.tryAnalyticsFallback(ctx, conversation, input, startTime, intent, analyticsSnapshot); ok {
+			return output, nil
+		}
+	}
+
 	// Build search input — tune params based on query intent
 	var searchLimit int
 	var searchMinScore float64
 	switch intent {
 	case IntentNarrative:
 		searchLimit = 15
-		searchMinScore = 0.58
+		searchMinScore = 0.50
 	default: // IntentStructured
 		searchLimit = chat.MaxSearchDocs
 		searchMinScore = 0.52
@@ -103,9 +141,11 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		return chat.ChatOutput{}, fmt.Errorf("%w: %v", chat.ErrSearchFailed, err)
 	}
 	if searchOutput.NoRelevantContext || len(searchOutput.Results) == 0 {
-		analyticsSnapshot, _ := uc.loadAnalyticsSnapshot(ctx, input.CampaignID, 8*time.Second)
-		if output, ok := uc.tryAnalyticsFallback(ctx, conversation, input, startTime, intent, analyticsSnapshot); ok {
-			return output, nil
+		if ShouldUseAnalyticsFallback(intent, input.Message) {
+			analyticsSnapshot, _ := uc.loadAnalyticsSnapshot(ctx, input.CampaignID, analyticsFallbackTimeout)
+			if output, ok := uc.tryAnalyticsFallback(ctx, conversation, input, startTime, intent, analyticsSnapshot); ok {
+				return output, nil
+			}
 		}
 
 		answer := "Mình chưa tìm thấy đủ dữ liệu liên quan trong campaign này để trả lời chắc chắn. Bạn có thể hỏi hẹp hơn theo nền tảng, khoảng thời gian, hoặc chủ đề cụ thể như phí giao hàng, tài xế, hủy đơn, hỗ trợ."
@@ -128,7 +168,7 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 		}, nil
 	}
 
-	analyticsSnapshot, _ := uc.loadAnalyticsSnapshot(ctx, input.CampaignID, 8*time.Second)
+	analyticsSnapshot, _ := uc.loadAnalyticsSnapshot(ctx, input.CampaignID, analyticsPromptTimeout)
 	prompt := uc.buildPrompt(input.Message, searchOutput.Results, history, analyticsSnapshot)
 
 	llmCtx, llmCancel := context.WithTimeout(ctx, 60*time.Second)
