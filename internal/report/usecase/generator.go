@@ -160,7 +160,7 @@ func (uc *implUseCase) aggregateDocs(ctx context.Context, input report.GenerateI
 		CampaignID: input.CampaignID,
 		Query:      buildReportRetrievalQuery(input.ReportType, input.Filters),
 		Limit:      uc.config.MaxDocs,
-		MinScore:   0.45,
+		MinScore:   0.20,
 		Filters: search.SearchFilters{
 			Sentiments: input.Filters.Sentiments,
 			Aspects:    input.Filters.Aspects,
@@ -222,26 +222,6 @@ func (uc *implUseCase) loadReportAnalyticsSummary(ctx context.Context, campaignI
 	return formatAnalyticsSnapshotForReport(snapshot)
 }
 
-// sampleDocs selects representative documents from the full result set.
-func (uc *implUseCase) sampleDocs(results []search.SearchResult) []search.SearchResult {
-	if len(results) <= uc.config.SampleSize {
-		return results
-	}
-
-	// Take top-scoring and evenly distributed samples
-	step := len(results) / uc.config.SampleSize
-	if step < 1 {
-		step = 1
-	}
-
-	samples := make([]search.SearchResult, 0, uc.config.SampleSize)
-	for i := 0; i < len(results) && len(samples) < uc.config.SampleSize; i += step {
-		samples = append(samples, results[i])
-	}
-
-	return samples
-}
-
 // buildAggregateQuery generates the search query based on report type.
 func buildAggregateQuery(reportType string) string {
 	switch reportType {
@@ -256,45 +236,4 @@ func buildAggregateQuery(reportType string) string {
 	default:
 		return "phân tích phản hồi khách hàng mạng xã hội chủ đề cảm xúc và hành động marketing"
 	}
-}
-
-// generatedSection holds LLM-generated content for one report section.
-type generatedSection struct {
-	Title   string
-	Content string
-}
-
-// compileMarkdown assembles all sections into a final Markdown document.
-func compileMarkdown(input report.GenerateInput, sections []generatedSection, totalDocs int) string {
-	var sb strings.Builder
-
-	// Header
-	title := input.Title
-	if title == "" {
-		title = fmt.Sprintf("Báo Cáo %s", input.ReportType)
-	}
-	sb.WriteString(fmt.Sprintf("# %s\n\n", title))
-	sb.WriteString(fmt.Sprintf("**Campaign ID:** %s\n\n", input.CampaignID))
-	sb.WriteString(fmt.Sprintf("**Loại báo cáo:** %s\n\n", input.ReportType))
-	if len(input.Filters.Sections) > 0 {
-		sb.WriteString(fmt.Sprintf("**Sections:** %s\n\n", strings.Join(input.Filters.Sections, ", ")))
-	}
-	if strings.TrimSpace(input.Filters.Prompt) != "" {
-		sb.WriteString(fmt.Sprintf("**Yêu cầu:** %s\n\n", input.Filters.Prompt))
-	}
-	sb.WriteString(fmt.Sprintf("**Tổng số documents phân tích:** %d\n\n", totalDocs))
-	sb.WriteString(fmt.Sprintf("**Thời gian tạo:** %s\n\n", time.Now().Format("02/01/2006 15:04")))
-	sb.WriteString("---\n\n")
-
-	// Sections
-	for _, section := range sections {
-		sb.WriteString(fmt.Sprintf("## %s\n\n", section.Title))
-		sb.WriteString(section.Content)
-		sb.WriteString("\n\n---\n\n")
-	}
-
-	// Footer
-	sb.WriteString("*Báo cáo được tạo tự động bởi SMAP Knowledge Service.*\n")
-
-	return sb.String()
 }

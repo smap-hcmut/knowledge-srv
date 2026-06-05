@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/indexing"
+	repo "knowledge-srv/internal/indexing/repository"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/point"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -99,6 +101,8 @@ func (uc *implUseCase) indexSingleInsight(
 	collectionName string,
 	doc indexing.InsightMessageInput,
 ) string {
+	startTime := time.Now()
+
 	if !doc.RAG {
 		return indexing.STATUS_SKIPPED
 	}
@@ -112,27 +116,64 @@ func (uc *implUseCase) indexSingleInsight(
 		return indexing.STATUS_SKIPPED
 	}
 
+	analyticsID := deterministicInsightUUID("analytics", projectID, doc.Identity.UapID)
+	sourceID := deterministicInsightUUID("source", projectID, firstNonEmptyString(
+		doc.Source.RootID,
+		doc.Source.ParentID,
+		doc.Source.SourceURL,
+		doc.Source.OriginalURL,
+		doc.Source.PostURL,
+		doc.Source.URL,
+		doc.Identity.UapID,
+	))
+	pointID := analyticsID
+	contentHash := uc.generateContentHash(cleanText)
+
 	embeddingText := buildEmbeddingText(doc, cleanText)
+	embeddingStart := time.Now()
 	genOutput, err := uc.embeddingUC.Generate(ctx, embedding.GenerateInput{Text: embeddingText})
+	embeddingTime := int(time.Since(embeddingStart).Milliseconds())
 	if err != nil {
 		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: embedding failed for %s: %v", doc.Identity.UapID, err)
 		return indexing.STATUS_FAILED
 	}
 
-	payload := uc.buildInsightPayload(projectID, campaignID, doc)
+	payload := uc.buildInsightPayload(analyticsID, sourceID, pointID, projectID, campaignID, doc)
 
+	upsertStart := time.Now()
 	err = uc.pointUC.Upsert(ctx, point.UpsertInput{
 		CollectionName: collectionName,
 		Points: []model.Point{
 			{
-				ID:      doc.Identity.UapID,
+				ID:      pointID,
 				Vector:  genOutput.Vector,
 				Payload: payload,
 			},
 		},
 	})
+	upsertTime := int(time.Since(upsertStart).Milliseconds())
 	if err != nil {
 		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: qdrant upsert failed for %s: %v", doc.Identity.UapID, err)
+		return indexing.STATUS_FAILED
+	}
+
+	now := time.Now()
+	_, err = uc.postgreRepo.UpsertDocument(ctx, repo.UpsertDocumentOptions{
+		AnalyticsID:     analyticsID,
+		ProjectID:       projectID,
+		SourceID:        sourceID,
+		QdrantPointID:   pointID,
+		CollectionName:  collectionName,
+		ContentHash:     contentHash,
+		Status:          indexing.STATUS_INDEXED,
+		RetryCount:      0,
+		EmbeddingTimeMs: embeddingTime,
+		UpsertTimeMs:    upsertTime,
+		TotalTimeMs:     int(time.Since(startTime).Milliseconds()),
+		IndexedAt:       &now,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: metadata upsert failed for %s: %v", doc.Identity.UapID, err)
 		return indexing.STATUS_FAILED
 	}
 
@@ -140,13 +181,19 @@ func (uc *implUseCase) indexSingleInsight(
 }
 
 func (uc *implUseCase) buildInsightPayload(
+	analyticsID string,
+	sourceID string,
+	pointID string,
 	projectID string,
 	campaignID string,
 	doc indexing.InsightMessageInput,
 ) map[string]interface{} {
 	cleanText := strings.TrimSpace(doc.Content.CleanText)
 	payload := insightPayload{
+		AnalyticsID:       analyticsID,
 		ProjectID:         projectID,
+		SourceID:          sourceID,
+		QdrantPointID:     pointID,
 		CampaignID:        campaignID,
 		UapID:             doc.Identity.UapID,
 		UapType:           doc.Identity.UapType,
@@ -280,4 +327,21 @@ func firstNonEmptyString(values ...string) string {
 		}
 	}
 	return ""
+}
+
+func deterministicInsightUUID(scope string, projectID string, raw string) string {
+	raw = strings.TrimSpace(raw)
+	if parsed, err := uuid.Parse(raw); err == nil {
+		return parsed.String()
+	}
+
+	seed := strings.Join([]string{
+		"smap",
+		"knowledge",
+		"direct-batch",
+		scope,
+		strings.TrimSpace(projectID),
+		raw,
+	}, "\x00")
+	return uuid.NewSHA1(uuid.NameSpaceURL, []byte(seed)).String()
 }

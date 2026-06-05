@@ -25,16 +25,16 @@ func (v *voyageImpl) Embed(ctx context.Context, texts []string) ([][]float32, er
 
 	body, statusCode, err := v.httpClient.Post(ctx, Endpoint, req, headers)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call Voyage API: %w", err)
+		return nil, fmt.Errorf("failed to call voyage API: %w", err)
 	}
 
 	if statusCode != http.StatusOK {
-		return nil, fmt.Errorf("Voyage API returned status: %d, body: %s", statusCode, string(body))
+		return nil, fmt.Errorf("voyage API returned status: %d, body: %s", statusCode, string(body))
 	}
 
 	var resp Response
 	if err := json.Unmarshal(body, &resp); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal Voyage response: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal voyage response: %w", err)
 	}
 
 	embeddings := make([][]float32, len(resp.Data))

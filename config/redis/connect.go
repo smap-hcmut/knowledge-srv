@@ -60,29 +60,6 @@ func Connect(ctx context.Context, cfg config.RedisConfig) (redis.IRedis, error) 
 	return instance, err
 }
 
-// GetClient returns the singleton Redis client instance.
-func GetClient() redis.IRedis {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	if instance == nil {
-		panic("Redis client not initialized. Call Connect() first")
-	}
-	return instance
-}
-
-// HealthCheck checks if Redis connection is healthy
-func HealthCheck(ctx context.Context) error {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	if instance == nil {
-		return fmt.Errorf("Redis client not initialized")
-	}
-
-	return instance.Ping(ctx)
-}
-
 // Disconnect closes the Redis connection
 func Disconnect() error {
 	mu.Lock()

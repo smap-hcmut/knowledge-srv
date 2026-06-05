@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"knowledge-srv/internal/search"
+	"strings"
 
 	pb "github.com/qdrant/go-client/qdrant"
 )
@@ -17,13 +18,14 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 
 	// 1. Filter by Platform
 	if len(filters.Platforms) > 0 {
+		platforms := expandFilterKeywordVariants(filters.Platforms)
 		must = append(must, &pb.Condition{
 			ConditionOneOf: &pb.Condition_Field{
 				Field: &pb.FieldCondition{
 					Key: "platform",
 					Match: &pb.Match{
 						MatchValue: &pb.Match_Keywords{
-							Keywords: &pb.RepeatedStrings{Strings: filters.Platforms},
+							Keywords: &pb.RepeatedStrings{Strings: platforms},
 						},
 					},
 				},
@@ -36,6 +38,7 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 	//   insightPayload   (new): "sentiment_label"
 	// Use Should (OR) so that either field format matches.
 	if len(filters.Sentiments) > 0 {
+		sentiments := expandFilterKeywordVariants(filters.Sentiments)
 		must = append(must, &pb.Condition{
 			ConditionOneOf: &pb.Condition_Filter{
 				Filter: &pb.Filter{
@@ -46,7 +49,7 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 									Key: "overall_sentiment",
 									Match: &pb.Match{
 										MatchValue: &pb.Match_Keywords{
-											Keywords: &pb.RepeatedStrings{Strings: filters.Sentiments},
+											Keywords: &pb.RepeatedStrings{Strings: sentiments},
 										},
 									},
 								},
@@ -58,7 +61,7 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 									Key: "sentiment_label",
 									Match: &pb.Match{
 										MatchValue: &pb.Match_Keywords{
-											Keywords: &pb.RepeatedStrings{Strings: filters.Sentiments},
+											Keywords: &pb.RepeatedStrings{Strings: sentiments},
 										},
 									},
 								},
@@ -93,7 +96,7 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 
 	// 5. Filter by Aspects (Nested)
 	if len(filters.Aspects) > 0 {
-		for _, aspect := range filters.Aspects {
+		for _, aspect := range expandFilterKeywordVariants(filters.Aspects) {
 			nestedFilter := &pb.Filter{
 				Must: []*pb.Condition{
 					{
@@ -121,13 +124,14 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 
 	// 6. Filter by Risk Levels
 	if len(filters.RiskLevels) > 0 {
+		riskLevels := expandFilterKeywordVariants(filters.RiskLevels)
 		must = append(must, &pb.Condition{
 			ConditionOneOf: &pb.Condition_Field{
 				Field: &pb.FieldCondition{
 					Key: "risk_level",
 					Match: &pb.Match{
 						MatchValue: &pb.Match_Keywords{
-							Keywords: &pb.RepeatedStrings{Strings: filters.RiskLevels},
+							Keywords: &pb.RepeatedStrings{Strings: riskLevels},
 						},
 					},
 				},
@@ -150,4 +154,29 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 
 	// Construct final filter
 	return &pb.Filter{Must: must}
+}
+
+func expandFilterKeywordVariants(values []string) []string {
+	seen := map[string]struct{}{}
+	out := make([]string, 0, len(values)*3)
+
+	add := func(value string) {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			return
+		}
+		if _, ok := seen[value]; ok {
+			return
+		}
+		seen[value] = struct{}{}
+		out = append(out, value)
+	}
+
+	for _, value := range values {
+		add(value)
+		add(strings.ToUpper(value))
+		add(strings.ToLower(value))
+	}
+
+	return out
 }
