@@ -8,7 +8,7 @@ const (
 	MaxConcurrency            = 10
 	MinContentLength          = 10
 	MinQualityScore           = 0.3
-	MinBusinessRelevanceScore = 0.45
+	MinBusinessRelevanceScore = 0.3
 	EMBEDDING_ERROR           = "EMBEDDING_ERROR"
 	QDRANT_ERROR              = "QDRANT_ERROR"
 	DB_ERROR                  = "DB_ERROR"
