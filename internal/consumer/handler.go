@@ -53,6 +53,9 @@ func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, 
 		Logger:      srv.l,
 		KafkaConfig: srv.kafkaConfig,
 		UseCase:     indexingUC,
+		// postgreRepo already embeds DLQRepository so parse-failure messages
+		// now land in indexing_dlq instead of being silently dropped.
+		DLQRepo:     postgreRepo,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create indexing consumer: %w", err)

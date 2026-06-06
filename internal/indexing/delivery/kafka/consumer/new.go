@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"knowledge-srv/config"
 	"knowledge-srv/internal/indexing"
+	repo "knowledge-srv/internal/indexing/repository"
 
 	"github.com/smap-hcmut/shared-libs/go/kafka"
 	"github.com/smap-hcmut/shared-libs/go/log"
@@ -22,6 +23,10 @@ type Config struct {
 	Logger      log.Logger
 	KafkaConfig config.KafkaConfig
 	UseCase     indexing.UseCase
+	// DLQRepo is optional; when set, parse/validation errors route to the
+	// indexing_dlq table instead of being silently MarkMessaged so the
+	// rejected payload can be triaged later.
+	DLQRepo repo.DLQRepository
 }
 
 // consumer implements Consumer (thin layer: receive msg → normalize → delegate to usecase).
@@ -29,6 +34,7 @@ type consumer struct {
 	l                      log.Logger
 	kafkaConfig            config.KafkaConfig
 	uc                     indexing.UseCase
+	dlq                    repo.DLQRepository
 	batchCompletedGroup    kafka.IConsumer
 	insightsPublishedGroup kafka.IConsumer
 	reportDigestGroup      kafka.IConsumer
@@ -49,6 +55,7 @@ func New(cfg Config) (Consumer, error) {
 		l:           cfg.Logger,
 		kafkaConfig: cfg.KafkaConfig,
 		uc:          cfg.UseCase,
+		dlq:         cfg.DLQRepo,
 	}, nil
 }
 
