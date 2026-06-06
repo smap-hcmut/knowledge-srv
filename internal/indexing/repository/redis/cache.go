@@ -2,7 +2,6 @@ package redis
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 
 	goredis "github.com/redis/go-redis/v9"
@@ -40,15 +39,4 @@ func (r *implCacheRepository) InvalidateSearchCache(ctx context.Context, project
 	}
 
 	return nil
-}
-
-// embeddingCacheKey generates a Redis key from content hash.
-func embeddingCacheKey(contentHash string) string {
-	return fmt.Sprintf("embedding:%s", contentHash)
-}
-
-// ContentHash generates a SHA-256 hash of content for use as cache key.
-func ContentHash(content string) string {
-	hash := sha256.Sum256([]byte(content))
-	return fmt.Sprintf("%x", hash)
 }

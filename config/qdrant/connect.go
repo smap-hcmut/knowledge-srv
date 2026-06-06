@@ -54,29 +54,6 @@ func Connect(ctx context.Context, cfg config.QdrantConfig) (qdrant.IQdrant, erro
 	return instance, err
 }
 
-// GetClient returns the singleton Qdrant client instance.
-func GetClient() qdrant.IQdrant {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	if instance == nil {
-		panic("Qdrant client not initialized. Call Connect() first")
-	}
-	return instance
-}
-
-// HealthCheck checks if Qdrant connection is healthy
-func HealthCheck(ctx context.Context) error {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	if instance == nil {
-		return fmt.Errorf("Qdrant client not initialized")
-	}
-
-	return instance.Ping(ctx)
-}
-
 // Disconnect closes the Qdrant connection
 func Disconnect() error {
 	mu.Lock()

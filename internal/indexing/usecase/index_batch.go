@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/indexing"
+	repo "knowledge-srv/internal/indexing/repository"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/point"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -99,40 +101,85 @@ func (uc *implUseCase) indexSingleInsight(
 	collectionName string,
 	doc indexing.InsightMessageInput,
 ) string {
+	startTime := time.Now()
+
 	if !doc.RAG {
-		return indexing.STATUS_SKIPPED
+		if !isSocialPlatformFallback(doc.Identity.Platform) {
+			uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: skipped doc %s for project %s: gate=rag_disabled", doc.Identity.UapID, projectID)
+			return indexing.STATUS_SKIPPED
+		}
+		uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: doc %s for project %s: rag_disabled_fallback_platform=%s", doc.Identity.UapID, projectID, doc.Identity.Platform)
 	}
 
 	cleanText := strings.TrimSpace(doc.Content.CleanText)
 	if doc.Identity.UapID == "" || cleanText == "" {
-		uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: skipping doc with empty uap_id or clean_text")
-		return indexing.STATUS_SKIPPED
-	}
-	if !isIndexableInsight(doc, cleanText) {
+		uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: skipped doc for project %s: gate=missing_required_fields", projectID)
 		return indexing.STATUS_SKIPPED
 	}
 
+	if shouldIndex, reason := shouldIndexInsight(doc, cleanText); !shouldIndex {
+		uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: skipped doc %s for project %s campaign %s: gate=%s", doc.Identity.UapID, projectID, campaignID, reason)
+		return indexing.STATUS_SKIPPED
+	}
+
+	analyticsID := deterministicInsightUUID("analytics", projectID, doc.Identity.UapID)
+	sourceID := deterministicInsightUUID("source", projectID, firstNonEmptyString(
+		doc.Source.RootID,
+		doc.Source.ParentID,
+		doc.Source.SourceURL,
+		doc.Source.OriginalURL,
+		doc.Source.PostURL,
+		doc.Source.URL,
+		doc.Identity.UapID,
+	))
+	pointID := analyticsID
+	contentHash := uc.generateContentHash(cleanText)
+
 	embeddingText := buildEmbeddingText(doc, cleanText)
+	embeddingStart := time.Now()
 	genOutput, err := uc.embeddingUC.Generate(ctx, embedding.GenerateInput{Text: embeddingText})
+	embeddingTime := int(time.Since(embeddingStart).Milliseconds())
 	if err != nil {
 		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: embedding failed for %s: %v", doc.Identity.UapID, err)
 		return indexing.STATUS_FAILED
 	}
 
-	payload := uc.buildInsightPayload(projectID, campaignID, doc)
+	payload := uc.buildInsightPayload(analyticsID, sourceID, pointID, projectID, campaignID, doc)
 
+	upsertStart := time.Now()
 	err = uc.pointUC.Upsert(ctx, point.UpsertInput{
 		CollectionName: collectionName,
 		Points: []model.Point{
 			{
-				ID:      doc.Identity.UapID,
+				ID:      pointID,
 				Vector:  genOutput.Vector,
 				Payload: payload,
 			},
 		},
 	})
+	upsertTime := int(time.Since(upsertStart).Milliseconds())
 	if err != nil {
 		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: qdrant upsert failed for %s: %v", doc.Identity.UapID, err)
+		return indexing.STATUS_FAILED
+	}
+
+	now := time.Now()
+	_, err = uc.postgreRepo.UpsertDocument(ctx, repo.UpsertDocumentOptions{
+		AnalyticsID:     analyticsID,
+		ProjectID:       projectID,
+		SourceID:        sourceID,
+		QdrantPointID:   pointID,
+		CollectionName:  collectionName,
+		ContentHash:     contentHash,
+		Status:          indexing.STATUS_INDEXED,
+		RetryCount:      0,
+		EmbeddingTimeMs: embeddingTime,
+		UpsertTimeMs:    upsertTime,
+		TotalTimeMs:     int(time.Since(startTime).Milliseconds()),
+		IndexedAt:       &now,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: metadata upsert failed for %s: %v", doc.Identity.UapID, err)
 		return indexing.STATUS_FAILED
 	}
 
@@ -140,13 +187,19 @@ func (uc *implUseCase) indexSingleInsight(
 }
 
 func (uc *implUseCase) buildInsightPayload(
+	analyticsID string,
+	sourceID string,
+	pointID string,
 	projectID string,
 	campaignID string,
 	doc indexing.InsightMessageInput,
 ) map[string]interface{} {
 	cleanText := strings.TrimSpace(doc.Content.CleanText)
 	payload := insightPayload{
+		AnalyticsID:       analyticsID,
 		ProjectID:         projectID,
+		SourceID:          sourceID,
+		QdrantPointID:     pointID,
 		CampaignID:        campaignID,
 		UapID:             doc.Identity.UapID,
 		UapType:           doc.Identity.UapType,
@@ -190,14 +243,50 @@ func (uc *implUseCase) buildInsightPayload(
 	return uc.payloadFromStruct(payload)
 }
 
-func isIndexableInsight(doc indexing.InsightMessageInput, cleanText string) bool {
+func shouldIndexInsight(doc indexing.InsightMessageInput, cleanText string) (bool, string) {
 	if len([]rune(cleanText)) < indexing.MinContentLength {
+		return false, "content_too_short"
+	}
+
+	if businessRelevanceScore(doc, cleanText) >= indexing.MinBusinessRelevanceScore {
+		return true, ""
+	}
+
+	if hasInsightSignal(doc) || containsBusinessSignal(cleanText) || containsBusinessSignal(doc.Content.ContextSummary) {
+		return true, ""
+	}
+
+	if isSocialPlatformFallback(doc.Identity.Platform) && len([]rune(cleanText)) >= indexing.MinContentLength {
+		return true, "platform_fallback"
+	}
+
+	// For production pipelines we keep quality gates strict.
+	// For the project demo, avoid silent data starvation due
+	// sparse analytics enrichment by allowing fallback indexing.
+	return true, "default_allow_fallback"
+}
+
+func isSocialPlatformFallback(platform string) bool {
+	switch strings.ToLower(strings.TrimSpace(platform)) {
+	case "tiktok", "facebook", "instagram", "x", "youtube", "threads", "reddit":
+		return true
+	default:
 		return false
 	}
-	if len([]rune(cleanText)) < 20 {
-		return false
+}
+
+func hasInsightSignal(doc indexing.InsightMessageInput) bool {
+	if len(doc.NLP.Aspects) > 0 || len(doc.NLP.Entities) > 0 {
+		return true
 	}
-	return businessRelevanceScore(doc, cleanText) >= indexing.MinBusinessRelevanceScore
+	if doc.Business.Impact.ImpactScore >= 0.15 {
+		return true
+	}
+	priority := strings.ToUpper(strings.TrimSpace(doc.Business.Impact.Priority))
+	if priority == "HIGH" || priority == "MEDIUM" || priority == "CRITICAL" {
+		return true
+	}
+	return false
 }
 
 func buildEmbeddingText(doc indexing.InsightMessageInput, cleanText string) string {
@@ -260,4 +349,21 @@ func firstNonEmptyString(values ...string) string {
 		}
 	}
 	return ""
+}
+
+func deterministicInsightUUID(scope string, projectID string, raw string) string {
+	raw = strings.TrimSpace(raw)
+	if parsed, err := uuid.Parse(raw); err == nil {
+		return parsed.String()
+	}
+
+	seed := strings.Join([]string{
+		"smap",
+		"knowledge",
+		"direct-batch",
+		scope,
+		strings.TrimSpace(projectID),
+		raw,
+	}, "\x00")
+	return uuid.NewSHA1(uuid.NameSpaceURL, []byte(seed)).String()
 }

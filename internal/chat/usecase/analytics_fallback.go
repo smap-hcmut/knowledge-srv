@@ -643,7 +643,8 @@ func platformLabelName(platform string) string {
 		if strings.TrimSpace(platform) == "" {
 			return "Unknown"
 		}
-		return strings.Title(strings.ToLower(platform))
+		normalized := strings.ToLower(platform)
+		return strings.ToUpper(normalized[:1]) + normalized[1:]
 	}
 }
 

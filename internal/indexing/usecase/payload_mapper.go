@@ -6,7 +6,10 @@ import (
 )
 
 type insightPayload struct {
+	AnalyticsID       string                 `json:"analytics_id"`
 	ProjectID         string                 `json:"project_id"`
+	SourceID          string                 `json:"source_id"`
+	QdrantPointID     string                 `json:"qdrant_point_id"`
 	CampaignID        string                 `json:"campaign_id"`
 	UapID             string                 `json:"uap_id"`
 	UapType           string                 `json:"uap_type"`

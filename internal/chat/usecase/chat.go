@@ -106,10 +106,10 @@ func (uc *implUseCase) Chat(ctx context.Context, sc model.Scope, input chat.Chat
 	switch intent {
 	case IntentNarrative:
 		searchLimit = 15
-		searchMinScore = 0.50
+		searchMinScore = 0.20
 	default: // IntentStructured
 		searchLimit = chat.MaxSearchDocs
-		searchMinScore = 0.52
+		searchMinScore = 0.20
 	}
 
 	searchInput := search.SearchInput{

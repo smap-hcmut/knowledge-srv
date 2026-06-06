@@ -15,7 +15,7 @@ import (
 const (
 	defaultListPageSize  = 20
 	maxListPageSize      = 50
-	reportSearchMinScore = 0.45
+	reportSearchMinScore = 0.20
 )
 
 func (uc *implUseCase) ListReports(ctx context.Context, sc model.Scope, input report.ListReportsInput) (report.ListReportsOutput, error) {
