@@ -12,6 +12,7 @@ type Handler interface {
 	RetryFailed(c *gin.Context)
 	Reconcile(c *gin.Context)
 	GetStatistics(c *gin.Context)
+	PurgeProject(c *gin.Context)
 }
 
 type handler struct {

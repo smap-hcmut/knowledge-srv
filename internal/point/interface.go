@@ -14,4 +14,5 @@ type UseCase interface {
 	Scroll(ctx context.Context, input ScrollInput) ([]model.Point, error)
 	Facet(ctx context.Context, input FacetInput) ([]FacetOutput, error)
 	EnsureCollection(ctx context.Context, name string, vectorSize uint64) error
+	DropCollection(ctx context.Context, name string) error
 }

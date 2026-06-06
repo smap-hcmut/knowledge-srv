@@ -212,3 +212,17 @@ func (r *implPostgresRepository) CountDocumentsByProject(ctx context.Context, pr
 
 	return stats, nil
 }
+
+// DeleteDocumentsByProject removes every indexed_documents row for the given
+// project. Used by the archive-cleanup path; returns the affected row count so
+// the caller can log how big the purge actually was.
+func (r *implPostgresRepository) DeleteDocumentsByProject(ctx context.Context, projectID string) (int64, error) {
+	const query = `DELETE FROM knowledge.indexed_documents WHERE project_id = $1`
+	result, err := r.db.ExecContext(ctx, query, projectID)
+	if err != nil {
+		r.l.Errorf(ctx, "indexing.repository.postgre.DeleteDocumentsByProject: Failed to delete documents for project %s: %v", projectID, err)
+		return 0, repo.ErrFailedToDelete
+	}
+	affected, _ := result.RowsAffected()
+	return affected, nil
+}

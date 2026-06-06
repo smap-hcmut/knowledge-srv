@@ -45,6 +45,27 @@ func (r *implRepository) EnsureCollection(ctx context.Context, name string, vect
 	return nil
 }
 
+// DropCollection removes a collection entirely. Used by the project archive
+// cleanup path so abandoned projects do not leave orphan Qdrant collections
+// consuming memory + disk indefinitely. No-op if the collection does not
+// exist so the call is idempotent across retries.
+func (r *implRepository) DropCollection(ctx context.Context, name string) error {
+	exists, err := r.client.CollectionExists(ctx, name)
+	if err != nil {
+		r.l.Errorf(ctx, "point.repository.qdrant.DropCollection: failed to check collection %s: %v", name, err)
+		return err
+	}
+	if !exists {
+		return nil
+	}
+	if err := r.client.DeleteCollection(ctx, name); err != nil {
+		r.l.Errorf(ctx, "point.repository.qdrant.DropCollection: failed to delete collection %s: %v", name, err)
+		return err
+	}
+	r.l.Infof(ctx, "point.repository.qdrant.DropCollection: deleted collection %s", name)
+	return nil
+}
+
 // ensurePayloadIndexes creates all required payload indexes for the collection.
 // Qdrant silently accepts duplicate CreateFieldIndex calls, so this is idempotent.
 func (r *implRepository) ensurePayloadIndexes(ctx context.Context, name string) error {

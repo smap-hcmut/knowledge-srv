@@ -13,4 +13,5 @@ var (
 	ErrFailedToCount        = errors.New("failed to count")
 	ErrFailedToUpdateStatus = errors.New("failed to update status")
 	ErrFailedToUpsert       = errors.New("failed to upsert")
+	ErrFailedToDelete       = errors.New("failed to delete")
 )

@@ -67,6 +67,36 @@ func (h *handler) Reconcile(c *gin.Context) {
 	response.OK(c, h.newReconcileResp(o))
 }
 
+// PurgeProject - Handler cho DELETE /internal/projects/:project_id/index
+// @Summary Purge all knowledge artifacts for a project
+// @Description Drop the project's Qdrant collection and indexed_documents rows.
+// @Tags Indexing (Internal)
+// @Produce json
+// @Param project_id path string true "Project ID"
+// @Success 200 {object} indexing.PurgeProjectOutput
+// @Failure 400 {object} response.Resp
+// @Failure 500 {object} response.Resp
+// @Router /internal/projects/{project_id}/index [delete]
+func (h *handler) PurgeProject(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	projectID := c.Param("project_id")
+	if projectID == "" {
+		h.l.Errorf(ctx, "indexing.delivery.http.PurgeProject: missing project_id parameter")
+		response.Error(c, ErrMissingProjectID, h.discord)
+		return
+	}
+
+	out, err := h.uc.PurgeProject(ctx, projectID)
+	if err != nil {
+		h.l.Errorf(ctx, "indexing.delivery.http.PurgeProject: PurgeProject failed: %v", err)
+		response.Error(c, h.mapError(err), h.discord)
+		return
+	}
+
+	response.OK(c, out)
+}
+
 // GetStatistics - Handler cho GET /internal/index/statistics/:project_id
 // @Summary Get indexing statistics for a project
 // @Description Get indexing statistics including total indexed, failed, pending records for a project

@@ -12,4 +12,13 @@ type UseCase interface {
 	RetryFailed(ctx context.Context, ip RetryFailedInput) (RetryFailedOutput, error)
 	Reconcile(ctx context.Context, ip ReconcileInput) (ReconcileOutput, error)
 	GetStatistics(ctx context.Context, projectID string) (StatisticOutput, error)
+	PurgeProject(ctx context.Context, projectID string) (PurgeProjectOutput, error)
+}
+
+// PurgeProjectOutput reports what the cleanup pass removed so the caller can
+// log/respond with how big the purge actually was.
+type PurgeProjectOutput struct {
+	ProjectID       string `json:"project_id"`
+	CollectionName  string `json:"collection_name"`
+	DocumentsDeleted int64  `json:"documents_deleted"`
 }

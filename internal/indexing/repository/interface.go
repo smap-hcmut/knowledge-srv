@@ -23,6 +23,7 @@ type DocumentRepository interface {
 	UpdateDocumentStatus(ctx context.Context, opt UpdateDocumentStatusOptions) (model.IndexedDocument, error)
 	UpsertDocument(ctx context.Context, opt UpsertDocumentOptions) (model.IndexedDocument, error)
 	CountDocumentsByProject(ctx context.Context, projectID string) (DocumentProjectStats, error)
+	DeleteDocumentsByProject(ctx context.Context, projectID string) (int64, error)
 }
 
 // DLQRepository - Operations for indexing_dlq table

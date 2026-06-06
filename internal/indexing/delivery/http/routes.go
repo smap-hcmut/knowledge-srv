@@ -12,5 +12,6 @@ func (h *handler) RegisterRoutes(r *gin.RouterGroup, mw *middleware.Middleware) 
 		internal.POST("/index/retry", h.RetryFailed)
 		internal.POST("/index/reconcile", h.Reconcile)
 		internal.GET("/index/statistics/:project_id", h.GetStatistics)
+		internal.DELETE("/projects/:project_id/index", h.PurgeProject)
 	}
 }
