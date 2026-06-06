@@ -92,7 +92,52 @@ func (uc *implUseCase) IndexBatch(ctx context.Context, input indexing.IndexBatch
 	return result, nil
 }
 
+// maxVoyageBatch caps how many texts we hand to Voyage in one call. Voyage's
+// API enforces 128; the spare 64 leaves headroom in case a future model
+// tightens the limit and keeps each request small enough that a single 429
+// retry does not pause the whole batch for too long.
+const maxVoyageBatch = 64
+
+// pendingIndex represents one document that has passed validation/dedup and
+// is waiting on a batched Voyage call. Holds everything the upsert phase
+// needs so we do not rebuild it after the embedding round-trip.
+type pendingIndex struct {
+	doc            indexing.InsightMessageInput
+	analyticsID    string
+	sourceID       string
+	pointID        string
+	contentHash    string
+	embeddingText  string
+	cleanText      string
+	startTime      time.Time
+}
+
 func (uc *implUseCase) processInsightBatch(ctx context.Context, input indexing.IndexBatchInput) indexing.IndexBatchOutput {
+	collectionName := fmt.Sprintf("proj_%s", input.ProjectID)
+
+	// Phase 1 — validate + dedup each document in parallel. The output is
+	// either a "pending" record ready for batched embedding, or one of the
+	// terminal STATUS_SKIPPED / STATUS_FAILED counts.
+	type prepareResult struct {
+		pending *pendingIndex
+		status  string // "" when pending is set
+	}
+	results := make([]prepareResult, len(input.Documents))
+	var prepWG sync.WaitGroup
+	sem := make(chan struct{}, indexing.MaxConcurrency)
+	for i := range input.Documents {
+		i := i
+		prepWG.Add(1)
+		sem <- struct{}{}
+		go func() {
+			defer prepWG.Done()
+			defer func() { <-sem }()
+			pending, status := uc.prepareIndex(ctx, input.ProjectID, input.CampaignID, input.Documents[i])
+			results[i] = prepareResult{pending: pending, status: status}
+		}()
+	}
+	prepWG.Wait()
+
 	var (
 		indexed int
 		failed  int
@@ -100,30 +145,73 @@ func (uc *implUseCase) processInsightBatch(ctx context.Context, input indexing.I
 		mu      sync.Mutex
 	)
 
-	collectionName := fmt.Sprintf("proj_%s", input.ProjectID)
-
-	g, gctx := errgroup.WithContext(ctx)
-	g.SetLimit(indexing.MaxConcurrency)
-
-	for i := range input.Documents {
-		doc := input.Documents[i]
-		g.Go(func() error {
-			result := uc.indexSingleInsight(gctx, input.ProjectID, input.CampaignID, collectionName, doc)
-			mu.Lock()
-			defer mu.Unlock()
-
-			switch result {
-			case indexing.STATUS_INDEXED:
-				indexed++
-			case indexing.STATUS_SKIPPED:
-				skipped++
-			case indexing.STATUS_FAILED:
-				failed++
-			}
-			return nil
-		})
+	pendings := make([]*pendingIndex, 0, len(results))
+	for _, r := range results {
+		switch {
+		case r.pending != nil:
+			pendings = append(pendings, r.pending)
+		case r.status == indexing.STATUS_SKIPPED:
+			skipped++
+		case r.status == indexing.STATUS_FAILED:
+			failed++
+		}
 	}
-	_ = g.Wait()
+
+	// Phase 2 — batch the embedding round-trips so a 200-document Kafka
+	// payload turns into a handful of Voyage calls instead of 200 separate
+	// API requests. Embedding still goes through the cache first so already
+	// fingerprinted texts return without touching Voyage at all.
+	for start := 0; start < len(pendings); start += maxVoyageBatch {
+		end := start + maxVoyageBatch
+		if end > len(pendings) {
+			end = len(pendings)
+		}
+		chunk := pendings[start:end]
+
+		texts := make([]string, len(chunk))
+		for j, p := range chunk {
+			texts[j] = p.embeddingText
+		}
+		embeddingStart := time.Now()
+		genOut, err := uc.embeddingUC.GenerateMany(ctx, embedding.GenerateManyInput{Texts: texts})
+		embeddingTime := int(time.Since(embeddingStart).Milliseconds())
+		if err != nil {
+			uc.l.Errorf(ctx, "indexing.usecase.processInsightBatch: batch embedding failed for project %s (chunk %d-%d): %v", input.ProjectID, start, end-1, err)
+			failed += len(chunk)
+			continue
+		}
+		if len(genOut.Vectors) != len(chunk) {
+			uc.l.Errorf(ctx, "indexing.usecase.processInsightBatch: vector count mismatch (expected %d, got %d) for project %s", len(chunk), len(genOut.Vectors), input.ProjectID)
+			failed += len(chunk)
+			continue
+		}
+
+		// Phase 3 — fan-out the upsert step concurrently per item; each
+		// upsert is independent so we hold MaxConcurrency goroutines in
+		// flight while the next embedding chunk warms up.
+		g, gctx := errgroup.WithContext(ctx)
+		g.SetLimit(indexing.MaxConcurrency)
+		for idx := range chunk {
+			idx := idx
+			pending := chunk[idx]
+			vector := genOut.Vectors[idx]
+			g.Go(func() error {
+				status := uc.finalizeIndex(gctx, input.ProjectID, input.CampaignID, collectionName, pending, vector, embeddingTime)
+				mu.Lock()
+				defer mu.Unlock()
+				switch status {
+				case indexing.STATUS_INDEXED:
+					indexed++
+				case indexing.STATUS_SKIPPED:
+					skipped++
+				case indexing.STATUS_FAILED:
+					failed++
+				}
+				return nil
+			})
+		}
+		_ = g.Wait()
+	}
 
 	return indexing.IndexBatchOutput{
 		ProjectID: input.ProjectID,
@@ -133,32 +221,34 @@ func (uc *implUseCase) processInsightBatch(ctx context.Context, input indexing.I
 	}
 }
 
-func (uc *implUseCase) indexSingleInsight(
+// prepareIndex runs validation + dedup for one document. Returns either a
+// pendingIndex record ready for batched embedding, or a terminal status that
+// the caller increments directly.
+func (uc *implUseCase) prepareIndex(
 	ctx context.Context,
 	projectID string,
 	campaignID string,
-	collectionName string,
 	doc indexing.InsightMessageInput,
-) string {
+) (*pendingIndex, string) {
 	startTime := time.Now()
 
 	if !doc.RAG {
 		if !isSocialPlatformFallback(doc.Identity.Platform) {
-			uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: skipped doc %s for project %s: gate=rag_disabled", doc.Identity.UapID, projectID)
-			return indexing.STATUS_SKIPPED
+			uc.l.Warnf(ctx, "indexing.usecase.prepareIndex: skipped doc %s for project %s: gate=rag_disabled", doc.Identity.UapID, projectID)
+			return nil, indexing.STATUS_SKIPPED
 		}
-		uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: doc %s for project %s: rag_disabled_fallback_platform=%s", doc.Identity.UapID, projectID, doc.Identity.Platform)
+		uc.l.Warnf(ctx, "indexing.usecase.prepareIndex: doc %s for project %s: rag_disabled_fallback_platform=%s", doc.Identity.UapID, projectID, doc.Identity.Platform)
 	}
 
 	cleanText := strings.TrimSpace(doc.Content.CleanText)
 	if doc.Identity.UapID == "" || cleanText == "" {
-		uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: skipped doc for project %s: gate=missing_required_fields", projectID)
-		return indexing.STATUS_SKIPPED
+		uc.l.Warnf(ctx, "indexing.usecase.prepareIndex: skipped doc for project %s: gate=missing_required_fields", projectID)
+		return nil, indexing.STATUS_SKIPPED
 	}
 
 	if shouldIndex, reason := shouldIndexInsight(doc, cleanText); !shouldIndex {
-		uc.l.Warnf(ctx, "indexing.usecase.indexSingleInsight: skipped doc %s for project %s campaign %s: gate=%s", doc.Identity.UapID, projectID, campaignID, reason)
-		return indexing.STATUS_SKIPPED
+		uc.l.Warnf(ctx, "indexing.usecase.prepareIndex: skipped doc %s for project %s campaign %s: gate=%s", doc.Identity.UapID, projectID, campaignID, reason)
+		return nil, indexing.STATUS_SKIPPED
 	}
 
 	analyticsID := deterministicInsightUUID("analytics", projectID, doc.Identity.UapID)
@@ -174,64 +264,73 @@ func (uc *implUseCase) indexSingleInsight(
 	pointID := analyticsID
 	contentHash := uc.generateContentHash(cleanText)
 
-	// Pre-embed dedup: if another consumer/replay already indexed this
-	// analytics_id with the same content_hash, skip without paying the Voyage
-	// embedding cost or upserting a duplicate Qdrant point. Closes the race
-	// where two Kafka messages with the same UAP both reached embed + upsert
-	// before either hit the UNIQUE constraint on the indexed_documents table.
 	if existing, err := uc.postgreRepo.GetOneDocument(ctx, repo.GetOneDocumentOptions{AnalyticsID: analyticsID}); err == nil &&
 		existing.ID != "" &&
 		existing.Status == indexing.STATUS_INDEXED &&
 		existing.ContentHash == contentHash {
-		uc.l.Debugf(ctx, "indexing.usecase.indexSingleInsight: dedup skip uap=%s analytics_id=%s", doc.Identity.UapID, analyticsID)
-		return indexing.STATUS_SKIPPED
+		uc.l.Debugf(ctx, "indexing.usecase.prepareIndex: dedup skip uap=%s analytics_id=%s", doc.Identity.UapID, analyticsID)
+		return nil, indexing.STATUS_SKIPPED
 	}
 
-	embeddingText := buildEmbeddingText(doc, cleanText)
-	embeddingStart := time.Now()
-	genOutput, err := uc.embeddingUC.Generate(ctx, embedding.GenerateInput{Text: embeddingText})
-	embeddingTime := int(time.Since(embeddingStart).Milliseconds())
-	if err != nil {
-		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: embedding failed for %s: %v", doc.Identity.UapID, err)
-		return indexing.STATUS_FAILED
-	}
+	return &pendingIndex{
+		doc:           doc,
+		analyticsID:   analyticsID,
+		sourceID:      sourceID,
+		pointID:       pointID,
+		contentHash:   contentHash,
+		embeddingText: buildEmbeddingText(doc, cleanText),
+		cleanText:     cleanText,
+		startTime:     startTime,
+	}, ""
+}
 
-	payload := uc.buildInsightPayload(analyticsID, sourceID, pointID, projectID, campaignID, doc)
+// finalizeIndex takes the embedded vector and runs Qdrant upsert + Postgres
+// metadata write for one pending document. Split out so the batched embedding
+// phase can hand vectors back to MaxConcurrency goroutines.
+func (uc *implUseCase) finalizeIndex(
+	ctx context.Context,
+	projectID string,
+	campaignID string,
+	collectionName string,
+	pending *pendingIndex,
+	vector []float32,
+	embeddingTime int,
+) string {
+	payload := uc.buildInsightPayload(pending.analyticsID, pending.sourceID, pending.pointID, projectID, campaignID, pending.doc)
 
 	upsertStart := time.Now()
-	err = uc.pointUC.Upsert(ctx, point.UpsertInput{
+	if err := uc.pointUC.Upsert(ctx, point.UpsertInput{
 		CollectionName: collectionName,
 		Points: []model.Point{
 			{
-				ID:      pointID,
-				Vector:  genOutput.Vector,
+				ID:      pending.pointID,
+				Vector:  vector,
 				Payload: payload,
 			},
 		},
-	})
-	upsertTime := int(time.Since(upsertStart).Milliseconds())
-	if err != nil {
-		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: qdrant upsert failed for %s: %v", doc.Identity.UapID, err)
+	}); err != nil {
+		uc.l.Errorf(ctx, "indexing.usecase.finalizeIndex: qdrant upsert failed for %s: %v", pending.doc.Identity.UapID, err)
 		return indexing.STATUS_FAILED
 	}
+	upsertTime := int(time.Since(upsertStart).Milliseconds())
 
 	now := time.Now()
-	_, err = uc.postgreRepo.UpsertDocument(ctx, repo.UpsertDocumentOptions{
-		AnalyticsID:     analyticsID,
+	_, err := uc.postgreRepo.UpsertDocument(ctx, repo.UpsertDocumentOptions{
+		AnalyticsID:     pending.analyticsID,
 		ProjectID:       projectID,
-		SourceID:        sourceID,
-		QdrantPointID:   pointID,
+		SourceID:        pending.sourceID,
+		QdrantPointID:   pending.pointID,
 		CollectionName:  collectionName,
-		ContentHash:     contentHash,
+		ContentHash:     pending.contentHash,
 		Status:          indexing.STATUS_INDEXED,
 		RetryCount:      0,
 		EmbeddingTimeMs: embeddingTime,
 		UpsertTimeMs:    upsertTime,
-		TotalTimeMs:     int(time.Since(startTime).Milliseconds()),
+		TotalTimeMs:     int(time.Since(pending.startTime).Milliseconds()),
 		IndexedAt:       &now,
 	})
 	if err != nil {
-		uc.l.Errorf(ctx, "indexing.usecase.indexSingleInsight: metadata upsert failed for %s: %v", doc.Identity.UapID, err)
+		uc.l.Errorf(ctx, "indexing.usecase.finalizeIndex: metadata upsert failed for %s: %v", pending.doc.Identity.UapID, err)
 		return indexing.STATUS_FAILED
 	}
 
