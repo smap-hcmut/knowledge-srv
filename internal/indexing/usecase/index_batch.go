@@ -27,6 +27,34 @@ func (uc *implUseCase) generateContentHash(content string) string {
 	return hex.EncodeToString(sum[:])
 }
 
+const (
+	// maxPayloadContentChars caps the content snippet stored in Qdrant. Long
+	// transcripts (TikTok captions, multi-paragraph reviews) easily push a
+	// single point past the 64MB serialized limit when payload also carries
+	// summaries, aspects and source URLs; the full text remains addressable
+	// in Postgres via SourceID + RootID.
+	maxPayloadContentChars = 800
+
+	// maxPayloadSummaryChars is the soft cap for the summary fallback when
+	// an upstream summary is missing — shorter than the raw content snippet
+	// because the summary is meant to be a TL;DR, not the full quote.
+	maxPayloadSummaryChars = 400
+)
+
+// trimPayloadText cuts s at most max runes long and appends an ellipsis so
+// callers can tell the snippet was truncated without re-fetching the full
+// document.
+func trimPayloadText(s string, max int) string {
+	if max <= 0 {
+		return ""
+	}
+	runes := []rune(s)
+	if len(runes) <= max {
+		return s
+	}
+	return string(runes[:max]) + "…"
+}
+
 // IndexBatch indexes a batch of direct payload documents from Kafka.
 func (uc *implUseCase) IndexBatch(ctx context.Context, input indexing.IndexBatchInput) (indexing.IndexBatchOutput, error) {
 	startTime := time.Now()
@@ -247,8 +275,13 @@ func (uc *implUseCase) buildInsightPayload(
 		ParentID:          doc.Source.ParentID,
 		PlatformMeta:      doc.Source.PlatformMeta,
 		Hierarchy:         doc.Source.Hierarchy,
-		Content:           cleanText,
-		ContentSummary:    firstNonEmptyString(doc.Content.Summary, cleanText),
+		// Content kept as a short snippet so Qdrant payload stays well below
+		// the 64MB point limit. Full text lives in Postgres
+		// (analytics.post_insight.content); search results carry RootID +
+		// SourceID + Permalink so callers can hydrate the original document
+		// when they actually need it.
+		Content:           trimPayloadText(cleanText, maxPayloadContentChars),
+		ContentSummary:    firstNonEmptyString(doc.Content.Summary, trimPayloadText(cleanText, maxPayloadSummaryChars)),
 		ContextSummary:    strings.TrimSpace(doc.Content.ContextSummary),
 		SentimentLabel:    doc.NLP.Sentiment.Label,
 		SentimentScore:    doc.NLP.Sentiment.Score,
