@@ -17,6 +17,7 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/kafka"
 	"github.com/smap-hcmut/shared-libs/go/llm"
 	"github.com/smap-hcmut/shared-libs/go/log"
+	"github.com/smap-hcmut/shared-libs/go/metrics"
 	"github.com/smap-hcmut/shared-libs/go/middleware"
 	"github.com/smap-hcmut/shared-libs/go/minio"
 	"github.com/smap-hcmut/shared-libs/go/redis"
@@ -128,6 +129,11 @@ func New(logger log.Logger, cfg Config) (*HTTPServer, error) {
 	// Add middlewares
 	srv.gin.Use(middleware.Logger(srv.l, srv.environment))
 	srv.gin.Use(gin.Recovery())
+	srv.gin.Use(metrics.GinMiddleware("knowledge-srv"))
+
+	// Expose Prometheus scrape endpoint on the main HTTP port so the SMAP
+	// monitoring stack can pull RED metrics without an extra Service.
+	metrics.MountMetrics(srv.gin)
 
 	return srv, nil
 }
