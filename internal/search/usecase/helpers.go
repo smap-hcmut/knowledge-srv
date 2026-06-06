@@ -11,14 +11,18 @@ import (
 	"knowledge-srv/internal/search"
 )
 
-// resolveCampaignProjects - Resolve campaign_id → project_ids (Tầng 2 cache)
-// As a side-effect, also caches the campaign name for query enrichment.
-func (uc *implUseCase) resolveCampaignProjects(ctx context.Context, campaignID string) ([]string, error) {
-	// Check cache
+// resolveCampaignProjects resolves campaign_id → project_ids visible to the
+// caller. The cache layer (Tầng 2) still holds the full list per campaign;
+// per-user filtering runs on top so two users querying the same campaign do
+// not pollute each other's view. Previously this method returned every
+// project in the campaign regardless of ownership, which let user A search /
+// chat in user B's campaign as long as A knew the campaign_id.
+func (uc *implUseCase) resolveCampaignProjects(ctx context.Context, userID, campaignID string) ([]string, error) {
+	// Check cache (campaign-scoped, not user-scoped — we filter below).
 	projectIDs, err := uc.cacheRepo.GetCampaignProjects(ctx, campaignID)
 	if err == nil && len(projectIDs) > 0 {
 		uc.l.Debugf(ctx, "search.usecase.resolveCampaignProjects: cache hit for campaign %s, %d projects", campaignID, len(projectIDs))
-		return projectIDs, nil
+		return uc.filterProjectsByAccess(ctx, userID, projectIDs)
 	}
 
 	// Cache miss → call Project Service
@@ -44,7 +48,36 @@ func (uc *implUseCase) resolveCampaignProjects(ctx context.Context, campaignID s
 		}
 	}
 
-	return campaign.ProjectIDs, nil
+	return uc.filterProjectsByAccess(ctx, userID, campaign.ProjectIDs)
+}
+
+// filterProjectsByAccess keeps only project IDs the caller is allowed to read.
+// Returns search.ErrCampaignNoProjects when the filter removes every project
+// so the caller treats the result the same as an empty campaign — knowledge-srv
+// returns a generic "no scope" error to the client rather than disclosing
+// which projects exist.
+func (uc *implUseCase) filterProjectsByAccess(ctx context.Context, userID string, projectIDs []string) ([]string, error) {
+	if strings.TrimSpace(userID) == "" {
+		// No user context = internal call (e.g. health probe). Be conservative
+		// and reject; routes that need a real user must populate the scope.
+		return nil, search.ErrCampaignNoProjects
+	}
+
+	allowed := make([]string, 0, len(projectIDs))
+	for _, projectID := range projectIDs {
+		ok, err := uc.projectSrv.ValidateProjectAccess(ctx, userID, projectID)
+		if err != nil {
+			uc.l.Warnf(ctx, "search.usecase.resolveCampaignProjects: ValidateProjectAccess(%s,%s) failed: %v", userID, projectID, err)
+			continue
+		}
+		if ok {
+			allowed = append(allowed, projectID)
+		}
+	}
+	if len(allowed) == 0 {
+		return nil, search.ErrCampaignNoProjects
+	}
+	return allowed, nil
 }
 
 // resolveCampaignName returns the campaign display name for query enrichment.

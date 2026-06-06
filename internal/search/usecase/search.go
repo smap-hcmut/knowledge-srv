@@ -57,8 +57,8 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 		}
 	}
 
-	// Step 2: Resolve campaign → project_ids (Tầng 2 cache)
-	projectIDs, err := uc.resolveCampaignProjects(ctx, input.CampaignID)
+	// Step 2: Resolve campaign → project_ids (Tầng 2 cache, RBAC filtered)
+	projectIDs, err := uc.resolveCampaignProjects(ctx, sc.UserID, input.CampaignID)
 	if err != nil {
 		return search.SearchOutput{}, err
 	}

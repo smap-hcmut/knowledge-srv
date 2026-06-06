@@ -15,8 +15,8 @@ import (
 )
 
 func (uc *implUseCase) Aggregate(ctx context.Context, sc model.Scope, input search.AggregateInput) (search.AggregateOutput, error) {
-	// Step 1: Resolve campaign -> projects
-	projectIDs, err := uc.resolveCampaignProjects(ctx, input.CampaignID)
+	// Step 1: Resolve campaign -> projects (RBAC filtered)
+	projectIDs, err := uc.resolveCampaignProjects(ctx, sc.UserID, input.CampaignID)
 	if err != nil {
 		return search.AggregateOutput{}, err
 	}

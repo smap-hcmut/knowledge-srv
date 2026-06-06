@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"knowledge-srv/internal/embedding"
 	"knowledge-srv/internal/indexing"
@@ -15,6 +17,15 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
 )
+
+// generateContentHash produces a stable per-content fingerprint used both for
+// the indexed_documents.content_hash column and the pre-embed dedup check.
+// SHA-256 keyed only by the normalized text — any caller-provided salt would
+// break dedup across consumers.
+func (uc *implUseCase) generateContentHash(content string) string {
+	sum := sha256.Sum256([]byte(content))
+	return hex.EncodeToString(sum[:])
+}
 
 // IndexBatch indexes a batch of direct payload documents from Kafka.
 func (uc *implUseCase) IndexBatch(ctx context.Context, input indexing.IndexBatchInput) (indexing.IndexBatchOutput, error) {
@@ -134,6 +145,19 @@ func (uc *implUseCase) indexSingleInsight(
 	))
 	pointID := analyticsID
 	contentHash := uc.generateContentHash(cleanText)
+
+	// Pre-embed dedup: if another consumer/replay already indexed this
+	// analytics_id with the same content_hash, skip without paying the Voyage
+	// embedding cost or upserting a duplicate Qdrant point. Closes the race
+	// where two Kafka messages with the same UAP both reached embed + upsert
+	// before either hit the UNIQUE constraint on the indexed_documents table.
+	if existing, err := uc.postgreRepo.GetOneDocument(ctx, repo.GetOneDocumentOptions{AnalyticsID: analyticsID}); err == nil &&
+		existing.ID != "" &&
+		existing.Status == indexing.STATUS_INDEXED &&
+		existing.ContentHash == contentHash {
+		uc.l.Debugf(ctx, "indexing.usecase.indexSingleInsight: dedup skip uap=%s analytics_id=%s", doc.Identity.UapID, analyticsID)
+		return indexing.STATUS_SKIPPED
+	}
 
 	embeddingText := buildEmbeddingText(doc, cleanText)
 	embeddingStart := time.Now()
