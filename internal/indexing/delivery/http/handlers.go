@@ -5,37 +5,6 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/response"
 )
 
-// Index - Handler cho POST /internal/index
-// @Summary Index batch từ MinIO file
-// @Description Internal API cho Analytics Service trigger indexing
-// @Tags Indexing (Internal)
-// @Accept json
-// @Produce json
-// @Param body body IndexReq true "Index request"
-// @Success 200 {object} IndexResp
-// @Failure 400 {object} response.Resp
-// @Failure 500 {object} response.Resp
-// @Router /internal/index [post]
-func (h *handler) Index(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	req, err := h.processIndexReq(c)
-	if err != nil {
-		h.l.Errorf(ctx, "indexing.delivery.http.Index: processIndexReq failed: %v", err)
-		response.Error(c, err, h.discord)
-		return
-	}
-
-	o, err := h.uc.Index(ctx, req.toInput())
-	if err != nil {
-		h.l.Errorf(ctx, "indexing.delivery.http.Index: Index failed: %v", err)
-		response.Error(c, h.mapError(err), h.discord)
-		return
-	}
-
-	response.OK(c, h.newIndexResp(o))
-}
-
 // RetryFailed - Handler cho POST /internal/index/retry
 // @Summary Retry failed indexing records
 // @Description Retry indexing for records that previously failed

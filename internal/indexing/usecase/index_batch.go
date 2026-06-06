@@ -197,27 +197,7 @@ func isIndexableInsight(doc indexing.InsightMessageInput, cleanText string) bool
 	if len([]rune(cleanText)) < 20 {
 		return false
 	}
-	if businessRelevanceScore(doc, cleanText) < indexing.MinBusinessRelevanceScore {
-		return false
-	}
-	if hasInsightSignal(doc) {
-		return true
-	}
-	return containsBusinessSignal(cleanText)
-}
-
-func hasInsightSignal(doc indexing.InsightMessageInput) bool {
-	if len(doc.NLP.Aspects) > 0 || len(doc.NLP.Entities) > 0 {
-		return true
-	}
-	if doc.Business.Impact.ImpactScore >= 0.15 {
-		return true
-	}
-	priority := strings.ToUpper(strings.TrimSpace(doc.Business.Impact.Priority))
-	if priority == "HIGH" || priority == "MEDIUM" || priority == "CRITICAL" {
-		return true
-	}
-	return false
+	return businessRelevanceScore(doc, cleanText) >= indexing.MinBusinessRelevanceScore
 }
 
 func buildEmbeddingText(doc indexing.InsightMessageInput, cleanText string) string {

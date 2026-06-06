@@ -4,23 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *handler) processIndexReq(c *gin.Context) (IndexReq, error) {
-	var req IndexReq
-
-	ctx := c.Request.Context()
-	if err := c.ShouldBindJSON(&req); err != nil {
-		h.l.Errorf(ctx, "indexing.delivery.http.processIndexReq: ShouldBindJSON failed: %v", err)
-		return req, err
-	}
-
-	if err := req.validate(); err != nil {
-		h.l.Errorf(ctx, "indexing.delivery.http.processIndexReq: validate failed: %v", err)
-		return req, err
-	}
-
-	return req, nil
-}
-
 func (h *handler) processRetryFailedReq(c *gin.Context) (RetryFailedReq, error) {
 	var req RetryFailedReq
 

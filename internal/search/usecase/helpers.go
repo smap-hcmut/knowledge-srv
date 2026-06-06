@@ -83,10 +83,8 @@ func (uc *implUseCase) mapQdrantResult(r point.SearchOutput) search.SearchResult
 	}
 
 	// Extract typed fields from payload.
-	// Two payload formats exist:
-	//   analyticsPayload: content, overall_sentiment, overall_sentiment_score
-	//   insightPayload:   content_summary, sentiment_label, sentiment_score
-	// Check both so that either format is handled correctly.
+	// Keep both legacy analytics field names and current direct insight field names
+	// readable because old Qdrant collections may still contain pre-migration points.
 	if v, ok := r.Payload["content"].(string); ok {
 		result.Content = v
 	} else if v, ok := r.Payload["content_summary"].(string); ok {
@@ -135,7 +133,7 @@ func (uc *implUseCase) mapQdrantResult(r point.SearchOutput) search.SearchResult
 				if s, ok := m["aspect_display_name"].(string); ok {
 					aspect.AspectDisplayName = s
 				}
-				// analyticsPayload uses "sentiment"; insightPayload uses "polarity"
+				// Legacy points use "sentiment"; direct insight points use "polarity".
 				if s, ok := m["sentiment"].(string); ok {
 					aspect.Sentiment = s
 				} else if s, ok := m["polarity"].(string); ok {

@@ -11,7 +11,6 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/kafka"
 	"github.com/smap-hcmut/shared-libs/go/llm"
 	"github.com/smap-hcmut/shared-libs/go/log"
-	"github.com/smap-hcmut/shared-libs/go/minio"
 	"github.com/smap-hcmut/shared-libs/go/redis"
 )
 
@@ -25,7 +24,6 @@ type ConsumerServer struct {
 	redisClient   redis.IRedis
 	qdrantClient  qdrant.IQdrant
 	postgresDB    *sql.DB
-	minioClient   minio.MinIO
 	kafkaProducer kafka.IProducer
 
 	// AI/ML clients
@@ -46,7 +44,6 @@ type Config struct {
 	RedisClient   redis.IRedis
 	QdrantClient  qdrant.IQdrant
 	PostgresDB    *sql.DB
-	MinIOClient   minio.MinIO
 	KafkaProducer kafka.IProducer
 
 	// AI/ML clients

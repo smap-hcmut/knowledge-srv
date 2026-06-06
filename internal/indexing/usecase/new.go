@@ -7,17 +7,15 @@ import (
 	"knowledge-srv/internal/point"
 
 	"github.com/smap-hcmut/shared-libs/go/log"
-	"github.com/smap-hcmut/shared-libs/go/minio"
 )
 
-// implUseCase implements the indexing.UseCase interface
+// implUseCase implements the indexing.UseCase interface.
 type implUseCase struct {
 	l           log.Logger
 	postgreRepo repo.PostgresRepository
 	pointUC     point.UseCase
 	embeddingUC embedding.UseCase
 	cacheRepo   repo.CacheRepository
-	minio       minio.MinIO
 }
 
 // New creates a new indexing usecase.
@@ -27,7 +25,6 @@ func New(
 	pointUC point.UseCase,
 	embeddingUC embedding.UseCase,
 	cacheRepo repo.CacheRepository,
-	minio minio.MinIO,
 ) indexing.UseCase {
 	return &implUseCase{
 		l:           l,
@@ -35,6 +32,5 @@ func New(
 		pointUC:     pointUC,
 		embeddingUC: embeddingUC,
 		cacheRepo:   cacheRepo,
-		minio:       minio,
 	}
 }

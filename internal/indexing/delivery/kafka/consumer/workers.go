@@ -10,37 +10,25 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/auth"
 )
 
-// handleBatchCompletedMessage receives Layer 3 message and routes by format.
+// handleBatchCompletedMessage receives the Layer 3 documents[] indexing message.
 func (c *consumer) handleBatchCompletedMessage(msg *sarama.ConsumerMessage) error {
 	ctx := context.Background()
 
 	c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Processing message from partition %d, offset %d",
 		msg.Partition, msg.Offset)
 
-	// 1. Try new format first (documents[])
-	var newMsg kafka.BatchCompletedMessage
-	if err := json.Unmarshal(msg.Value, &newMsg); err == nil && len(newMsg.Documents) > 0 {
-		c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Detected new format (documents[]), project=%s docs=%d",
-			newMsg.ProjectID, len(newMsg.Documents))
-		return c.handleNewBatchCompleted(ctx, newMsg)
+	var message kafka.BatchCompletedMessage
+	if err := json.Unmarshal(msg.Value, &message); err != nil {
+		c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Invalid message format (skipping): %v", err)
+		return nil
 	}
 
-	// 2. Fallback to legacy format (file_url)
-	var legacyMsg kafka.LegacyBatchCompletedMessage
-	if err := json.Unmarshal(msg.Value, &legacyMsg); err == nil && legacyMsg.FileURL != "" {
-		c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Detected legacy format (file_url), batch=%s",
-			legacyMsg.BatchID)
-		return c.handleLegacyBatchCompleted(ctx, legacyMsg)
-	}
-
-	// 3. Invalid message format
-	c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Cannot parse message (neither new nor legacy format), skipping")
-	return nil
-}
-
-func (c *consumer) handleNewBatchCompleted(ctx context.Context, message kafka.BatchCompletedMessage) error {
 	if message.ProjectID == "" {
-		c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleNewBatchCompleted: Missing project_id (skipping)")
+		c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Missing project_id (skipping)")
+		return nil
+	}
+	if len(message.Documents) == 0 {
+		c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: Missing documents[] payload (skipping)")
 		return nil
 	}
 
@@ -51,34 +39,12 @@ func (c *consumer) handleNewBatchCompleted(ctx context.Context, message kafka.Ba
 
 	output, err := c.uc.IndexBatch(ctx, input)
 	if err != nil {
-		c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.handleNewBatchCompleted: IndexBatch failed: %v", err)
+		c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: IndexBatch failed: %v", err)
 		return fmt.Errorf("usecase error: %w", err)
 	}
 
-	c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleNewBatchCompleted: project=%s total=%d indexed=%d skipped=%d failed=%d",
+	c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleBatchCompletedMessage: project=%s total=%d indexed=%d skipped=%d failed=%d",
 		message.ProjectID, output.TotalRecords, output.Indexed, output.Skipped, output.Failed)
-	return nil
-}
-
-func (c *consumer) handleLegacyBatchCompleted(ctx context.Context, message kafka.LegacyBatchCompletedMessage) error {
-	if message.BatchID == "" || message.FileURL == "" {
-		c.l.Warnf(ctx, "indexing.delivery.kafka.consumer.handleLegacyBatchCompleted: Missing required fields (skipping)")
-		return nil
-	}
-
-	input := toIndexInput(message)
-
-	sc := auth.Scope{UserID: "system", Role: "system"}
-	ctx = auth.SetScopeToContext(ctx, sc)
-
-	output, err := c.uc.Index(ctx, input)
-	if err != nil {
-		c.l.Errorf(ctx, "indexing.delivery.kafka.consumer.handleLegacyBatchCompleted: Index failed: %v", err)
-		return fmt.Errorf("usecase error: %w", err)
-	}
-
-	c.l.Infof(ctx, "indexing.delivery.kafka.consumer.handleLegacyBatchCompleted: batch=%s indexed=%d failed=%d skipped=%d",
-		message.BatchID, output.Indexed, output.Failed, output.Skipped)
 	return nil
 }
 

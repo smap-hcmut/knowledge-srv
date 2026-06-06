@@ -180,7 +180,6 @@ func main() {
 		RedisClient:   redisClient,
 		QdrantClient:  qdrantClient,
 		PostgresDB:    postgresDB,
-		MinIOClient:   minioClient,
 		VoyageClient:  voyageClient,
 		LLMClient:     llmClient,
 		Discord:       discordClient,

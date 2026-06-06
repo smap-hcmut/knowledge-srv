@@ -12,7 +12,6 @@ func New(cfg Config) (*ConsumerServer, error) {
 		redisClient:   cfg.RedisClient,
 		qdrantClient:  cfg.QdrantClient,
 		postgresDB:    cfg.PostgresDB,
-		minioClient:   cfg.MinIOClient,
 		voyageClient:  cfg.VoyageClient,
 		llmClient:     cfg.LLMClient,
 		discord:       cfg.Discord,
@@ -45,9 +44,6 @@ func (srv *ConsumerServer) validate() error {
 	}
 	if srv.postgresDB == nil {
 		return fmt.Errorf("postgres db is required")
-	}
-	if srv.minioClient == nil {
-		return fmt.Errorf("minio client is required")
 	}
 	// kafkaProducer is OPTIONAL — event publishing only
 

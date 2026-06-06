@@ -6,7 +6,6 @@ import (
 
 //go:generate mockery --name UseCase
 type UseCase interface {
-	Index(ctx context.Context, input IndexInput) (IndexOutput, error)
 	IndexBatch(ctx context.Context, input IndexBatchInput) (IndexBatchOutput, error)
 	IndexInsight(ctx context.Context, input IndexInsightInput) (IndexInsightOutput, error)
 	IndexDigest(ctx context.Context, input IndexDigestInput) (IndexDigestOutput, error)

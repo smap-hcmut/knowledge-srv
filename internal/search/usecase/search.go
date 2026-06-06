@@ -90,7 +90,7 @@ func (uc *implUseCase) Search(ctx context.Context, sc model.Scope, input search.
 	vector := generateOutput.Vector
 
 	// Step 5: Build Qdrant filter (without project_id — implicit by collection)
-	filter := uc.buildSearchFilter(nil, input.Filters)
+	filter := uc.buildSearchFilter(input.Filters)
 
 	// Step 6: Search per-project Qdrant collections in parallel (server-side score filtering).
 	// Over-fetch a bit so snapshot dedupe still leaves enough documents for the prompt.

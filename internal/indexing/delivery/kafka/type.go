@@ -1,10 +1,6 @@
 package kafka
 
-import (
-	"time"
-
-	"github.com/smap-hcmut/shared-libs/go/constants"
-)
+import "github.com/smap-hcmut/shared-libs/go/constants"
 
 // Topic & Group constants
 const (
@@ -24,16 +20,6 @@ const (
 	TopicInsightsPublishedDLQ = constants.TopicInsightsPublishedDLQ
 	TopicReportDigestDLQ      = constants.TopicReportDigestDLQ
 )
-
-// LegacyBatchCompletedMessage is the old format (MinIO file reference).
-type LegacyBatchCompletedMessage struct {
-	BatchID     string    `json:"batch_id"`
-	ProjectID   string    `json:"project_id"`
-	CampaignID  string    `json:"campaign_id,omitempty"`
-	FileURL     string    `json:"file_url"`
-	RecordCount int       `json:"record_count"`
-	CompletedAt time.Time `json:"completed_at"`
-}
 
 // BatchCompletedMessage is the new direct payload format.
 type BatchCompletedMessage struct {

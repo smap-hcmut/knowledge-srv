@@ -15,7 +15,7 @@ func (srv *HTTPServer) setupIndexingDomain(ctx context.Context, r *gin.RouterGro
 	postgreRepo := indexingPostgre.New(srv.postgresDB, srv.l)
 	cacheRepo := indexingRedis.New(srv.redisClient, srv.l)
 
-	uc := indexingUsecase.New(srv.l, postgreRepo, srv.pointUC, srv.embeddingUC, cacheRepo, srv.minioClient)
+	uc := indexingUsecase.New(srv.l, postgreRepo, srv.pointUC, srv.embeddingUC, cacheRepo)
 
 	handler := indexingHTTP.New(srv.l, uc, srv.discord)
 	handler.(interface {

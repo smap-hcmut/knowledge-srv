@@ -7,9 +7,9 @@ import (
 	pb "github.com/qdrant/go-client/qdrant"
 )
 
-// analyticsPayloadIndexes lists all fields that need payload indexes for faceting and filtering.
+// payloadIndexes lists all fields that need payload indexes for faceting and filtering.
 // keyword indexes are required for Facet queries; float index for range filters on timestamps.
-var analyticsPayloadIndexes = []struct {
+var payloadIndexes = []struct {
 	field     string
 	fieldType pb.FieldType
 }{
@@ -48,11 +48,11 @@ func (r *implRepository) EnsureCollection(ctx context.Context, name string, vect
 // ensurePayloadIndexes creates all required payload indexes for the collection.
 // Qdrant silently accepts duplicate CreateFieldIndex calls, so this is idempotent.
 func (r *implRepository) ensurePayloadIndexes(ctx context.Context, name string) error {
-	for _, idx := range analyticsPayloadIndexes {
+	for _, idx := range payloadIndexes {
 		if err := r.client.CreateFieldIndex(ctx, name, idx.field, idx.fieldType); err != nil {
 			return fmt.Errorf("point.repository.qdrant.ensurePayloadIndexes: failed to create index %s on %s: %w", idx.field, name, err)
 		}
 	}
-	r.l.Infof(ctx, "point.repository.qdrant.ensurePayloadIndexes: ensured %d payload indexes on %s", len(analyticsPayloadIndexes), name)
+	r.l.Infof(ctx, "point.repository.qdrant.ensurePayloadIndexes: ensured %d payload indexes on %s", len(payloadIndexes), name)
 	return nil
 }

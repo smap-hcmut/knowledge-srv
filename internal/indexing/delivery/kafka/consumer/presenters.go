@@ -5,17 +5,6 @@ import (
 	kafkaDelivery "knowledge-srv/internal/indexing/delivery/kafka"
 )
 
-// toIndexInput maps legacy Kafka message DTO to usecase input.
-func toIndexInput(m kafkaDelivery.LegacyBatchCompletedMessage) indexing.IndexInput {
-	return indexing.IndexInput{
-		BatchID:     m.BatchID,
-		ProjectID:   m.ProjectID,
-		CampaignID:  m.CampaignID,
-		FileURL:     m.FileURL,
-		RecordCount: m.RecordCount,
-	}
-}
-
 // toIndexBatchInput maps new Kafka message DTO to usecase input.
 func toIndexBatchInput(m kafkaDelivery.BatchCompletedMessage) indexing.IndexBatchInput {
 	docs := make([]indexing.InsightMessageInput, len(m.Documents))

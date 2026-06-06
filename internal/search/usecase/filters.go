@@ -6,10 +6,8 @@ import (
 	pb "github.com/qdrant/go-client/qdrant"
 )
 
-// buildSearchFilter - Build Qdrant filter from domain filters.
-// projectIDs is no longer used for filtering since we now query per-project collections directly.
-// The parameter is kept for API compatibility but ignored.
-func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.SearchFilters) *pb.Filter {
+// buildSearchFilter builds a Qdrant filter from domain filters.
+func (uc *implUseCase) buildSearchFilter(filters search.SearchFilters) *pb.Filter {
 	must := []*pb.Condition{}
 
 	// Note: project_id filtering is implicit — we query proj_{project_id} collections directly.
@@ -31,9 +29,9 @@ func (uc *implUseCase) buildSearchFilter(projectIDs []string, filters search.Sea
 		})
 	}
 
-	// 3. Filter by Sentiment — support both payload formats:
-	//   analyticsPayload (old): "overall_sentiment"
-	//   insightPayload   (new): "sentiment_label"
+	// 3. Filter by Sentiment — support both legacy analytics and current insight fields:
+	//   legacy analytics: "overall_sentiment"
+	//   direct insight:   "sentiment_label"
 	// Use Should (OR) so that either field format matches.
 	if len(filters.Sentiments) > 0 {
 		must = append(must, &pb.Condition{

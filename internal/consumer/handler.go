@@ -47,7 +47,6 @@ func (srv *ConsumerServer) setupDomains(ctx context.Context) (*domainConsumers, 
 		pointUC,
 		embeddingUC,
 		cacheRepo,
-		srv.minioClient,
 	)
 
 	indexingCons, err := indexingConsumer.New(indexingConsumer.Config{
