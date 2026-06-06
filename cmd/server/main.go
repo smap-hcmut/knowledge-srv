@@ -43,6 +43,37 @@ func (r *rateLimitedLLM) Generate(ctx context.Context, prompt string) (string, e
 	return r.inner.Generate(ctx, prompt)
 }
 
+// GenerateStream proxies to the inner provider while holding a semaphore
+// slot for the lifetime of the stream so concurrent SSE clients still
+// respect the per-pod API quota cap.
+func (r *rateLimitedLLM) GenerateStream(ctx context.Context, prompt string) (<-chan string, <-chan error) {
+	select {
+	case r.sem <- struct{}{}:
+	case <-ctx.Done():
+		errs := make(chan error, 1)
+		errs <- ctx.Err()
+		close(errs)
+		chunks := make(chan string)
+		close(chunks)
+		return chunks, errs
+	}
+	innerChunks, innerErrs := r.inner.GenerateStream(ctx, prompt)
+	chunks := make(chan string, 8)
+	errs := make(chan error, 1)
+	go func() {
+		defer func() { <-r.sem }()
+		defer close(chunks)
+		defer close(errs)
+		for c := range innerChunks {
+			chunks <- c
+		}
+		if err, ok := <-innerErrs; ok {
+			errs <- err
+		}
+	}()
+	return chunks, errs
+}
+
 func (r *rateLimitedLLM) Name() string {
 	return r.inner.Name()
 }

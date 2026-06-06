@@ -190,6 +190,8 @@ github.com/sagikazarmark/locafero v0.11.0/go.mod h1:nVIGvgyzw595SUSUE6tvCp3YYTeH
 github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24/go.mod h1:M+9NzErvs504Cn4c5DxATwIqPbtswREoFCre64PpcG4=
 github.com/smap-hcmut/shared-libs/go v1.0.12 h1:EgwuyjSIu0rNgj+ls9oEVqN3H/9xxj2aXdIXvR/w1kg=
 github.com/smap-hcmut/shared-libs/go v1.0.12/go.mod h1:yOhGS568myW3CaXP4y62hPuP8Ij70gdRNHsR9OZovSs=
+github.com/smap-hcmut/shared-libs/go v1.0.13 h1:jZ49L7Bp/PQVlh21utzm0QFVbgKf9u7kEP8R2tVqWx4=
+github.com/smap-hcmut/shared-libs/go v1.0.13/go.mod h1:e9knMoHnWFmnX9BTaDaBY5MU9OkuJWAugnKYcS6aNYU=
 github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 h1:+jumHNA0Wrelhe64i8F6HNlS8pkoyMv5sreGx2Ry5Rw=
 github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8/go.mod h1:3n1Cwaq1E1/1lhQhtRK2ts/ZwZEhjcQeJQ1RuC6Q/8U=
 github.com/spf13/afero v1.15.0 h1:b/YBCLWAJdFWJTN9cLhiXXcD7mzKn9Dm86dNnfyQw1I=
