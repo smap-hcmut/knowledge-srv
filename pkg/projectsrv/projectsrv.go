@@ -43,11 +43,19 @@ func (c *projectImpl) GetCampaign(ctx context.Context, campaignID string) (*Camp
 	return &campaign, nil
 }
 
-// ValidateProjectAccess checks if a user has access to a project.
+// ValidateProjectAccess checks if a user has access to a project. Hits the
+// project-srv internal route which is guarded by the same X-Internal-Key
+// the GetCampaign call already uses, so no extra credential plumbing is
+// required for service-to-service callers.
 func (c *projectImpl) ValidateProjectAccess(ctx context.Context, userID, projectID string) (bool, error) {
-	url := fmt.Sprintf("%s%s/%s/access?user_id=%s", c.baseURL, PathProjects, projectID, userID)
+	url := fmt.Sprintf("%s/api/v1/internal/projects/%s/access?user_id=%s", c.baseURL, projectID, userID)
 
-	_, statusCode, err := c.httpClient.Get(ctx, url, nil)
+	headers := map[string]string{}
+	if c.internalKey != "" {
+		headers[InternalKeyHeaderName] = c.internalKey
+	}
+
+	_, statusCode, err := c.httpClient.Get(ctx, url, headers)
 	if err != nil {
 		return false, fmt.Errorf("failed to validate project access: %w", err)
 	}
