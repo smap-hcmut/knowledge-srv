@@ -154,7 +154,7 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 
 // aggregateDocs searches for relevant documents using the search UseCase.
 func (uc *implUseCase) aggregateDocs(ctx context.Context, input report.GenerateInput) (search.SearchOutput, error) {
-	sc := model.Scope{} // System-level scope for background tasks
+	sc := model.Scope{UserID: input.UserID} // carry caller identity so RBAC pass-through works
 
 	searchInput := search.SearchInput{
 		CampaignID: input.CampaignID,

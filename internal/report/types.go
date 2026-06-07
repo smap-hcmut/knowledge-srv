@@ -18,6 +18,7 @@ type GenerateInput struct {
 	ReportType string
 	Filters    ReportFilters
 	Title      string
+	UserID     string // caller identity for background generation scope
 }
 
 type ReportFilters struct {

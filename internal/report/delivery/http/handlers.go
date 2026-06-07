@@ -29,7 +29,9 @@ func (h *handler) GenerateReport(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.Generate(ctx, sc, req.toInput())
+	input := req.toInput()
+	input.UserID = sc.UserID
+	o, err := h.uc.Generate(ctx, sc, input)
 	if err != nil {
 		h.logUsecaseError(ctx, "report.delivery.http.GenerateReport: usecase Generate failed", err)
 		response.Error(c, h.mapError(err), h.discord)
