@@ -79,12 +79,10 @@ func (uc *implUseCase) aggregateCollection(
 	emptyFilter := &pb.Filter{}
 
 	var (
-		colTotal   uint64
-		sentimentLegacyR []point.FacetOutput
-		sentimentNewR    []point.FacetOutput
-		platformR        []point.FacetOutput
-		aspectLegacyR    []point.FacetOutput
-		aspectNewR       []point.FacetOutput
+		colTotal     uint64
+		sentimentR   []point.FacetOutput
+		platformR    []point.FacetOutput
+		aspectR      []point.FacetOutput
 	)
 
 	g, gCtx := errgroup.WithContext(ctx)
@@ -105,25 +103,8 @@ func (uc *implUseCase) aggregateCollection(
 		return nil
 	})
 
-	// Sentiment
-	g.Go(func() error {
-		res, err := uc.pointUC.Facet(gCtx, point.FacetInput{
-			CollectionName: collectionName,
-			Key:            "overall_sentiment",
-			Filter:         emptyFilter,
-			Limit:          10,
-		})
-		if err != nil {
-			if isCollectionNotFoundError(err) {
-				return nil
-			}
-			return err
-		}
-		sentimentLegacyR = res
-		return nil
-	})
-
-	// Sentiment (new payload format)
+	// Sentiment — payload_mapper only emits sentiment_label; the legacy
+	// overall_sentiment fan-out was halving Qdrant throughput for no win.
 	g.Go(func() error {
 		res, err := uc.pointUC.Facet(gCtx, point.FacetInput{
 			CollectionName: collectionName,
@@ -140,7 +121,7 @@ func (uc *implUseCase) aggregateCollection(
 			}
 			return err
 		}
-		sentimentNewR = res
+		sentimentR = res
 		return nil
 	})
 
@@ -162,39 +143,8 @@ func (uc *implUseCase) aggregateCollection(
 		return nil
 	})
 
-	// Negative aspects (legacy payload)
-	g.Go(func() error {
-		negFilter := &pb.Filter{
-			Must: []*pb.Condition{
-				{
-					ConditionOneOf: &pb.Condition_Field{
-						Field: &pb.FieldCondition{
-							Key: "overall_sentiment",
-							Match: &pb.Match{
-								MatchValue: &pb.Match_Keyword{Keyword: "NEGATIVE"},
-							},
-						},
-					},
-				},
-			},
-		}
-		res, err := uc.pointUC.Facet(gCtx, point.FacetInput{
-			CollectionName: collectionName,
-			Key:            "aspects.aspect",
-			Filter:         negFilter,
-			Limit:          5,
-		})
-		if err != nil {
-			if isCollectionNotFoundError(err) {
-				return nil
-			}
-			return fmt.Errorf("failed to facet aspects in %s: %w", collectionName, err)
-		}
-		aspectLegacyR = res
-		return nil
-	})
-
-	// Negative aspects (new payload format)
+	// Negative aspects keyed on sentiment_label (the only key the indexer
+	// writes today).
 	g.Go(func() error {
 		negFilter := &pb.Filter{
 			Must: []*pb.Condition{
@@ -225,7 +175,7 @@ func (uc *implUseCase) aggregateCollection(
 			}
 			return fmt.Errorf("failed to facet aspects in %s: %w", collectionName, err)
 		}
-		aspectNewR = res
+		aspectR = res
 		return nil
 	})
 
@@ -238,19 +188,13 @@ func (uc *implUseCase) aggregateCollection(
 	defer mu.Unlock()
 
 	*totalDocs += colTotal
-	for _, s := range sentimentLegacyR {
-		sentimentMap[s.Value] += s.Count
-	}
-	for _, s := range sentimentNewR {
+	for _, s := range sentimentR {
 		sentimentMap[s.Value] += s.Count
 	}
 	for _, p := range platformR {
 		platformMap[p.Value] += p.Count
 	}
-	for _, a := range aspectLegacyR {
-		aspectMap[a.Value] += a.Count
-	}
-	for _, a := range aspectNewR {
+	for _, a := range aspectR {
 		aspectMap[a.Value] += a.Count
 	}
 

@@ -31,39 +31,17 @@ func (uc *implUseCase) buildSearchFilter(filters search.SearchFilters) *pb.Filte
 		})
 	}
 
-	// 3. Filter by Sentiment — support both legacy analytics and current insight fields:
-	//   legacy analytics: "overall_sentiment"
-	//   direct insight:   "sentiment_label"
-	// Use Should (OR) so that either field format matches.
+	// 3. Filter by Sentiment — payload_mapper only emits sentiment_label, so
+	// the legacy overall_sentiment branch was dead weight in every search.
 	if len(filters.Sentiments) > 0 {
 		sentiments := expandFilterKeywordVariants(filters.Sentiments)
 		must = append(must, &pb.Condition{
-			ConditionOneOf: &pb.Condition_Filter{
-				Filter: &pb.Filter{
-					Should: []*pb.Condition{
-						{
-							ConditionOneOf: &pb.Condition_Field{
-								Field: &pb.FieldCondition{
-									Key: "overall_sentiment",
-									Match: &pb.Match{
-										MatchValue: &pb.Match_Keywords{
-											Keywords: &pb.RepeatedStrings{Strings: sentiments},
-										},
-									},
-								},
-							},
-						},
-						{
-							ConditionOneOf: &pb.Condition_Field{
-								Field: &pb.FieldCondition{
-									Key: "sentiment_label",
-									Match: &pb.Match{
-										MatchValue: &pb.Match_Keywords{
-											Keywords: &pb.RepeatedStrings{Strings: sentiments},
-										},
-									},
-								},
-							},
+			ConditionOneOf: &pb.Condition_Field{
+				Field: &pb.FieldCondition{
+					Key: "sentiment_label",
+					Match: &pb.Match{
+						MatchValue: &pb.Match_Keywords{
+							Keywords: &pb.RepeatedStrings{Strings: sentiments},
 						},
 					},
 				},

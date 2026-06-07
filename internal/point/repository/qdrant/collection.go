@@ -14,7 +14,6 @@ var payloadIndexes = []struct {
 	fieldType pb.FieldType
 }{
 	{"platform", pb.FieldType_FieldTypeKeyword},
-	{"overall_sentiment", pb.FieldType_FieldTypeKeyword},
 	{"sentiment_label", pb.FieldType_FieldTypeKeyword},
 	{"risk_level", pb.FieldType_FieldTypeKeyword},
 	{"aspects.aspect", pb.FieldType_FieldTypeKeyword},
