@@ -23,6 +23,10 @@ const (
 	// voyageMaxBackoff caps how long we'll sleep between retries so a single
 	// embed call cannot hold a Kafka message hostage forever.
 	voyageMaxBackoff = 8 * time.Second
+
+	// voyageMaxBatchSize is Voyage API's max inputs per call. Larger batches
+	// are split transparently.
+	voyageMaxBatchSize = 128
 )
 
 // errVoyageRetryable signals the calling Embed loop that it can try again.
@@ -40,6 +44,25 @@ func (v *voyageImpl) Embed(ctx context.Context, texts []string) ([][]float32, er
 		return nil, fmt.Errorf("voyage: at least one text is required")
 	}
 
+	// Chunk into voyageMaxBatchSize to respect Voyage's 128 input limit.
+	allEmbeddings := make([][]float32, 0, len(texts))
+	for start := 0; start < len(texts); start += voyageMaxBatchSize {
+		end := start + voyageMaxBatchSize
+		if end > len(texts) {
+			end = len(texts)
+		}
+		chunk := texts[start:end]
+		chunkEmb, err := v.embedChunk(ctx, chunk)
+		if err != nil {
+			return nil, err
+		}
+		allEmbeddings = append(allEmbeddings, chunkEmb...)
+	}
+	return allEmbeddings, nil
+}
+
+// embedChunk sends one batch (≤ voyageMaxBatchSize) to Voyage with retries.
+func (v *voyageImpl) embedChunk(ctx context.Context, texts []string) ([][]float32, error) {
 	req := Request{
 		Input: texts,
 		Model: Model,

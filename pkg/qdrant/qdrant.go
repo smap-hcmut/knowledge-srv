@@ -12,6 +12,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var waitTrue = true
+
 // ... (rest of the code remains the same)
 
 // reUUID is a pre-compiled regex for UUID validation.
@@ -164,6 +166,7 @@ func (c *qdrantImpl) UpsertPoint(ctx context.Context, collectionName string, poi
 	}
 	_, err = c.pointsClient.Upsert(ctx, &pb.UpsertPoints{
 		CollectionName: collectionName,
+		Wait:           &waitTrue,
 		Points:         []*pb.PointStruct{qdrantPoint},
 	})
 	if err != nil {
@@ -208,6 +211,7 @@ func (c *qdrantImpl) UpsertPoints(ctx context.Context, collectionName string, po
 	}
 	_, err := c.pointsClient.Upsert(ctx, &pb.UpsertPoints{
 		CollectionName: collectionName,
+		Wait:           &waitTrue,
 		Points:         qdrantPoints,
 	})
 	if err != nil {
