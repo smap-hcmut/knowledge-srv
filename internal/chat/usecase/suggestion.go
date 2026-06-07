@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"knowledge-srv/internal/chat"
 	"knowledge-srv/internal/model"
@@ -11,6 +12,11 @@ import (
 
 // GetSuggestions - Generate smart suggestions for a campaign
 func (uc *implUseCase) GetSuggestions(ctx context.Context, sc model.Scope, input chat.GetSuggestionsInput) (chat.SuggestionOutput, error) {
+	cacheKey := suggestionCacheKey(sc.UserID, input.CampaignID)
+	if cached, ok := uc.lookupSuggestionCache(cacheKey); ok {
+		return cached, nil
+	}
+
 	// Call Search Domain to get aggregation data
 	aggInput := search.AggregateInput{
 		CampaignID: input.CampaignID,
@@ -86,9 +92,44 @@ func (uc *implUseCase) GetSuggestions(ctx context.Context, sc model.Scope, input
 		suggestions = suggestions[:4]
 	}
 
-	return chat.SuggestionOutput{
+	out := chat.SuggestionOutput{
 		Suggestions: suggestions,
-	}, nil
+	}
+	uc.storeSuggestionCache(cacheKey, out)
+	return out, nil
+}
+
+func suggestionCacheKey(userID, campaignID string) string {
+	return userID + "|" + campaignID
+}
+
+func (uc *implUseCase) lookupSuggestionCache(key string) (chat.SuggestionOutput, bool) {
+	uc.suggestionCacheMu.RLock()
+	defer uc.suggestionCacheMu.RUnlock()
+	entry, ok := uc.suggestionCache[key]
+	if !ok || time.Now().After(entry.expiresAt) {
+		return chat.SuggestionOutput{}, false
+	}
+	return entry.response, true
+}
+
+func (uc *implUseCase) storeSuggestionCache(key string, out chat.SuggestionOutput) {
+	uc.suggestionCacheMu.Lock()
+	defer uc.suggestionCacheMu.Unlock()
+	// Cheap GC: if the map grows past a few hundred campaigns, drop expired
+	// entries inline so it can't grow unbounded with no eviction loop.
+	if len(uc.suggestionCache) > 256 {
+		now := time.Now()
+		for k, v := range uc.suggestionCache {
+			if now.After(v.expiresAt) {
+				delete(uc.suggestionCache, k)
+			}
+		}
+	}
+	uc.suggestionCache[key] = suggestionCacheEntry{
+		response:  out,
+		expiresAt: time.Now().Add(suggestionCacheTTL),
+	}
 }
 
 func getFallbackSuggestions() []chat.SmartSuggestion {
