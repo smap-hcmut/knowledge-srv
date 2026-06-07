@@ -34,7 +34,7 @@ type suggestionCacheEntry struct {
 	expiresAt time.Time
 }
 
-const suggestionCacheTTL = 60 * time.Second
+const suggestionCacheTTL = 120 * time.Second
 
 func New(
 	repo repository.PostgresRepository,
