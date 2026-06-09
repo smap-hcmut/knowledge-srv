@@ -3,12 +3,21 @@ package chat
 import "time"
 
 const (
-	MaxHistoryMessages = 20
-	MaxSearchDocs      = 10
-	MaxDocContentLen   = 500
+	// Trimmed 2026-06-09 to cut DeepSeek round-trip from ~30 s to
+	// ~5-10 s. Each value tracks a different cost lever:
+	//   MaxHistoryMessages  — more history = longer prompt = slower TTFT
+	//   MaxSearchDocs       — bigger context window per turn
+	//   MaxDocContentLen    — each citation excerpt size
+	//   MaxTokenWindow      — hard ceiling before buildReducedPrompt kicks in
+	// The reduced values still cover normal RAG turns; the previous
+	// 28 000-token ceiling was sized for a multi-doc deep dive that the
+	// chat box rarely actually issues.
+	MaxHistoryMessages = 8
+	MaxSearchDocs      = 6
+	MaxDocContentLen   = 320
 	MinMessageLength   = 3
 	MaxMessageLength   = 2000
-	MaxTokenWindow     = 28000
+	MaxTokenWindow     = 8000
 )
 
 type ChatInput struct {
