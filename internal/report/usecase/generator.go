@@ -3,6 +3,7 @@ package usecase
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"knowledge-srv/internal/model"
 	"knowledge-srv/internal/report"
@@ -14,14 +15,24 @@ import (
 	"github.com/smap-hcmut/shared-libs/go/minio"
 )
 
-// generateInBackground runs the report generation pipeline.
-// This is called in a goroutine and must handle its own errors.
-//
-// Pipeline: Aggregate → rank evidence → generate business brief → compile → upload
-func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string, input report.GenerateInput) {
-	startTime := time.Now()
+// errNoDocsForReport marks the only permanent (non-retriable) failure mode:
+// the campaign has no indexed evidence matching the filters. Retrying buys
+// nothing — the user has to broaden filters or wait for more ingestion.
+var errNoDocsForReport = errors.New("no relevant documents found for report generation")
 
-	// Panic recovery
+// reportRetryAttempts caps how many times generateInBackground will re-run
+// the pipeline on transient failures (LLM timeout, search/MinIO blip).
+const (
+	reportRetryAttempts = 2
+	reportRetryBackoff  = 5 * time.Second
+)
+
+// generateInBackground runs the report generation pipeline with retry.
+// Transient failures (LLM/search/upload) get one more attempt after a short
+// backoff; the permanent "no docs" outcome short-circuits immediately.
+func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string, input report.GenerateInput) {
+	// Panic recovery wraps the whole retry loop so a panic in attempt N still
+	// records the failure on the report row instead of leaking up the goroutine.
 	defer func() {
 		if r := recover(); r != nil {
 			uc.l.Errorf(ctx, "report.usecase.generateInBackground: panic recovered: %v", r)
@@ -32,29 +43,69 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 		}
 	}()
 
-	uc.l.Infof(ctx, "report.usecase.generateInBackground: Starting generation for report %s", reportID)
+	var lastErr error
+	for attempt := 1; attempt <= reportRetryAttempts; attempt++ {
+		// If the user cancelled mid-retry, stop instead of overwriting the
+		// cancelled status with another attempt's failure.
+		if latest, err := uc.repo.GetReportByID(ctx, reportID); err == nil && latest.Status == report.StatusCancelled {
+			uc.l.Infof(ctx, "report.usecase.generateInBackground: Report %s cancelled before attempt %d", reportID, attempt)
+			return
+		}
+
+		uc.l.Infof(ctx, "report.usecase.generateInBackground: attempt %d/%d for report %s", attempt, reportRetryAttempts, reportID)
+		err := uc.tryGenerate(ctx, reportID, input)
+		if err == nil {
+			return
+		}
+		lastErr = err
+		if errors.Is(err, errNoDocsForReport) {
+			// Permanent — broader filters or fresher ingestion required.
+			_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
+				ReportID:     reportID,
+				ErrorMessage: err.Error(),
+			})
+			return
+		}
+		if attempt < reportRetryAttempts {
+			uc.l.Warnf(ctx, "report.usecase.generateInBackground: attempt %d failed for %s: %v — retrying in %s", attempt, reportID, err, reportRetryBackoff)
+			select {
+			case <-ctx.Done():
+				_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
+					ReportID:     reportID,
+					ErrorMessage: fmt.Sprintf("cancelled while retrying: %v", err),
+				})
+				return
+			case <-time.After(reportRetryBackoff):
+			}
+		}
+	}
+
+	// All retries exhausted — record the last error so the UI can surface it.
+	_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
+		ReportID:     reportID,
+		ErrorMessage: fmt.Sprintf("retries exhausted (%d attempts): %v", reportRetryAttempts, lastErr),
+	})
+}
+
+// tryGenerate runs a single attempt of the report pipeline. Returns
+// errNoDocsForReport for the permanent "no evidence" outcome, or a raw
+// error for retriable failures. nil on success.
+func (uc *implUseCase) tryGenerate(ctx context.Context, reportID string, input report.GenerateInput) error {
+	startTime := time.Now()
 
 	// Phase 1: Aggregate - Search for relevant documents
 	searchOutput, err := uc.aggregateDocs(ctx, input)
 	if err != nil {
-		uc.l.Errorf(ctx, "report.usecase.generateInBackground: Aggregate phase failed: %v", err)
-		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
-			ReportID:     reportID,
-			ErrorMessage: fmt.Sprintf("aggregate failed: %v", err),
-		})
-		return
+		uc.l.Errorf(ctx, "report.usecase.tryGenerate: Aggregate phase failed: %v", err)
+		return fmt.Errorf("aggregate failed: %w", err)
 	}
 
 	if len(searchOutput.Results) == 0 {
-		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
-			ReportID:     reportID,
-			ErrorMessage: "no relevant documents found for report generation",
-		})
-		return
+		return errNoDocsForReport
 	}
 
 	totalDocs := len(searchOutput.Results)
-	uc.l.Infof(ctx, "report.usecase.generateInBackground: Found %d documents for report %s", totalDocs, reportID)
+	uc.l.Infof(ctx, "report.usecase.tryGenerate: Found %d documents for report %s", totalDocs, reportID)
 
 	// Phase 2: Evidence - Select representative, business-grade documents.
 	// Use the full retrieval set here so the evidence pack can cover sentiment
@@ -76,17 +127,13 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 	content, err := uc.llm.Generate(llmCtx, prompt)
 	cancel()
 	if err != nil {
-		uc.l.Errorf(ctx, "report.usecase.generateInBackground: LLM generation failed: %v", err)
-		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
-			ReportID:     reportID,
-			ErrorMessage: fmt.Sprintf("LLM generation failed: %v", err),
-		})
-		return
+		uc.l.Errorf(ctx, "report.usecase.tryGenerate: LLM generation failed: %v", err)
+		return fmt.Errorf("LLM generation failed: %w", err)
 	}
 	content = normalizeBusinessReportMarkdown(content)
 	sectionsCount := countBusinessSections(content)
 
-	uc.l.Infof(ctx, "report.usecase.generateInBackground: Generated business report with %d sections for report %s", sectionsCount, reportID)
+	uc.l.Infof(ctx, "report.usecase.tryGenerate: Generated business report with %d sections for report %s", sectionsCount, reportID)
 
 	// Phase 4: Compile - Assemble markdown and upload
 	markdown := compileBusinessMarkdown(input, content, evidence, totalDocs)
@@ -95,15 +142,11 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 	fileBytes := []byte(markdown)
 
 	if err := uc.ensureReportBucket(ctx); err != nil {
-		uc.l.Errorf(ctx, "report.usecase.generateInBackground: Storage setup failed for bucket %q: %v", uc.config.ReportBucket, err)
-		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
-			ReportID:     reportID,
-			ErrorMessage: fmt.Sprintf("storage setup failed: %v", err),
-		})
-		return
+		uc.l.Errorf(ctx, "report.usecase.tryGenerate: Storage setup failed for bucket %q: %v", uc.config.ReportBucket, err)
+		return fmt.Errorf("storage setup failed: %w", err)
 	}
 
-	_, err = uc.minio.UploadFile(ctx, &minio.UploadRequest{
+	if _, err := uc.minio.UploadFile(ctx, &minio.UploadRequest{
 		BucketName:  uc.config.ReportBucket,
 		ObjectName:  objectName,
 		Reader:      bytes.NewReader(fileBytes),
@@ -114,27 +157,21 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 			"report_type": input.ReportType,
 			"campaign_id": input.CampaignID,
 		},
-	})
-	if err != nil {
-		uc.l.Errorf(ctx, "report.usecase.generateInBackground: Upload failed to bucket %q: %v", uc.config.ReportBucket, err)
-		_ = uc.repo.UpdateFailed(ctx, repository.UpdateFailedOptions{
-			ReportID:     reportID,
-			ErrorMessage: fmt.Sprintf("upload failed to bucket %q: %v", uc.config.ReportBucket, err),
-		})
-		return
+	}); err != nil {
+		uc.l.Errorf(ctx, "report.usecase.tryGenerate: Upload failed to bucket %q: %v", uc.config.ReportBucket, err)
+		return fmt.Errorf("upload failed to bucket %q: %w", uc.config.ReportBucket, err)
 	}
 
-	// Mark report as completed
 	completedAt := time.Now()
 	generationTimeMs := completedAt.Sub(startTime).Milliseconds()
 
 	latest, err := uc.repo.GetReportByID(ctx, reportID)
 	if err == nil && latest.Status == report.StatusCancelled {
-		uc.l.Infof(ctx, "report.usecase.generateInBackground: Report %s was cancelled, skipping completion update", reportID)
-		return
+		uc.l.Infof(ctx, "report.usecase.tryGenerate: Report %s was cancelled, skipping completion update", reportID)
+		return nil
 	}
 
-	err = uc.repo.UpdateCompleted(ctx, repository.UpdateCompletedOptions{
+	if err := uc.repo.UpdateCompleted(ctx, repository.UpdateCompletedOptions{
 		ReportID:          reportID,
 		FileURL:           objectName,
 		FileSizeBytes:     int64(len(fileBytes)),
@@ -143,13 +180,13 @@ func (uc *implUseCase) generateInBackground(ctx context.Context, reportID string
 		SectionsCount:     sectionsCount,
 		GenerationTimeMs:  generationTimeMs,
 		CompletedAt:       completedAt,
-	})
-	if err != nil {
-		uc.l.Errorf(ctx, "report.usecase.generateInBackground: Failed to update completed status: %v", err)
-		return
+	}); err != nil {
+		uc.l.Errorf(ctx, "report.usecase.tryGenerate: Failed to update completed status: %v", err)
+		return fmt.Errorf("update completed: %w", err)
 	}
 
-	uc.l.Infof(ctx, "report.usecase.generateInBackground: Report %s completed in %dms", reportID, generationTimeMs)
+	uc.l.Infof(ctx, "report.usecase.tryGenerate: Report %s completed in %dms", reportID, generationTimeMs)
+	return nil
 }
 
 // aggregateDocs searches for relevant documents using the search UseCase.
